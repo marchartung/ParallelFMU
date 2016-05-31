@@ -3,4 +3,4 @@
 	url = ../../google/googletest.git
 [submodule "OMVis"]
 	path = thirdparty/OMVis
-	url = ../../vwaurich/OMVis.git
+	url = https://github.com/vwaurich/OMVis.git
