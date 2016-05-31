@@ -4,3 +4,6 @@
 [submodule "OMVis"]
 	path = thirdparty/OMVis
 	url = https://github.com/vwaurich/OMVis.git
+[submodule "NetworkOffloader"]
+	path = thirdparty/NetworkOffloader
+	url = https://github.com/marchartung/NetworkOffloader.git
