@@ -1,0 +1,3 @@
+loadFile("Blower.mo"); getErrorString();
+setCommandLineOptions("+simCodeTarget=Cpp"); getErrorString();
+translateModelFMU(Blower, version="1.0"); getErrorString();

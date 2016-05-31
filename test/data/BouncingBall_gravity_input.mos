@@ -1,0 +1,5 @@
+loadModel(Modelica, {"3.2.1"}); getErrorString();
+loadFile("BouncingBall_gravity_input.mo"); getErrorString();
+setDebugFlags("hardcodedStartValues"); getErrorString();
+setCommandLineOptions("+simCodeTarget=Cpp"); getErrorString();
+translateModelFMU(BouncingBall_gravity_input, version="1.0"); getErrorString();

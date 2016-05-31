@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<loader>
+		<fmuSdkFmuLoader workingDirectory="./" id="0" />
+	</loader>
+	<writer>
+		<csvFileWriter id="0" resultFile="result_simpleview_mpi.csv" />
+	</writer>
+	<fmus>
+		<fmu name="BouncingBall" path="test/data/BouncingBall.fmu" loader="fmuSdk" solver="euler" relativeTolerance="1.0e-5" />
+		<fmu name="SimpleView" path="test/data/SimpleView.fmu" loader="fmuSdk" solver="euler" relativeTolerance="1.0e-5" />
+	</fmus>
+	<connections>
+		<connection source="BouncingBall" dest="SimpleView">
+			<real out="0" in="0" />
+		</connection>
+	</connections>
+	<scheduling>
+		<nodes numNodes="2" numCoresPerNode="1" numFmusPerCore="1"/>
+	</scheduling>
+	<simulation startTime="0.0" endTime="5.0" globalTolerance="1.0e-5" globalMaxError="1.0e-6" globalDefaultStepSize="1.0e-3" globalEventInterval="2.0e-5"/>
+</configuration>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <loader>
+        <fmiLibraryFmuLoader workingDirectory="./" id="0" />
+    </loader>
+    <writer>
+        <coutWriter id="0" resultFile="result.csv" />
+    </writer>
+    <solver>
+        <euler id="0" defaultStepSize="0.0001"/>
+    </solver>
+    <fmus>
+        <fmu name="BouncingBall" path="test/data/BouncingBall.fmu" loaderId="0" solverId="0" relativeTolerance="1.0e-5" />
+    </fmus>
+    <scheduling>
+        <node id="0">
+            <core id="0">
+                <solver id="0" />
+            </core>
+        </node>
+    </scheduling>
+    <simulation startTime="0.0" endTime="0.5" globalTolerance="1.0e-5" globalMaxError="1.0e-6" globalDefaultStepSize="1.0e-3" globalEventInterval="2.0e-5"/>
+</configuration>

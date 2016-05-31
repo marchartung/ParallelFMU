@@ -1,0 +1,127 @@
+/*
+ * Plans.hpp
+ *
+ *  Created on: 08.03.2016
+ *      Author: hartung
+ */
+
+#ifndef INCLUDE_INITIALIZATION_PLANS_HPP_
+#define INCLUDE_INITIALIZATION_PLANS_HPP_
+
+#include "Stdafx.hpp"
+#include "BasicTypedefs.hpp"
+#include "fmi/InputMapping.hpp"
+
+namespace Initialization
+{
+    struct FmuPlan
+    {
+        string_type name;
+        string_type path;
+        string_type workingPath;
+        string_type version;
+
+        size_type id;
+
+        string_type loader;
+        bool intermediateResults;
+        bool tolControlled;
+        real_type relTol;
+
+        bool logEnabled;
+
+        int_type solverId;
+    };
+
+    struct ConnectionPlan
+    {
+        string_type kind;
+        size_type bufferSize;
+
+        size_type sourceRank;
+        size_type destRank;
+
+        string_type sourceFmu;
+        string_type destFmu;
+
+        size_type startTag;
+
+        FMI::InputMapping inputMapping;
+    };
+
+
+    struct SolverPlan
+    {
+        string_type kind;
+        size_type id;
+
+        shared_ptr<FmuPlan> fmu;
+
+        real_type startTime;
+        real_type endTime;
+        real_type stepSize;
+
+        real_type maxError;
+        real_type eventInterval;
+
+        std::list<shared_ptr<ConnectionPlan>> outConnections;
+        std::list<shared_ptr<ConnectionPlan>> inConnections;
+    };
+
+    struct WriterPlan
+    {
+        string_type kind;
+        real_type startTime;
+        real_type endTime;
+        size_type numSteps;
+        string_type filePath;
+    };
+
+    struct HistoryPlan
+    {
+        string_type kind;
+    };
+
+    struct DataManagerPlan
+    {
+        WriterPlan writer;
+        HistoryPlan history;
+        vector<vector<shared_ptr<SolverPlan> > > solvers;
+        std::list<shared_ptr<ConnectionPlan>> outConnections;
+        std::list<shared_ptr<ConnectionPlan>> inConnections;
+    };
+
+
+
+    struct SchedulePlan
+    {
+        std::vector<std::vector<std::vector<size_type> > > nodeStructure; // node -> core -> solv
+
+        std::vector<tuple<size_type, size_type>> solvIdToCore; // solv -> (node,core)
+    };
+
+    struct SimulationPlan
+    {
+        string_type kind;
+        real_type startTime;
+        real_type endTime;
+
+        real_type defaultStepSize;
+        real_type defaultEventInterval;
+        real_type defaultMaxError;
+        real_type defaultTolerance;
+
+
+        DataManagerPlan dataManager;
+    };
+
+    struct ProgramPlan
+    {
+        vector<SimulationPlan> simPlans; //for mpi
+    };
+
+
+
+} /* namespace Synchronization */
+
+#endif /* INCLUDE_INITIALIZATION_PLANS_HPP_ */

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<writer>
+		<csvFileWriter id="0" resultFile="result.csv" />
+	</writer>
+	<fmus>
+		<fmu name="BouncingBall" path="test/data/BouncingBall.fmu" loader="fmiLib" solver="euler" relativeTolerance="1.0e-5" defaultStepSize="0.0001"/>
+	</fmus>
+	<simulation startTime="0.0" endTime="0.5" globalTolerance="1.0e-5" globalMaxError="1.0e-6" globalDefaultStepSize="1.0e-3" globalEventInterval="2.0e-5"/>
+</configuration>

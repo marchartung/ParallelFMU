@@ -1,0 +1,218 @@
+# This script will setup tests for the parallel FMI suite
+#
+# Some of these options can be controlled by passing arguments to CMAKE
+#     if the FMI library is installed to a custom location              -DFMILIB_HOME=<path>
+
+
+CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
+PROJECT (FMI_Testsuite)
+
+SET(CMAKE_VERBOSE_MAKEFILE ON)
+#OPTION(BUILD_DOCUMENTATION "Create and install the HTML based API documentation (requires Doxygen)" ${DOXYGEN_FOUND})
+LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
+MESSAGE(STATUS "Using Cmake version ${CMAKE_VERSION}")
+
+# ---------------------------
+# Find all dependencies
+# ---------------------------
+# Find MPI
+FIND_PACKAGE(MPI)
+IF(MPI_C_FOUND)
+  MESSAGE(STATUS "MPI enabled")
+  add_definitions(-DUSE_MPI)
+ELSE(MPI_C_FOUND)
+  MESSAGE(STATUS "MPI disabled")
+  SET(MPI_C_INCLUDE_PATH "")
+  SET(MPI_C_LIBRARIES "")
+  SET(MPI_C_LINK_FLAGS "")
+ENDIF(MPI_C_FOUND)
+
+
+# Find OpenMP
+FIND_PACKAGE(OpenMP)
+IF(OPENMP_FOUND)
+  MESSAGE(STATUS "OPENMP enabled")
+  add_definitions(-DUSE_OPENMP)
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+ELSE(OPENMP_FOUND)
+  MESSAGE(STATUS "OPENMP disabled")
+ENDIF(OPENMP_FOUND)
+
+# Find Lapack
+FIND_PACKAGE(Lapack)
+IF(NOT(LAPACK_FOUND))
+  MESSAGE (FATAL_ERROR "Lapack not found but required.")
+ELSE(NOT(LAPACK_FOUND))
+  MESSAGE (STATUS "Using Lapack (LIB:${LAPACK_LIBRARIES})")
+ENDIF(NOT(LAPACK_FOUND))
+
+# Find Boost
+FIND_PACKAGE(Boost REQUIRED COMPONENTS program_options filesystem system)
+IF(Boost_FOUND)
+	MESSAGE(STATUS "Boost enabled")
+ELSE(Boost_FOUND)
+  MESSAGE (FATAL_ERROR "Boost required")
+ENDIF(Boost_FOUND)
+
+# Find Doxygen
+FIND_PACKAGE(Doxygen)
+
+# Check C++11
+INCLUDE(CheckCXXCompilerFlag)
+CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+IF(COMPILER_SUPPORTS_CXX11)
+  add_compile_options(-std=c++11 -Wall)
+  #SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall")
+ELSEIF(COMPILER_SUPPORTS_CXX0X)
+  add_compile_options(-std=c++0x -Wall)
+  #SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -Wall")
+ELSE()
+  MESSAGE(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
+ENDIF()
+
+
+# Find FMI library
+FIND_PACKAGE(FMILib)
+IF(FMILIB_FOUND)
+   MESSAGE (STATUS "Using FMI library")
+   add_definitions(-DUSE_FMILIB)
+ELSE(FMILIB_FOUND)
+	SET(FMILIB_INCLUDE_DIR "")
+	SET(FMILIB_LIBRARIES "")
+ENDIF(FMILIB_FOUND)
+
+#Find matio
+FIND_PACKAGE(Matio)
+IF(MATIO_FOUND)
+	MESSAGE (STATUS "Using matio")
+ELSE(MATIO_FOUND)
+	MESSAGE (FATAL_ERROR "Couldn't find matio")
+ENDIF(MATIO_FOUND)
+
+# Find FMU-SDK
+FILE(GLOB_RECURSE FMUSDK_SRCS "thirdparty/fmusdk/src/*.c" "thirdparty/fmusdk/src/*.cpp")
+SET(FMUSDK_INCLUDE_DIR "thirdparty/fmusdk/include")
+
+#Find MatFileCompare
+FILE(GLOB_RECURSE MATCMP_SRCS "thirdparty/MatFileCompare/MatFileCMP.cpp")
+SET(MATCMP_INCLUDE_DIR "thirdparty/MatFileCompare")
+# Find GTest
+#SET(GTEST_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/gtest-1.7.0/include")
+#SET(GTEST_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/gtest-1.7.0/build")
+ADD_SUBDIRECTORY("${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/googletest")
+#LINK_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR} ${GTEST_LIBRARIES})
+
+FILE(GLOB_RECURSE SRCS "src/*/*.cpp")
+
+FILE(GLOB_RECURSE HEADERS "include/*/*.hpp" "include/*/*.h")
+ADD_DEFINITIONS(-DUSE_LOGGER)
+
+# Find OMC
+FIND_PACKAGE(OMC)
+IF(OMC_FOUND)
+	MESSAGE(STATUS "Set up tests with omc")
+ELSE(OMC_FOUND)
+	MESSAGE(WARNING "Couldn't find omc. No tests will be installed")
+ENDIF(OMC_FOUND)
+
+# Remove OpenMP-Files if no OpenMP is available
+IF(NOT(USE_OPENMP_))
+  #MESSAGE(STATUS "Pre: ${SRCS}")
+  LIST(REMOVE_ITEM SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src/simulation/OpenMPSimulation.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/src/synchronization/OpenMPConnection.cpp")
+  #MESSAGE(STATUS "Post: ${SRCS}")
+ENDIF(NOT(USE_OPENMP_))
+
+
+# ---------------------------
+# Build Documentation
+# ---------------------------
+
+IF(BUILD_DOCUMENTATION)
+    IF(NOT DOXYGEN_FOUND)
+        MESSAGE(FATAL_ERROR "Doxygen is needed to build the documentation.")
+    ENDIF()
+    MESSAGE(STATUS "Doxygen is used to build the documentation;-)")
+    SET(doxyfile_in ${CMAKE_CURRENT_SOURCE_DIR}/doc/Doxyfile.in)
+    SET(doxyfile ${CMAKE_CURRENT_BINARY_DIR}/doxyfile)
+    SET(doxyfile_html_in ${CMAKE_CURRENT_SOURCE_DIR}/doc)
+
+    SET(DOC_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/include")
+
+    CONFIGURE_FILE(${doxyfile_in} ${doxyfile} @ONLY IMMEDIATE)
+
+    ADD_CUSTOM_TARGET(doc ALL
+        COMMAND ${DOXYGEN_EXECUTABLE} ${doxyfile}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        COMMENT "Generating API documentation with Doxygen"
+        VERBATIM)
+ENDIF()
+
+
+# ---------------------------
+# Add custom target fmucleancmake which will remove fmuTmp* folders
+# ---------------------------
+
+ADD_CUSTOM_TARGET(fmuclean
+        COMMAND rm -rf fmuTmp*
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        COMMENT "Removing fmuTmp folders."
+        )
+
+ADD_CUSTOM_TARGET(fmucleancmake
+    COMMAND ${CMAKE_MAKE_PROGRAM} clean
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    )
+ADD_DEPENDENCIES(fmucleancmake fmuclean)
+
+
+
+# ---------------------------
+# Setup Build
+# ---------------------------
+
+#SET(CMAKE_CXX_FLAGS_DEBUG "-O2 -g -Wall")
+
+#ADD_SUBDIRECTORY("${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/matio-1.5.4", "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/matio-1.5.4/build")
+
+INCLUDE_DIRECTORIES("include" ${MPI_C_INCLUDE_PATH} ${MATIO_INCLUDE_DIR} ${FMILIB_INCLUDE_DIR} ${FMUSDK_INCLUDE_DIR} ${MATIO_INCLUDE_DIR} ${MATCMP_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} ${Boost_INCLUDE_DIRS} ${LAPACK_INCLUDE_DIR}  "test/include")
+
+ADD_EXECUTABLE(test_fmu  ${SRCS} ${FMUSDK_SRCS} "src/Main.cpp")
+TARGET_LINK_LIBRARIES (test_fmu ${MATIO_LIBRARIES} ${FMILIB_LIBRARIES} ${LAPACK_LIBRARIES} ${Boost_LIBRARIES} ${MPI_LIBRARIES} "dl" "expat")
+INSTALL (TARGETS test_fmu DESTINATION ".")
+
+IF(OMC_FOUND)
+	ADD_EXECUTABLE(test_fmu_test ${SRCS} ${FMUSDK_SRCS} ${MATCMP_SRCS} "test/Main.cpp")
+	TARGET_LINK_LIBRARIES (test_fmu_test ${FMILIB_LIBRARIES} ${LAPACK_LIBRARIES} ${MPI_LIBRARIES} ${Boost_LIBRARIES} ${MATIO_LIBRARIES} "dl" "expat" "gtest")
+	FILE(COPY "${CMAKE_CURRENT_SOURCE_DIR}/test/data" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/test_tmp")
+	
+	EXECUTE_PROCESS(COMMAND "${OMC_COMPILER}" "${CMAKE_CURRENT_BINARY_DIR}/test_tmp/data/BouncingBall.mos" WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/test_tmp/data" RESULT_VARIABLE OMC_RESULT OUTPUT_VARIABLE OMC_ERROR)
+	IF(OMC_RESULT)
+		message(FATAL_ERROR "Couldn't build test fmus: ${git_ver}")
+	ELSE(OMC_RESULT)
+		message(STATUS "Build BouncingBall.fmu")
+	ENDIF(OMC_RESULT)
+
+	EXECUTE_PROCESS(COMMAND "${OMC_COMPILER}" "${CMAKE_CURRENT_BINARY_DIR}/test_tmp/data/SimpleView.mos" WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/test_tmp/data" RESULT_VARIABLE OMC_RESULT OUTPUT_VARIABLE OMC_ERROR)
+	IF(OMC_RESULT)
+		message(FATAL_ERROR "Couldn't build test fmus: ${git_ver}")
+	ELSE(OMC_RESULT)
+		message(STATUS "Build SimpleView.fmu")
+	ENDIF(OMC_RESULT)
+
+	FILE(GLOB_RECURSE XML_FMU_BINARIES "${CMAKE_CURRENT_BINARY_DIR}/test_tmp/data/*.fmu" "${CMAKE_CURRENT_BINARY_DIR}/test_tmp/data/*.xml")
+	FILE(COPY ${XML_FMU_BINARIES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/test/data")
+	FILE(REMOVE_RECURSE "${CMAKE_CURRENT_BINARY_DIR}/test_tmp")
+ENDIF(OMC_FOUND)
+
+#INSTALL (DIRECTORY "data" DESTINATION ".")
+
+
+# ---------------------------
+# Build Precompiled Header
+# ---------------------------
+
+#INCLUDE("${CMAKE_CURRENT_LIST_DIR}/cmake/PrecompiledHeader.cmake")
+#add_precompiled_header(test_fmu "include/Stdafx.hpp" SOURCE_CXX "src/Stdafx.cpp")
+#add_precompiled_header(test_fmu_test "include/Stdafx.hpp" SOURCE_CXX "src/Stdafx.cpp")
