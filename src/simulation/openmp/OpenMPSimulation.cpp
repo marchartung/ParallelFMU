@@ -20,7 +20,7 @@ namespace Simulation
         vector<shared_ptr<Solver::ISolver>>& solver = getSolver();
         for(size_type i = 0;i<solver.size();++i)
             LOGGER_WRITE("FMU" + to_string(i) + " to " + to_string(solver[i]->getFmu()->getValues().getValues<real_type>()[0]), Util::LC_SOLVER, Util::LL_INFO);
-#pragma omp parallel default(none) shared(solver) num_threads(2)
+#pragma omp parallel default(none) shared(solver)
         {
             bool_type running = true;
             size_type iterationCount = 0, ompRank = omp_get_thread_num(), numOmpRanks = omp_get_num_threads(), maxS = solver.size(), jmpOmp = std::ceil(
