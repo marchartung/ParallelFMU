@@ -83,6 +83,12 @@ namespace Initialization
             else if (in.fmu->loader == "fmiLib")
                 res = createSolverWithKnownFmu<DataManagerClass, FMI::FmiLibFmu>(dm, in);
 #endif
+#ifdef USE_NETWORK_OFFLOADER
+            else if(in.fmu->loader == "network")
+            {
+                res = new AbstractSolver<DataManagerClass, FMI::EmptyFmu>(dm,in);
+            }
+#endif
             else
                 throw std::runtime_error("MainFactory: Unkown fmu loader type " + in.fmu->loader);
             return res;

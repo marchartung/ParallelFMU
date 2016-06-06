@@ -30,10 +30,19 @@ namespace Initialization
 
         tuple<const int *, const char ***> getProgramArgs() const;
 
+        bool isSimulationServer() const;
+
+        bool isSimulationClient() const;
+
+        int getSimulationServerPort() const;
+
      private:
 
         std::string _configFilePath = "";
         Util::LogSettings _logSettings;
+        int _simulationServerPort;
+        bool _simulationClient;
+
         int * _argc;
         char *** _argv;
 

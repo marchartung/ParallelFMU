@@ -5,15 +5,6 @@
  *  \date Oct 2015
  */
 
-/*
- * Code Style:   - 4 spaces instead of tabs
- *               - names of member variables should be written in camelCase with leading "_"
- *               - function names should be written in camel case
- *               - put all used std classes into Stdafx.h
- *               - names of header and code files always start with a capital letter
- *               - includes to header files of the project are always related to the input-folder and enclosed in "" signs
- *               - includes to thirdparty header files are enclosed in < >
- */
 
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
@@ -36,7 +27,7 @@ int_type main(int_type argc, char *argv[])
         Initialization::Program prog(&argc, &argv);
 
         Simulation::AbstractSimulationSPtr simulation = prog.getSimulation();
-        simulation->initialize();
+        simulation->initialize(&argc,&argv);
         simulation->simulate();
 
     }

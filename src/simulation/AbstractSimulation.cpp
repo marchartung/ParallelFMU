@@ -31,7 +31,7 @@ namespace Simulation
         return _simulationEndTime;
     }
 
-    void AbstractSimulation::initialize(int_type * argc, char **argv[])
+    void AbstractSimulation::initialize()
     {
         for (Solver::SolverSPtr& solver : _solver)
         {

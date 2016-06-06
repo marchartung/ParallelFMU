@@ -313,6 +313,7 @@ namespace Synchronization
             return res;
         }
 
+public:
         bool_type sendOutputs(const FMI::ValueCollection & fmuValues, real_type curTime, size_type solveOrder, FMI::AbstractFmu* fmu,
                               const Solver::SolverStepInfo & stepInfo)
         {

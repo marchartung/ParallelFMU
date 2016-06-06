@@ -5,7 +5,7 @@
 
 
 CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
-PROJECT (ParallelFmu)
+PROJECT (ParallelFmuProject)
 
 SET(CMAKE_VERBOSE_MAKEFILE ON)
 #OPTION(BUILD_DOCUMENTATION "Create and install the HTML based API documentation (requires Doxygen)" ${DOXYGEN_FOUND})
@@ -157,6 +157,7 @@ SET(BUILD_PARALLELFMU_SERVER TRUE)
 FIND_PACKAGE(NetworkOffload)
 IF(NetworkOffload_FOUND)
 	ADD_SUBDIRECTORY("${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/NetworkOffload")
+	ADD_DEFINITIONS(-DUSE_NETWORK_OFFLOADER)
 	MESSAGE(STATUS "Building NetworkOffload from submodule")
 ELSE(NetworkOffload_FOUND)
 	MESSAGE(STATUS "Disable offloading. Module NetworkOffload is empty.")
@@ -180,7 +181,7 @@ IF(BUILD_DOCUMENTATION)
 
     CONFIGURE_FILE(${doxyfile_in} ${doxyfile} @ONLY IMMEDIATE)
 
-    ADD_CUSTOM_TARGET(doc ALL
+    ADD_CUSTOM_TARGET(pf_doc ALL
         COMMAND ${DOXYGEN_EXECUTABLE} ${doxyfile}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         COMMENT "Generating API documentation with Doxygen"

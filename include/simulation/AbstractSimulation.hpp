@@ -37,7 +37,7 @@ namespace Simulation
         /**
          * Initialize all solvers, data-managers and FMUs.
          */
-        virtual void initialize(int_type * argc = NULL, char **argv[] = NULL);
+        virtual void initialize();
 
         /**
          * Get all solvers that are part of the simulation.

@@ -7,7 +7,6 @@
 
 #include "initialization/CommandLineArgs.hpp"
 
-
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -17,17 +16,25 @@ namespace Initialization
 {
 
     CommandLineArgs::CommandLineArgs(const std::string& configFile, const Util::LogLevel& logLvl)
-        : _configFilePath(configFile),
-          _logSettings(Util::LogSettings()),
-          _argc(nullptr),
-          _argv(nullptr)
+            : _configFilePath(configFile),
+              _logSettings(Util::LogSettings()),
+              _simulationServerPort(-1),
+              _simulationClient(false),
+              _argc(nullptr),
+              _argv(nullptr)
     {
         _logSettings.setAll(logLvl);
     }
 
     CommandLineArgs::CommandLineArgs(int* argc, char** argv[])
+            : _configFilePath(""),
+              _logSettings(Util::LogSettings()),
+              _simulationServerPort(-1),
+              _simulationClient(false),
+              _argc(nullptr),
+              _argv(nullptr)
     {
-        initialize(argc,argv);
+        initialize(argc, argv);
     }
 
     const std::string& CommandLineArgs::getConfigFilePath() const
@@ -48,8 +55,8 @@ namespace Initialization
     tuple<int*, char***> CommandLineArgs::getProgramArgs()
     {
         //if(_argc == nullptr || _argv == nullptr)
-            //throw std::runtime_error("CommandLineArgs: cannot access program arguments, they wasn't set.");
-        return make_tuple(_argc,_argv);
+        //throw std::runtime_error("CommandLineArgs: cannot access program arguments, they wasn't set.");
+        return make_tuple(_argc, _argv);
     }
 
     tuple<const int*, const char***> CommandLineArgs::getProgramArgs() const
@@ -65,10 +72,14 @@ namespace Initialization
 
         namespace po = boost::program_options;
         po::options_description desc("Options");
-        desc.add_options()("help", "Print help messages")("configFile,c", boost::program_options::value<std::string>()->required(),
+        desc.add_options()
+                ("help", "Print help messages")
+                ("configFile,c", boost::program_options::value<std::string>()->required(),
                                                           "Path to the configuration file containing detailed information about the FMUs")(
                 "log-settings,V", po::value<vector<std::string> >(), "log information: loader, event, solver, system, other")(
-                "numThreads,n", boost::program_options::value<size_type>(), "The number of threads respectively processes to use");
+                //"numThreads,n", po::value<size_type>(), "The number of threads respectively processes to use")(
+                "server,S",po::value<int>(), "Setting up an simulation server based on NetworkOffloader interface. Takes the port on which it should open")(
+                "client,C", "Starting a client program for remote connection based on the NetworkOffload interface");
 
         po::variables_map vm;
         this->_argc = argc;
@@ -82,8 +93,27 @@ namespace Initialization
                 cout << "Basic Command Line Parameter App" << endl << desc << endl;
                 return;
             }
+            if (vm.count("server"))
+            {
+#ifdef USE_NETWORK_OFFLOADER
+                cout << "Creating FMU calculation server." << endl;
+                _simulationServer = vm[server].as<int>();
+#else
+                throw std::runtime_error("FMU server is not supported, since submodule NetworkOffloader is missing or hasn't been build.");
+#endif
+            }
 
-            if (vm.count("configFile"))
+            if (vm.count("client"))
+            {
+#ifdef USE_NETWORK_OFFLOADER
+                cout << "Creating FMU client." << endl;
+                _simulationClient = true;
+#else
+                throw std::runtime_error("FMU client is not supported, since submodule NetworkOffloader is missing or hasn't been build.");
+#endif
+            }
+
+            if (vm.count("configFile") ) // TODO when server no config file
                 this->_configFilePath = vm["configFile"].as<std::string>();
             else
                 throw runtime_error("Path to configuration file required, but missing.");
@@ -97,7 +127,8 @@ namespace Initialization
                     tmpvec.clear();
                     boost::split(tmpvec, log_vec[i], boost::is_any_of("="));
 
-                    if (tmpvec.size() > 1 && logLvlMap.find(tmpvec[1]) != logLvlMap.end() && (tmpvec[0] == "all" || logCatMap.find(tmpvec[0]) != logCatMap.end()))
+                    if (tmpvec.size() > 1 && logLvlMap.find(tmpvec[1]) != logLvlMap.end()
+                            && (tmpvec[0] == "all" || logCatMap.find(tmpvec[0]) != logCatMap.end()))
                     {
                         if (tmpvec[0] == "all")
                         {
@@ -130,6 +161,21 @@ namespace Initialization
         return logCatMap;
     }
 
+    bool CommandLineArgs::isSimulationServer() const
+    {
+        return _simulationServerPort != -1;
+    }
+
+    bool CommandLineArgs::isSimulationClient() const
+    {
+        return _simulationClient;
+    }
+
+    int CommandLineArgs::getSimulationServerPort() const
+    {
+        return _simulationServerPort;
+    }
+
     map<std::string, Util::LogLevel> CommandLineArgs::getLogLvlMap()
     {
 
@@ -141,6 +187,5 @@ namespace Initialization
         return logLvlMap;
     }
 
-} // namespace Initialization
-
+}  // namespace Initialization
 

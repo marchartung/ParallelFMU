@@ -37,8 +37,15 @@ private:
 	bool _usingMPI;
 
 	CommandLineArgs _commandLineArgs;
+	ProgramPlan _pp;
 
 	Simulation::AbstractSimulationSPtr _simulation;
+
+	bool initMPI(int & rank, int & numRanks);
+
+	bool initNetworkConnection(const int & rank, Initialization::XMLConfigurationReader & reader);
+
+	void deinitMPI();
 };
 
 } /* namespace Initialization */

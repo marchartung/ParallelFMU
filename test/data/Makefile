@@ -18,11 +18,11 @@ build:
 	@echo
 	@echo Building FMUs for unit tests...
 	@echo
-	`omc BouncingBall.mos`
-	`omc SimpleView.mos`
-	`omc BouncingBall_gravity_input.mos`
-	`omc Blower.mos`
-	`omc BouncingBall_gravity.mos`
+	#`omc BouncingBall.mos`
+	#`omc SimpleView.mos`
+	#`omc BouncingBall_gravity_input.mos`
+	#`omc Blower.mos`
+	#`omc BouncingBall_gravity.mos`
 
 
 # Cleans all files that are not listed as dependencies 
