@@ -39,7 +39,20 @@ namespace FMI
 
         list<std::pair<string_type ,size_type> > getAllReferences() const;
 
-        size_t size() const;
+        size_type size() const;
+
+        template<typename T>
+        size_type getReference(const std::string & varName) const
+        {
+            const map<size_type, vector<string_type> >& values = _valueReferenceToNamesMapping[dataIndex<T>()];
+            for(const auto & p : values)
+            {
+                for(const auto name : p.second)
+                    if(name == varName)
+                        return p.first;
+            }
+            return std::numeric_limits<size_type>::max();
+        }
 
         template<typename T>
         void addNameReferencePair(const string_type & name, size_type valueReference)
@@ -56,6 +69,21 @@ namespace FMI
             }
             else
                 iter->second.push_back(name);
+        }
+
+        template<typename T>
+        void addInputNameReferencePair(const string_type & name, size_type valueReference)
+        {
+            if (name.length() == 0)
+                throw std::runtime_error("Cannot add empty name to reference mapping");
+
+            map<size_type, string_type >& values = _valueInputReferenceToNamesMapping[dataIndex<T>()];
+
+            auto iter = values.find(valueReference);
+            if (iter == values.end())
+            {
+                values.insert(pair<size_type, string_type >(valueReference, name));
+            }
         }
 
         template<typename T>
@@ -89,6 +117,18 @@ namespace FMI
         }
 
         template<typename T>
+        std::vector<string_type> getInputValueNames() const
+        {
+            const map<size_type, string_type >& values = _valueInputReferenceToNamesMapping[dataIndex<T>()];
+            std::vector<string_type> res;
+            for (map<size_type,string_type >::const_iterator it = values.begin();it!=values.end();++it)
+            {
+                    res.push_back(it->second);
+            }
+            return res;
+        }
+
+        template<typename T>
         const vector<string_type> & getAllValueNamesByReference(size_type valueReference) const
         {
             const map<size_type, vector<string_type> >& values = _valueReferenceToNamesMapping[dataIndex<T>()];
@@ -98,6 +138,7 @@ namespace FMI
 
      private:
         vector<map<size_type, vector<string_type> > > _valueReferenceToNamesMapping;
+        vector<map<size_type, string_type> > _valueInputReferenceToNamesMapping;
         vector<map<size_type, vector<string_type> > > _valueReferenceToDescriptionMapping;
     };
 } /* namespace FMI */
