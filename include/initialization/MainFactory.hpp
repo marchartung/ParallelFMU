@@ -73,6 +73,26 @@ namespace Initialization
             return res;
         }
 
+        FMI::AbstractFmu * createFmu(const FmuPlan & plan) const
+        {
+            FMI::AbstractFmu * res;
+            if (plan.loader == "fmuSdk")
+                res = new FMI::FmuSdkFmu(plan);
+#ifdef USE_FMILIB
+            else if (plan.loader == "fmiLib")
+                res = new FMI::FmiLibFmu(plan);
+#endif
+#ifdef USE_NETWORK_OFFLOADER
+            else if(plan.loader == "network")
+            {
+                res = new FMI::EmptyFmu(in);
+            }
+#endif
+            else
+                throw std::runtime_error("MainFactory: Unkown fmu loader type " + plan.loader);
+            return res;
+        }
+
         template<class DataManagerClass>
         Solver::ISolver * createSolver(std::shared_ptr<DataManagerClass> & dm, const SolverPlan & in) const
         {

@@ -16,33 +16,33 @@ namespace Initialization
 {
     struct FmuPlan
     {
-        string_type name;
-        string_type path;
-        string_type workingPath;
-        string_type version;
+        std::string name;
+        std::string path;
+        std::string workingPath;
+        std::string version;
 
         size_type id;
 
-        string_type loader;
+        std::string loader;
         bool intermediateResults;
         bool tolControlled;
         real_type relTol;
 
         bool logEnabled;
 
-        int_type solverId;
+        int solverId;
     };
 
     struct ConnectionPlan
     {
-        string_type kind;
+        std::string kind;
         size_type bufferSize;
 
         size_type sourceRank;
         size_type destRank;
 
-        string_type sourceFmu;
-        string_type destFmu;
+        std::string sourceFmu;
+        std::string destFmu;
 
         size_type startTag;
 
@@ -52,7 +52,7 @@ namespace Initialization
 
     struct SolverPlan
     {
-        string_type kind;
+        std::string kind;
         size_type id;
 
         shared_ptr<FmuPlan> fmu;
@@ -70,16 +70,16 @@ namespace Initialization
 
     struct WriterPlan
     {
-        string_type kind;
+        std::string kind;
         real_type startTime;
         real_type endTime;
         size_type numSteps;
-        string_type filePath;
+        std::string filePath;
     };
 
     struct HistoryPlan
     {
-        string_type kind;
+        std::string kind;
     };
 
     struct DataManagerPlan
@@ -102,7 +102,7 @@ namespace Initialization
 
     struct SimulationPlan
     {
-        string_type kind;
+        std::string kind;
         real_type startTime;
         real_type endTime;
 

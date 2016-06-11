@@ -428,6 +428,14 @@ namespace FMI
             getValuesInternal(values.getValues<string_type>(), _eventValueReferences.getValues<string_type>());
         }
 
+        void getAllValues(FMI::ValueCollection& values) const
+        {
+            getValuesInternal(values.getValues<real_type>(), _allValueReferences.getValues<real_type>());
+            getValuesInternal(values.getValues<int_type>(), _allValueReferences.getValues<int_type>());
+            getValuesInternal(values.getValues<bool_type>(), _allValueReferences.getValues<bool_type>());
+            getValuesInternal(values.getValues<string_type>(), _allValueReferences.getValues<string_type>());
+        }
+
         const FmuEventInfo& getEventInfo() const
         {
             return _eventInfo;

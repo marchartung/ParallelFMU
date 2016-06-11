@@ -14,20 +14,18 @@ namespace Network
 {
     struct NetworkFmuInformation
     {
-        std::string fmuName;
+        size_type fmuId;
         NetOff::VariableList inputList;
         NetOff::VariableList outputList;
     };
 
     struct NetworkPlan
     {
-        std::shared_ptr<NetOff::SimulationServer> _server;
+        std::shared_ptr<NetOff::SimulationServer> server;
         std::vector<NetworkFmuInformation> fmuNet;
     };
 
     void appendNetworkInformation(Initialization::ProgramPlan & plan, NetworkPlan & netPlan);
-
-    NetworkPlan recvInitialNetworkInformation(const int & port);
 
 }
 

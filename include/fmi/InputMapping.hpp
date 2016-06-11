@@ -32,6 +32,7 @@ namespace FMI
         InputMapping(vector<tuple<size_type, size_type> > realVarsMapping = vector<tuple<size_type, size_type> >(), vector<tuple<size_type, size_type> > intVarsMapping = vector<tuple<size_type, size_type> >(), vector<tuple<size_type, size_type> > bool_typeVarsMapping = vector<tuple<size_type, size_type> >(), vector<tuple<size_type, size_type> > stringVarsMapping =
                              vector<tuple<size_type, size_type> >());
 
+
         /**
          * Delete the mapping object including all stored mapping tuples.
          */

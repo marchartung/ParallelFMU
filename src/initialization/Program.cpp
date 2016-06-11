@@ -12,6 +12,10 @@
 
 #include <mpi.h>
 
+#ifdef USE_NETWORK_OFFLOADER
+#include "InitialServer.hpp"
+#endif
+
 Initialization::Program::Program(const CommandLineArgs & cla)
         : _isInitialized(false),
           _usingMPI(false),
@@ -130,11 +134,11 @@ bool Initialization::Program::initNetworkConnection(const int& rank, Initializat
 {
     // Need to tread special cases. In a network server case the socket can only be hold by one process. The addional information need to be send via mpi
 #ifdef USE_NETWORK_OFFLOADER
-    Network::NetworkPlan np;
     if (rank == 0)
     {
-        np = Network::recvInitialNetworkInformation(_commandLineArgs.getSimulationServerPort());
-        appendNetworkInformation(_pp,np);
+        // initial network phase. Gather which information need to be collected and send to the client:
+        Network::InitialServer initServer(_commandLineArgs.getSimulationServerPort(), _pp)
+        np = initServer.getNetworkPlan();
 
         //TODO broadCast np
     }
@@ -144,9 +148,12 @@ bool Initialization::Program::initNetworkConnection(const int& rank, Initializat
         //TODO recv var informations
         // np = recv...
 #else
+        // test if the rank is on default (0), if not somethings wrong with @param rank.
         throw std::runtime_error("Internal error. Rank missmatch in network initialization.");
 #endif
     }
+    // adding network fmu and connections to program plan
+    Network::appendNetworkInformation(_pp,np);
 #endif
     return true;
 }
