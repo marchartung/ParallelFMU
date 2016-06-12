@@ -10,6 +10,7 @@
 
 #include "VariableList.hpp"
 #include "SimulationServer.hpp"
+#include <memory>
 namespace Network
 {
     struct NetworkFmuInformation

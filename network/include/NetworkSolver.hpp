@@ -24,10 +24,14 @@ namespace Solver
 
         }
 
-        AbstractSolver(const Initialization::SolverPlan & in, std::shared_ptr<DataManagerClass> & dataManager, const std::shared_ptr<NetOff::SimulationServer> & server)
+        AbstractSolver(const Initialization::SolverPlan & in, std::shared_ptr<DataManagerClass> & dataManager)
                 : _id(in.id),
                   _dataManager(dataManager),
-                  _simServer(server)
+                  _currentTime(in.startTime),
+                  _endTime(in.endTime),
+                  _simServer(in.server),
+                  _outputMappings(in.outputMappings),
+                  _spec(NetOff::ClientMessageSpecifyer::UNPAUSE)
         {
             if(!_simServer->isActive())
                 throw std::runtime_error("SimulationServer isn't active. Abort.");
@@ -42,19 +46,19 @@ namespace Solver
                 switch(_spec)
                 {
                     case NetOff::ClientMessageSpecifyer::INPUTS:
-
+                        confirmInputs();
                         break;
                     case NetOff::ClientMessageSpecifyer::PAUSE:
-
+                        pauseSim();
                         break;
                     case NetOff::ClientMessageSpecifyer::UNPAUSE:
-
+                        unpauseSim();
                         break;
                     case NetOff::ClientMessageSpecifyer::RESET:
-
+                        abortSim();
                         break;
                     case NetOff::ClientMessageSpecifyer::CLIENT_ABORT:
-
+                        abortSim();
                         break;
                 }
             }
@@ -152,9 +156,22 @@ namespace Solver
         real_type _currentTime;
         real_type _endTime;
 
+        FMI::ValueCollection values;
+
         std::shared_ptr<NetOff::SimulationServer> _simServer;
+        std::vector<FMI::InputMapping> _outputMappings;
 
         NetOff::ClientMessageSpecifyer _spec;
+
+        void confirmInputs()
+        {
+            //TODO!!!
+
+        }
+
+        void pauseSim();
+        void unpauseSim();
+        void abortSim();
 
     };
 }

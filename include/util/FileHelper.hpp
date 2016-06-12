@@ -18,6 +18,8 @@ namespace Util
      public:
 
         static std::string find(const std::string & path, const std::string & fileName, const bool & recursive);
+
+        static std::string absoluteFilePath( const std::string & fileName);
     };
 
 }

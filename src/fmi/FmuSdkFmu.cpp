@@ -22,7 +22,7 @@ namespace FMI
     {
     }
 
-    void FmuSdkFmu::load()
+    void FmuSdkFmu::load(const bool & alsoInit)
     {
         _path = boost::filesystem::absolute(_path).string();
 
@@ -95,8 +95,21 @@ namespace FMI
             //std::cout << "start vals: [" << _startValues << "]\n";
             _presentFmus[_path] = this;
         }
-        AbstractFmu::load();
-        initialize();
+        AbstractFmu::load(alsoInit);
+        if (!_startValueReferences.getValues<real_type>().empty())
+            _fmu->setReal(_component, _startValueReferences.getValues<real_type>().data(), _startValueReferences.getValues<real_type>().size(),
+                          _startValues.getValues<real_type>().data());
+
+        if (!_startValueReferences.getValues<bool_type>().empty())
+            _fmu->setBoolean(_component, _startValueReferences.getValues<real_type>().data(), _startValueReferences.getValues<real_type>().size(),
+                             _startValues.getValues<bool_type>().data());
+
+        if (!_startValueReferences.getValues<int_type>().empty())
+            _fmu->setInteger(_component, _startValueReferences.getValues<real_type>().data(), _startValueReferences.getValues<real_type>().size(),
+                             _startValues.getValues<int_type>().data());
+
+        if (alsoInit)
+            initialize();
     }
 
     void FmuSdkFmu::unload()
@@ -115,18 +128,6 @@ namespace FMI
     inline void FmuSdkFmu::initialize()
     {
         fmiStatus fmiFlag;
-        if (!_startValueReferences.getValues<real_type>().empty())
-            _fmu->setReal(_component, _startValueReferences.getValues<real_type>().data(), _startValueReferences.getValues<real_type>().size(),
-                          _startValues.getValues<real_type>().data());
-
-        if (!_startValueReferences.getValues<bool_type>().empty())
-            _fmu->setBoolean(_component, _startValueReferences.getValues<real_type>().data(), _startValueReferences.getValues<real_type>().size(),
-                             _startValues.getValues<bool_type>().data());
-
-        if (!_startValueReferences.getValues<int_type>().empty())
-            _fmu->setInteger(_component, _startValueReferences.getValues<real_type>().data(), _startValueReferences.getValues<real_type>().size(),
-                             _startValues.getValues<int_type>().data());
-
         fmiFlag = _fmu->initialize(_component, isToleranceControlled(), getRelativeTolerance(), &_componentEventInfo);
         if (fmiFlag > fmiWarning)
             throw runtime_error("Could not initialize model");

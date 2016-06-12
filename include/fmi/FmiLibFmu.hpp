@@ -28,7 +28,7 @@ namespace FMI
         FmiLibFmu(const Initialization::FmuPlan & in);
         virtual ~FmiLibFmu();
 
-        void load() override;
+        void load(const bool & alsoInit = true) override;
         void unload() override;
         void initialize() override;
 

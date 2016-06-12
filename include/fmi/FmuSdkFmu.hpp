@@ -26,7 +26,7 @@ namespace FMI
 
         virtual ~FmuSdkFmu();
 
-        void load() override;
+        void load(const bool & alsoInit = true) override;
         void unload() override;
         void initialize() override;
 

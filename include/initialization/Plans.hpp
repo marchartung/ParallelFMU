@@ -12,6 +12,10 @@
 #include "BasicTypedefs.hpp"
 #include "fmi/InputMapping.hpp"
 
+#ifdef USE_NETWORK_OFFLOADER
+#include "SimulationServer.hpp"
+#endif
+
 namespace Initialization
 {
     struct FmuPlan
@@ -66,6 +70,11 @@ namespace Initialization
 
         std::list<shared_ptr<ConnectionPlan>> outConnections;
         std::list<shared_ptr<ConnectionPlan>> inConnections;
+
+#ifdef USE_NETWORK_OFFLOADER
+        std::shared_ptr<NetOff::SimulationServer> server;
+        std::vector<FMI::InputMapping> outputMappings;
+#endif
     };
 
     struct WriterPlan

@@ -42,7 +42,7 @@ namespace FMI
         throw runtime_error("The FMI library is not able to duplicate a fmu instance!");
     }
 
-    void FMI::FmiLibFmu::load()
+    void FMI::FmiLibFmu::load(const bool & alsoInit)
     {
         if (isLoaded())
         {
@@ -121,7 +121,9 @@ namespace FMI
         setNumEventIndicators(fmi1_import_get_number_of_event_indicators(_fmu.get()));
         _posPath = _loadedFmuObjects.insert(_path).first;
         fmi1_import_free_variable_list(vl);
-        initialize();
+        //AbstractFmu::load(alsoInit);
+        if(alsoInit)
+            initialize();
     }
 
     void FmiLibFmu::initialize()

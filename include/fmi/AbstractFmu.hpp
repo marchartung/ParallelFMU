@@ -96,7 +96,7 @@ namespace FMI
         /**
          * Load the shared library of the FMU and instantiate and initialize an instance of the FMU.
          */
-        virtual void load()
+        virtual void load(const bool & alsoInit = true)
         {
             _loaded = true;
         }

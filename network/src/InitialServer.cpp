@@ -12,6 +12,8 @@
 namespace Network
 {
     InitialServer::InitialServer(const int & port, Initialization::ProgramPlan & plan)
+        :_port(port),
+         _plan(plan)
     {
 
     }
@@ -65,73 +67,46 @@ namespace Network
     {
         NetOff::SimulationServer & server = *_networkPlan.server.get();
         int newId = server.getLastSimId();
-        std::string filePath = Util::FileHelper::find(_tmpFmus[newId]->getWorkingDirectory(), server.getSimulationFileName(),true);
-        if(filePath.empty())
-            throw std::runtime_error("Couldn't find requested file.");
-        server.confirmSimulationFile(newId,filePath);
+        std::string filePath = Util::FileHelper::find(_tmpFmus[newId]->getWorkingDirectory(), server.getSimulationFileName(), true);
+        if (filePath.empty())
+        {
+            if (server.getSimulationFileName().find('/') != std::string::npos)
+            {
+                filePath = Util::FileHelper::absoluteFilePath(server.getSimulationFileName());  // look from root
+            }
+            if (filePath.empty())
+                throw std::runtime_error("Couldn't find requested file.");
+        }
+        server.confirmSimulationFile(newId, filePath);
     }
 
     void InitialServer::initSim()
     {
         NetOff::SimulationServer & server = *_networkPlan.server.get();
         int newId = server.getLastSimId();
-        NetOff::ValueContainer initialValues;
         FMI::AbstractFmu * fmu = _tmpFmus[newId].get();
-        //TODO create InputMapping for vars valueInfo -> references -> name cmp -> vector<int> -> valuzereferences
-        FMI::InputMapping mapping;
-        auto refs = fmu->getAllValueReferences();
-        NetOff::VariableList inputNames = server.getSelectedInputVariables(newId);
+
+        const FMI::ValueReferenceCollection & refs = fmu->getAllValueReferences();
         const FMI::ValueInfo & vi = fmu->getValueInfo();
 
-        const std::vector<std::string> & realInputs  = inputNames.getReals();
-        for(size_type i=0;i<realInputs.size();++i)
-        {
-            size_type ref = vi.getReference<real_type>(realInputs[i]);
-            for(size_type j=0;j<refs.getValues<real_type>().size();++j)
-            {
-                if(refs.getValues<real_type>()[j] == ref)
-                {
-                    mapping.push_back<real_type>(std::make_tuple(j,i));
-                }
-            }
-        }
+        FMI::InputMapping inputMapping = getMappingFromNameList(refs,server.getSelectedInputVariables(newId),vi);
+        FMI::InputMapping outputMapping = getMappingFromNameList(refs,server.getSelectedOutputVariables(newId),vi);
 
-        const std::vector<std::string> & intInputs  = inputNames.getInts();
-        for(size_type i=0;i<realInputs.size();++i)
-        {
-            size_type ref = vi.getReference<int_type>(intInputs[i]);
-            for(size_type j=0;j<refs.getValues<int_type>().size();++j)
-            {
-                if(refs.getValues<int_type>()[j] == ref)
-                {
-                    mapping.push_back<int_type>(std::make_tuple(j,i));
-                }
-            }
-        }
-
-        const std::vector<std::string> & realInputs  = inputNames.getReals();
-        for(size_type i=0;i<realInputs.size();++i)
-        {
-            size_type ref = vi.getReference<real_type>(realInputs[i]);
-            for(size_type j=0;j<refs.getValues<real_type>().size();++j)
-            {
-                if(refs.getValues<real_type>()[j] == ref)
-                {
-                    mapping.push_back<real_type>(std::make_tuple(j,i));
-                }
-            }
-        }
-
-        //TODO init fmu, take values
-
-
-        server.confirmSimulationInit(newId,initialValues);
+        fmu->load(true);
+        //TODO use input values in initialization
+        NetOff::ValueContainer initialValues = outputMapping.pack(fmu->getValues());
+        server.confirmSimulationInit(newId, initialValues);
     }
 
     std::shared_ptr<Initialization::FmuPlan> InitialServer::findFmuInProgramPlan(const std::string fmuPath)
     {
         std::shared_ptr<Initialization::FmuPlan> res;
-        //TODO
+        for(const auto & simPlan : _plan.simPlans)
+            for(const std::shared_ptr<Initialization::SolverPlan> & solvPlan : simPlan.dataManager.solvers)
+            {
+                if(fmuPath == solvPlan->fmu->path || fmuPath == solvPlan->fmu->name)
+                    res = solvPlan->fmu;
+            }
         return res;
     }
 
@@ -155,8 +130,19 @@ namespace Network
         _tmpFmus[newId]->load();
         const FMI::ValueInfo & info = _tmpFmus[newId]->getValueInfo();
 
-        NetOff::VariableList inputVarNames(info.getInputValueNames<real_type>(),info.getInputValueNames<int_type>(),info.getInputValueNames<bool_type>())
-                           , outputVarNames(info.getValueNames<real_type>(),info.getValueNames<int_type>(),info.getValueNames<bool_type>());
-        server.confirmSimulationAdd(newId,inputVarNames,outputVarNames);
+        NetOff::VariableList inputVarNames(info.getInputValueNames<real_type>(), info.getInputValueNames<int_type>(), info.getInputValueNames<bool_type>()),
+                outputVarNames(info.getValueNames<real_type>(), info.getValueNames<int_type>(), info.getValueNames<bool_type>());
+        server.confirmSimulationAdd(newId, inputVarNames, outputVarNames);
     }
+
+    FMI::InputMapping InitialServer::getMappingFromNameList(const FMI::ValueReferenceCollection& refs, const NetOff::VariableList& vars,
+                                                            const FMI::ValueInfo& vi)
+    {
+        FMI::InputMapping mapping;
+        addRefsToMapping<real_type>(mapping,vars.getReals(),vi,refs);
+        addRefsToMapping<int_type>(mapping,vars.getInts(),vi,refs);
+        addRefsToMapping<bool_type>(mapping,vars.getBools(),vi,refs);
+
+    }
+
 }
