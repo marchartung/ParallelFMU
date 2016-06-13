@@ -251,22 +251,22 @@ namespace FMI
             out[i] = string_type(stringValues[i]);
     }
 
-    void FmuSdkFmu::setValuesInternal(const vector<real_type> & in, const vector<size_type> & references) const
+    void FmuSdkFmu::setValuesInternal(const vector<real_type> & in, const vector<size_type> & references)
     {
         _fmu->setReal(_component, references.data(), references.size(), in.data());
     }
 
-    void FmuSdkFmu::setValuesInternal(const vector<int_type> & in, const vector<size_type> & references) const
+    void FmuSdkFmu::setValuesInternal(const vector<int_type> & in, const vector<size_type> & references)
     {
         _fmu->setInteger(_component, references.data(), references.size(), in.data());
     }
 
-    void FmuSdkFmu::setValuesInternal(const vector<bool_type> & in, const vector<size_type> & references) const
+    void FmuSdkFmu::setValuesInternal(const vector<bool_type> & in, const vector<size_type> & references)
     {
         _fmu->setBoolean(_component, references.data(), references.size(), in.data());
     }
 
-    void FmuSdkFmu::setValuesInternal(const vector<string_type> & in, const vector<size_type> & references) const
+    void FmuSdkFmu::setValuesInternal(const vector<string_type> & in, const vector<size_type> & references)
     {
         const char* stringValues[references.size()];
         for (size_type i = 0; i < references.size(); i++)

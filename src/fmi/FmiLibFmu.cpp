@@ -207,17 +207,17 @@ namespace FMI
         //    out[i] = string_type(stringValues[i]);
     }
 
-    void FmiLibFmu::setValuesInternal(const vector<real_type> & in, const vector<size_type> & references) const
+    void FmiLibFmu::setValuesInternal(const vector<real_type> & in, const vector<size_type> & references)
     {
         fmi1_import_set_real(_fmu.get(), (const unsigned int *) references.data(), references.size(), in.data());
     }
 
-    void FmiLibFmu::setValuesInternal(const vector<int_type> & in, const vector<size_type> & references) const
+    void FmiLibFmu::setValuesInternal(const vector<int_type> & in, const vector<size_type> & references)
     {
         fmi1_import_set_integer(_fmu.get(), (const unsigned int *) references.data(), references.size(), in.data());
     }
 
-    void FmiLibFmu::setValuesInternal(const vector<bool_type> & in, const vector<size_type> & references) const
+    void FmiLibFmu::setValuesInternal(const vector<bool_type> & in, const vector<size_type> & references)
     {
         char charValues[references.size()];
         for (size_type i = 0; i < references.size(); i++)
@@ -225,7 +225,7 @@ namespace FMI
         fmi1_import_set_boolean(_fmu.get(), (const unsigned int *) references.data(), references.size(), charValues);
     }
 
-    void FmiLibFmu::setValuesInternal(const vector<string_type> & in, const vector<size_type> & references) const
+    void FmiLibFmu::setValuesInternal(const vector<string_type> & in, const vector<size_type> & references)
     {
         const char* stringValues[references.size()];
         for (size_type i = 0; i < references.size(); i++)

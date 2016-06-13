@@ -12,41 +12,42 @@
 #include "CommandLineArgs.hpp"
 #include "Plans.hpp"
 
-namespace Initialization {
+namespace Initialization
+{
 
-class Program {
-public:
+    class Program
+    {
+     public:
 
-	Program(const CommandLineArgs & cla);
+        Program(const CommandLineArgs & cla);
 
-	Program(int * argc, char **argv[]);
+        Program(int * argc, char **argv[]);
 
-	virtual ~Program();
+        virtual ~Program();
 
-	void initialize();
+        void initialize();
 
-	void deinitialize();
+        void deinitialize();
 
-	Simulation::AbstractSimulationSPtr getSimulation();
+        Simulation::AbstractSimulationSPtr getSimulation();
 
-	void printProgramInfo(const ProgramPlan & in) const;
+        void printProgramInfo(const ProgramPlan & in) const;
 
-private:
+     private:
 
-	bool _isInitialized;
-	bool _usingMPI;
+        bool _isInitialized;
+        bool _usingMPI;
 
-	CommandLineArgs _commandLineArgs;
-	ProgramPlan _pp;
+        CommandLineArgs _commandLineArgs;
+        ProgramPlan _pp;
 
-	Simulation::AbstractSimulationSPtr _simulation;
+        Simulation::AbstractSimulationSPtr _simulation;
 
-	bool initMPI(int & rank, int & numRanks);
+        bool initMPI(int & rank, int & numRanks);
+        bool initNetworkConnection(const int & rank, Initialization::XMLConfigurationReader & reader);
 
-	bool initNetworkConnection(const int & rank, Initialization::XMLConfigurationReader & reader);
-
-	void deinitMPI();
-};
+        void deinitMPI();
+    };
 
 } /* namespace Initialization */
 

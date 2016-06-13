@@ -18,6 +18,16 @@ namespace FMI
      * Class to connect the output variables of an FMU with the input variables of another FMU. The mappings are
      * separated by their type and defined as tuple '(index of output variable, index of input variable)'.
      * @note Only double, int, bool_type and string_type are valid types (T) for the template functions.
+     *
+     *
+     * example:
+     *
+     *      FMU1             ->             FMU2
+     *      r11                              r21
+     *      r12  (pack)      r11  (unpack)   r22 = r11
+     *      r13  ----->      i11   ----->    i21 = i11
+     *      i11              b11             b21
+     *      b11                              b22 = b11
      */
     class InputMapping : protected ValueSwitch
     {
@@ -66,6 +76,12 @@ namespace FMI
             return _connectedVars[dataIndex<T>()];
         }
 
+        template<typename T>
+        size_type size() const
+        {
+            return _connectedVars[dataIndex<T>()].size();
+        }
+
         /**
          * Takes a VC and reduces it according to the mapping stored. Does the opersite of unpack()
          * @return ValueCollection containing only the indexes stored in the InputMapping class
@@ -86,6 +102,18 @@ namespace FMI
 
 
         friend std::ostream & operator<<(std::ostream & in, const InputMapping & im);
+
+        template<typename T>
+        const size_type * data() const
+        {
+            return _connectedVars[dataIndex<T>()].data();
+        }
+
+        template<typename T>
+        size_type * data()
+        {
+            return _connectedVars[dataIndex<T>()].data();
+        }
 
      private:
         /// Output variables mapped to input variables

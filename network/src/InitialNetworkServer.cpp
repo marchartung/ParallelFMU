@@ -5,30 +5,32 @@
  *      Author: hartung
  */
 
-#include "InitialServer.hpp"
+#include "../include/InitialNetworkServer.hpp"
+
 #include "initialization/MainFactory.hpp"
 #include "util/FileHelper.hpp"
 
 namespace Network
 {
-    InitialServer::InitialServer(const int & port, Initialization::ProgramPlan & plan)
-        :_port(port),
-         _plan(plan)
+    InitialNetworkServer::InitialNetworkServer(const int & port, Initialization::ProgramPlan & plan)
+            : _port(port),
+              _plan(plan),
+              _offsets(4, 0)
     {
 
     }
 
-    InitialServer::~InitialServer()
+    InitialNetworkServer::~InitialNetworkServer()
     {
 
     }
 
-    NetworkPlan InitialServer::getNetworkPlan()
+    NetworkPlan InitialNetworkServer::getNetworkPlan()
     {
         return _networkPlan;
     }
 
-    void InitialServer::start()
+    void InitialNetworkServer::start()
     {
         NetOff::SimulationServer & server = *_networkPlan.server.get();
         _networkPlan.server = std::shared_ptr<NetOff::SimulationServer>(new NetOff::SimulationServer(_port));
@@ -57,13 +59,14 @@ namespace Network
                     throw std::runtime_error("Client aborted connection in initialization.");
                     break;
                 case NetOff::InitialClientMessageSpecifyer::START:
+                    startSim();
                     run = false;
                     break;
             }
         }
     }
 
-    void InitialServer::getFile()
+    void InitialNetworkServer::getFile()
     {
         NetOff::SimulationServer & server = *_networkPlan.server.get();
         int newId = server.getLastSimId();
@@ -80,40 +83,57 @@ namespace Network
         server.confirmSimulationFile(newId, filePath);
     }
 
-    void InitialServer::initSim()
+    void InitialNetworkServer::initSim()
     {
         NetOff::SimulationServer & server = *_networkPlan.server.get();
         int newId = server.getLastSimId();
+
         FMI::AbstractFmu * fmu = _tmpFmus[newId].get();
+        if (!fmu->isLoaded())
+        {
+            const FMI::ValueReferenceCollection & refs = fmu->getAllValueReferences();
+            const FMI::ValueInfo & vi = fmu->getValueInfo();
 
-        const FMI::ValueReferenceCollection & refs = fmu->getAllValueReferences();
-        const FMI::ValueInfo & vi = fmu->getValueInfo();
+            *_networkPlan.fmuNet[newId].outputMap = getMappingFromNameList(refs, server.getSelectedInputVariables(newId), vi, true);
+            *_networkPlan.fmuNet[newId].inputMap = getMappingFromNameList(refs, server.getSelectedOutputVariables(newId), vi, false);
 
-        FMI::InputMapping inputMapping = getMappingFromNameList(refs,server.getSelectedInputVariables(newId),vi);
-        FMI::InputMapping outputMapping = getMappingFromNameList(refs,server.getSelectedOutputVariables(newId),vi);
-
-        fmu->load(true);
-        //TODO use input values in initialization
-        NetOff::ValueContainer initialValues = outputMapping.pack(fmu->getValues());
+            fmu->load(true);
+        }
+        NetOff::ValueContainer initialValues = *_networkPlan.fmuNet[newId].outputMap.pack(fmu->getValues(FMI::ReferenceContainerType::ALL));
         server.confirmSimulationInit(newId, initialValues);
     }
 
-    std::shared_ptr<Initialization::FmuPlan> InitialServer::findFmuInProgramPlan(const std::string fmuPath)
+    std::shared_ptr<Initialization::FmuPlan> InitialNetworkServer::findFmuInProgramPlan(const std::string fmuPath, Network::NetworkFmuInformation & netInfo)
     {
         std::shared_ptr<Initialization::FmuPlan> res;
-        for(const auto & simPlan : _plan.simPlans)
-            for(const std::shared_ptr<Initialization::SolverPlan> & solvPlan : simPlan.dataManager.solvers)
+        size_type simId = 0, coreId = 0, solveId = 0;
+        for (const auto & simPlan : _plan.simPlans)
+        {
+            for (const auto & solvVec : simPlan.dataManager.solvers)
             {
-                if(fmuPath == solvPlan->fmu->path || fmuPath == solvPlan->fmu->name)
-                    res = solvPlan->fmu;
+                for (const std::shared_ptr<Initialization::SolverPlan> & solvPlan : solvVec)
+                {
+                    if (fmuPath == solvPlan->fmu->path || fmuPath == solvPlan->fmu->name)
+                    {
+                        res = solvPlan->fmu;
+                        netInfo.simPos = simId;
+                        netInfo.corePos = coreId;
+                        netInfo.solverPos = solveId;
+                        return res;
+                    }
+                    ++solveId;
+                }
+                ++coreId;
             }
+            ++simId;
+        }
         return res;
     }
 
-    void InitialServer::addSim()
+    void InitialNetworkServer::addSim()
     {
         NetOff::SimulationServer & server = *_networkPlan.server.get();
-        std::vector<Network::NetworkFmuInformation> & netFmuVec = _networkPlan.fmuNet;
+        std::vector<Network::NetworkFmuInformation> &netFmuVec = _networkPlan.fmuNet;
 
         Initialization::MainFactory mf;
         int newId = std::get<1>(server.getAddedSimulation());
@@ -121,10 +141,12 @@ namespace Network
         netFmuVec.resize(newId + 1);
         _tmpFmus.resize(newId + 1);
 
-        std::shared_ptr<Initialization::FmuPlan> fmuPlan = findFmuInProgramPlan(std::get<0>(server.getAddedSimulation()));
-        netFmuVec[newId].fmuId = fmuPlan->id;
+        std::shared_ptr<Initialization::FmuPlan> fmuPlan = findFmuInProgramPlan(std::get<0>(server.getAddedSimulation()), netFmuVec[newId]);
         if (!fmuPlan)
+        {
+            server.deinitialize();
             throw std::runtime_error("Couldn't find fmu with given path.");
+        }
 
         _tmpFmus[newId] = std::shared_ptr<FMI::AbstractFmu>(mf.createFmu(*fmuPlan));
         _tmpFmus[newId]->load();
@@ -135,13 +157,20 @@ namespace Network
         server.confirmSimulationAdd(newId, inputVarNames, outputVarNames);
     }
 
-    FMI::InputMapping InitialServer::getMappingFromNameList(const FMI::ValueReferenceCollection& refs, const NetOff::VariableList& vars,
-                                                            const FMI::ValueInfo& vi)
+    void InitialNetworkServer::startSim()
+    {
+        for (const auto & fmu : _tmpFmus)
+            fmu->unload();
+
+    }
+
+    FMI::InputMapping InitialNetworkServer::getMappingFromNameList(const FMI::ValueReferenceCollection& refs, const NetOff::VariableList& vars,
+                                                                   const FMI::ValueInfo& vi, bool fromFmu)
     {
         FMI::InputMapping mapping;
-        addRefsToMapping<real_type>(mapping,vars.getReals(),vi,refs);
-        addRefsToMapping<int_type>(mapping,vars.getInts(),vi,refs);
-        addRefsToMapping<bool_type>(mapping,vars.getBools(),vi,refs);
+        addRefsToMapping<real_type>(mapping, vars.getReals(), vi, refs, fromFmu);
+        addRefsToMapping<int_type>(mapping, vars.getInts(), vi, refs, fromFmu);
+        addRefsToMapping<bool_type>(mapping, vars.getBools(), vi, refs, fromFmu);
 
     }
 

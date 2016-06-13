@@ -19,6 +19,12 @@
 
 namespace FMI
 {
+    enum ReferenceContainerType
+    {
+        ALL, START, EVENT, CONTINIOUS
+    };
+
+
     /**
      * This class represents a loaded FMU that can access all functions that are described in the FMI 1.0
      * model-exchange standard. Additionally it provides some events and functions to interact with solvers
@@ -27,6 +33,7 @@ namespace FMI
     class AbstractFmu
     {
      public:
+
         /**
          * Creates a new instance of an object representing a FMU.
          * @param name A unique name for the FMU.
@@ -80,10 +87,10 @@ namespace FMI
         virtual void getValuesInternal(vector<bool_type> & out, const vector<size_type> & references) const = 0;
         virtual void getValuesInternal(vector<string_type> & out, const vector<size_type> & references) const = 0;
 
-        virtual void setValuesInternal(const vector<real_type> & out, const vector<size_type> & references) const = 0;
-        virtual void setValuesInternal(const vector<int_type> & out, const vector<size_type> & references) const = 0;
-        virtual void setValuesInternal(const vector<bool_type> & out, const vector<size_type> & references) const = 0;
-        virtual void setValuesInternal(const vector<string_type> & out, const vector<size_type> & references) const = 0;
+        virtual void setValuesInternal(const vector<real_type> & out, const vector<size_type> & references) = 0;
+        virtual void setValuesInternal(const vector<int_type> & out, const vector<size_type> & references) = 0;
+        virtual void setValuesInternal(const vector<bool_type> & out, const vector<size_type> & references) = 0;
+        virtual void setValuesInternal(const vector<string_type> & out, const vector<size_type> & references) = 0;
 
         virtual void getStatesInternal(real_type * states) const = 0;
         virtual void setStatesInternal(const real_type * states) = 0;
@@ -271,10 +278,26 @@ namespace FMI
             return res;
         }
 
-        ValueCollection getValues() const
+        ValueCollection getValues(ReferenceContainerType refType = ReferenceContainerType::EVENT) const
         {
-            FMI::ValueCollection res(_eventValueReferences.getValues<real_type>().size(), _eventValueReferences.getValues<int_type>().size(),
-                                     _eventValueReferences.getValues<bool_type>().size(), _eventValueReferences.getValues<string_type>().size());
+            const ValueReferenceCollection * refs = nullptr;
+            switch(refType)
+            {
+                case ReferenceContainerType::ALL:
+                    refs = &_allValueReferences;
+                    break;
+                case ReferenceContainerType::START:
+                    refs = &_startValueReferences;
+                    break;
+                case ReferenceContainerType::EVENT:
+                    refs = &_eventValueReferences;
+                    break;
+                case ReferenceContainerType::CONTINIOUS:
+                    refs = &_continousValueReferences;
+                    break;
+            }
+            FMI::ValueCollection res(refs->getValues<real_type>().size(), refs->getValues<int_type>().size(),
+                                     refs->getValues<bool_type>().size(), refs->getValues<string_type>().size());
             getValues(res);
             return res;
         }

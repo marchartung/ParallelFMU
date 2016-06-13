@@ -85,7 +85,7 @@ namespace Initialization
 #ifdef USE_NETWORK_OFFLOADER
             else if(plan.loader == "network")
             {
-                res = new FMI::EmptyFmu(in);
+                res = new FMI::EmptyFmu(plan);
             }
 #endif
             else
@@ -106,7 +106,7 @@ namespace Initialization
 #ifdef USE_NETWORK_OFFLOADER
             else if(in.fmu->loader == "network")
             {
-                res = new AbstractSolver<DataManagerClass, FMI::EmptyFmu>(dm,in);
+                res = new Solver::AbstractSolver<DataManagerClass, FMI::EmptyFmu>(dm,in);
             }
 #endif
             else

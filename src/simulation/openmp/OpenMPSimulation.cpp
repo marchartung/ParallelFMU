@@ -37,7 +37,11 @@ namespace Simulation
                 for (size_type i = sidStart; i < sidEnd; ++i)
                 {
                     //LOGGER_WRITE(solver[i]->getFmu()->getName() + " at " + to_string(solver[i]->getCurrentTime()), Util::LC_SOLVER, Util::LL_ERROR);
-                    solver[i]->solve(100);
+                    if(solver[i]->solve(10) == std::numeric_limits<size_type>::max())
+                    {
+                        LOGGER_WRITE("Abort simulation at " + to_string(solver[i]->getCurrentTime()) , Util::LC_SOLVER, Util::LL_ERROR);
+                        return;
+                    }
                     running = !solver[i]->isFinished();
 
                 }

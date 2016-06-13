@@ -11,14 +11,14 @@ namespace FMI
 {
 
     EmptyFmu::EmptyFmu()
+        : AbstractFmu(Initialization::DefaultValues::fmuPlan())
     {
-        // TODO Auto-generated constructor stub
 
     }
 
     EmptyFmu::~EmptyFmu()
     {
-        // TODO Auto-generated destructor stub
+
     }
 
     FMI::AbstractFmu* EmptyFmu::duplicate()
@@ -51,34 +51,42 @@ namespace FMI
 
     void EmptyFmu::getValuesInternal(vector<real_type>& out, const vector<size_type>& references) const
     {
+        _values.getValues<real_type>(out,references);
     }
 
     void EmptyFmu::getValuesInternal(vector<int_type>& out, const vector<size_type>& references) const
     {
+        _values.getValues<int_type>(out,references);
     }
 
     void EmptyFmu::getValuesInternal(vector<bool_type>& out, const vector<size_type>& references) const
     {
+        _values.getValues<bool_type>(out,references);
     }
 
     void EmptyFmu::getValuesInternal(vector<string_type>& out, const vector<size_type>& references) const
     {
+        _values.getValues<string_type>(out,references);
     }
 
-    void EmptyFmu::setValuesInternal(const vector<real_type>& out, const vector<size_type>& references) const
+    void EmptyFmu::setValuesInternal(const vector<real_type>& out, const vector<size_type>& references)
     {
+        _values.setValues<real_type>(out,references);
     }
 
-    void EmptyFmu::setValuesInternal(const vector<int_type>& out, const vector<size_type>& references) const
+    void EmptyFmu::setValuesInternal(const vector<int_type>& out, const vector<size_type>& references)
     {
+        _values.setValues<int_type>(out,references);
     }
 
-    void EmptyFmu::setValuesInternal(const vector<bool_type>& out, const vector<size_type>& references) const
+    void EmptyFmu::setValuesInternal(const vector<bool_type>& out, const vector<size_type>& references)
     {
+        _values.setValues<bool_type>(out,references);
     }
 
-    void EmptyFmu::setValuesInternal(const vector<string_type>& out, const vector<size_type>& references) const
+    void EmptyFmu::setValuesInternal(const vector<string_type>& out, const vector<size_type>& references)
     {
+        _values.setValues<string_type>(out,references);
     }
 
     void EmptyFmu::getStatesInternal(real_type* states) const
@@ -91,6 +99,16 @@ namespace FMI
 
     void EmptyFmu::getStateDerivativesInternal(real_type* stateDerivatives)
     {
+    }
+
+    void EmptyFmu::setNumValues(const size_type& numReals, const size_type& numInts, const size_type& numBools, const size_type& numStrings)
+    {
+        _values = FMI::ValueCollection(numReals,numInts,numBools,numStrings);
+    }
+
+    const FMI::ValueCollection & EmptyFmu::getEmptyFmuValues() const
+    {
+        return _values;
     }
 
     void EmptyFmu::getEventIndicatorsInternal(real_type* eventIndicators)

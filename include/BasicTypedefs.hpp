@@ -11,13 +11,14 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <cstdint>
 
 typedef double real_type;
 typedef int int_type;
 typedef char bool_type;
 typedef std::string string_type;
 
-typedef unsigned int size_type;
+typedef uint32_t size_type;
 
 namespace FMI
 {

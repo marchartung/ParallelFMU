@@ -24,7 +24,11 @@ namespace Simulation
             running = false;
             for (size_type i = 0; i < solver.size(); ++i)
             {
-                solver[i]->solve(10);
+                if(solver[i]->solve(10) == std::numeric_limits<size_type>::max())
+                {
+                    LOGGER_WRITE("Abort simulation at " + to_string(solver[i]->getCurrentTime()) , Util::LC_SOLVER, Util::LL_ERROR);
+                    return;
+                }
                 if (solver[i]->getCurrentTime() < getSimulationEndTime())
                     running = true;
                 else

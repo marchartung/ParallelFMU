@@ -97,7 +97,7 @@ namespace Initialization
             {
 #ifdef USE_NETWORK_OFFLOADER
                 cout << "Creating FMU calculation server." << endl;
-                _simulationServer = vm[server].as<int>();
+                _simulationServerPort = vm["server"].as<int>();
 #else
                 throw std::runtime_error("FMU server is not supported, since submodule NetworkOffloader is missing or hasn't been build.");
 #endif
@@ -107,13 +107,14 @@ namespace Initialization
             {
 #ifdef USE_NETWORK_OFFLOADER
                 cout << "Creating FMU client." << endl;
+                throw std::runtime_error("FMU client is not supported, yet.");
                 _simulationClient = true;
 #else
                 throw std::runtime_error("FMU client is not supported, since submodule NetworkOffloader is missing or hasn't been build.");
 #endif
             }
 
-            if (vm.count("configFile") ) // TODO when server no config file
+            if (vm.count("configFile") )
                 this->_configFilePath = vm["configFile"].as<std::string>();
             else
                 throw runtime_error("Path to configuration file required, but missing.");

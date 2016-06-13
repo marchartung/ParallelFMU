@@ -232,6 +232,9 @@ namespace Solver
                         case DependencyStatus::BLOCKED:
 
                             break;
+                        case DependencyStatus::ABORT_SIM:
+                            return std::numeric_limits<size_type>::max();
+                            break;
                         default:
                             throw std::runtime_error("AbstractSolver: Unknown dependency");
                     }

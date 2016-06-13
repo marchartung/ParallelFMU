@@ -18,7 +18,8 @@ namespace Solver
     {
         FREE,
         BLOCKED,
-        EVENT
+        EVENT,
+        ABORT_SIM
     };
 
     struct DependencySolverInfo

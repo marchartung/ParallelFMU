@@ -51,6 +51,14 @@ namespace Initialization
         size_type startTag;
 
         FMI::InputMapping inputMapping;
+
+        ConnectionPlan swapSourceAndDest() const
+        {
+            ConnectionPlan res;
+            std::swap(destFmu,sourceFmu);
+            std::swap(sourceRank,destRank);
+            return res;
+        }
     };
 
 
@@ -72,8 +80,7 @@ namespace Initialization
         std::list<shared_ptr<ConnectionPlan>> inConnections;
 
 #ifdef USE_NETWORK_OFFLOADER
-        std::shared_ptr<NetOff::SimulationServer> server;
-        std::vector<FMI::InputMapping> outputMappings;
+        Network::NetworkPlan networkPlan;
 #endif
     };
 

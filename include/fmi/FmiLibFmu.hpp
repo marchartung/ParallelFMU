@@ -53,10 +53,10 @@ namespace FMI
         void getValuesInternal(vector<bool_type> & out, const vector<size_type> & references) const override;
         void getValuesInternal(vector<string_type> & out, const vector<size_type> & references) const override;
 
-        void setValuesInternal(const vector<real_type> & in, const vector<size_type> & references) const override;
-        void setValuesInternal(const vector<int_type> & in, const vector<size_type> & references) const override;
-        void setValuesInternal(const vector<bool_type> & in, const vector<size_type> & references) const override;
-        void setValuesInternal(const vector<string_type> & in, const vector<size_type> & references) const override;
+        void setValuesInternal(const vector<real_type> & in, const vector<size_type> & references) override;
+        void setValuesInternal(const vector<int_type> & in, const vector<size_type> & references) override;
+        void setValuesInternal(const vector<bool_type> & in, const vector<size_type> & references) override;
+        void setValuesInternal(const vector<string_type> & in, const vector<size_type> & references) override;
 
         fmi1_boolean_t toFmi1Boolean(bool_type value) const;
         size_type toSizeT(fmi1_value_reference_t value) const;

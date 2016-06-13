@@ -53,6 +53,13 @@ namespace FMI
             throw runtime_error("ValueCollection: type was not collected.");
         }
 
+        template<typename T>
+        void getValues(vector<T> & out, const vector<size_type>& references) const
+        {
+            for(size_type i = 0; i < out.size();++i)
+                out[i] = getValues<T>()[references[i]];
+        }
+
         /**
          * Get a constant reference to the vector of all stored values.
          * @return Reference to the internal storage vector.
@@ -61,6 +68,13 @@ namespace FMI
         const vector<T>& getValues() const
         {
             throw runtime_error("ValueCollection: type was not collected.");
+        }
+
+        template<typename T>
+        void setValues(const vector<T> & out, const vector<size_type>& references)
+        {
+            for(size_type i = 0; i < out.size();++i)
+                getValues<T>()[references[i]] = out[i];
         }
 
         /**

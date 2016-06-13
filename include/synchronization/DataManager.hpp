@@ -77,7 +77,7 @@ namespace Synchronization
             /////////////////////////////////////////////////////////
             ///////////////////// SEND OUTPUTS //////////////////////
             /////////////////////////////////////////////////////////
-            if (!sendOutputs(newValues, fmu->getTime(), solveOrder, fmu, stepInfo))
+            if (!sendOutputs(fmu->getTime(), solveOrder, fmu, stepInfo))
                 return false;
 
             //////////////////////////////////////////////////////////
@@ -99,7 +99,9 @@ namespace Synchronization
 
             return true;
         }
-
+        /**
+         * Sets values in fmu, which were send via connections. Only use if its sure that all values are present
+         */
         void setFmuInputValuesAtT(const real_type & t, FMI::AbstractFmu* fmu) override
         {
             FMI::ValueCollection fmuValues = fmu->getValues();
@@ -195,6 +197,17 @@ namespace Synchronization
         const AbstractDataHistory* getHistory() const
         {
             return &_history;
+        }
+
+        // dirty, passes interface
+        bool sendSingleOutput(real_type curTime, size_type solveOrder, const FMI::AbstractFmu* fmu, const size_type & conId)
+        {
+            if(_communicator.send(
+                HistoryEntry(curTime, solveOrder, _valuePacking[conId].pack(fmu->getValues()), true), conId))
+                _lastCommTime[conId] = curTime;
+            else
+                return false;
+            return true;
         }
 
      protected:
@@ -313,10 +326,10 @@ namespace Synchronization
             return res;
         }
 
-public:
-        bool_type sendOutputs(const FMI::ValueCollection & fmuValues, real_type curTime, size_type solveOrder, FMI::AbstractFmu* fmu,
+        bool sendOutputs(real_type curTime, size_type solveOrder, FMI::AbstractFmu* fmu,
                               const Solver::SolverStepInfo & stepInfo)
         {
+            const FMI::ValueCollection fmuValues = fmu->getValues();
             for (size_type conId : _communicator.getOutConnectionIds(fmu))
             {
                 if (_lastCommTime[conId] < curTime)  // check if the time wasn't already written

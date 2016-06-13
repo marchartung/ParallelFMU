@@ -20,29 +20,37 @@ namespace FMI
 
         virtual ~EmptyFmu();
 
-        virtual AbstractFmu * duplicate();
-        virtual void stepCompleted();
-        virtual FMI::FmuEventInfo eventUpdate();
-        virtual double getDefaultStart() const;
-        virtual double getDefaultStop() const;
-        virtual void initialize();
+        virtual AbstractFmu * duplicate() override;
+        virtual void stepCompleted() override;
+        virtual FMI::FmuEventInfo eventUpdate() override;
+        virtual double getDefaultStart() const override;
+        virtual double getDefaultStop() const override;
+        virtual void initialize() override;
+
+        const FMI::ValueCollection & getEmptyFmuValues() const;
+        void setNumValues(const size_type & numReals, const size_type & numInts, const size_type & numBools, const size_type & numStrings);
 
      protected:
-        virtual void getValuesInternal(vector<real_type> & out, const vector<size_type> & references) const;
-        virtual void getValuesInternal(vector<int_type> & out, const vector<size_type> & references) const;
-        virtual void getValuesInternal(vector<bool_type> & out, const vector<size_type> & references) const;
-        virtual void getValuesInternal(vector<string_type> & out, const vector<size_type> & references) const;
+        virtual void getValuesInternal(vector<real_type> & out, const vector<size_type> & references) const override;
+        virtual void getValuesInternal(vector<int_type> & out, const vector<size_type> & references) const override;
+        virtual void getValuesInternal(vector<bool_type> & out, const vector<size_type> & references) const override;
+        virtual void getValuesInternal(vector<string_type> & out, const vector<size_type> & references) const override;
 
-        virtual void setValuesInternal(const vector<real_type> & out, const vector<size_type> & references) const;
-        virtual void setValuesInternal(const vector<int_type> & out, const vector<size_type> & references) const;
-        virtual void setValuesInternal(const vector<bool_type> & out, const vector<size_type> & references) const;
-        virtual void setValuesInternal(const vector<string_type> & out, const vector<size_type> & references) const;
+        virtual void setValuesInternal(const vector<real_type> & out, const vector<size_type> & references) override;
+        virtual void setValuesInternal(const vector<int_type> & out, const vector<size_type> & references) override;
+        virtual void setValuesInternal(const vector<bool_type> & out, const vector<size_type> & references) override;
+        virtual void setValuesInternal(const vector<string_type> & out, const vector<size_type> & references) override;
 
-        virtual void getStatesInternal(real_type * states) const;
-        virtual void setStatesInternal(const real_type * states);
+        virtual void getStatesInternal(real_type * states) const override;
+        virtual void setStatesInternal(const real_type * states) override;
 
-        virtual void getStateDerivativesInternal(real_type * stateDerivatives);
-        virtual void getEventIndicatorsInternal(real_type * eventIndicators);
+        virtual void getStateDerivativesInternal(real_type * stateDerivatives) override;
+        virtual void getEventIndicatorsInternal(real_type * eventIndicators) override;
+
+     private:
+
+        FMI::ValueCollection _values;
+
     };
 
 } /* namespace FMI */

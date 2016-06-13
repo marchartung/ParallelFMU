@@ -15,9 +15,11 @@ namespace Network
 {
     struct NetworkFmuInformation
     {
-        size_type fmuId;
-        NetOff::VariableList inputList;
-        NetOff::VariableList outputList;
+        size_type simPos;
+        size_type corePos;
+        size_type solverPos;
+        FMI::InputMapping inputMap;
+        FMI::InputMapping outputMap;
     };
 
     struct NetworkPlan
