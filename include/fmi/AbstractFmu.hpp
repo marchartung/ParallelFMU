@@ -298,7 +298,7 @@ namespace FMI
             }
             FMI::ValueCollection res(refs->getValues<real_type>().size(), refs->getValues<int_type>().size(),
                                      refs->getValues<bool_type>().size(), refs->getValues<string_type>().size());
-            getValues(res);
+            getAllValues(res);
             return res;
         }
 
@@ -456,7 +456,7 @@ namespace FMI
             getValuesInternal(values.getValues<real_type>(), _allValueReferences.getValues<real_type>());
             getValuesInternal(values.getValues<int_type>(), _allValueReferences.getValues<int_type>());
             getValuesInternal(values.getValues<bool_type>(), _allValueReferences.getValues<bool_type>());
-            getValuesInternal(values.getValues<string_type>(), _allValueReferences.getValues<string_type>());
+            //getValuesInternal(values.getValues<string_type>(), _allValueReferences.getValues<string_type>());
         }
 
         const FmuEventInfo& getEventInfo() const

@@ -201,6 +201,7 @@ namespace Solver
             int fmuId = _simServer->getLastSimId();
             real_type remoteTime = _simServer->getLastReceivedTime(fmuId);
             if (!_outputsSent)
+            {
                 if (_dataManager->sendSingleOutput(remoteTime, 1, &_fmu, outConns[fmuId]->getLocalId()))
                     _outputsSent = true;
                 else
@@ -209,6 +210,7 @@ namespace Solver
                     _outputsSent = false;
                     return 1;
                 }
+            }
             if (std::abs(_currentTime - remoteTime) > 1.0e-10)
             {
                 // get values

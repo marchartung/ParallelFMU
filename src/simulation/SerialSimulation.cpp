@@ -17,6 +17,8 @@ namespace Simulation
         bool_type running = true;  //MF only set, not used
         size_type iterationCount = 0;
         const vector<shared_ptr<Solver::ISolver>>& solver = getSolver();
+        std::vector<size_type> numSteps(solver.size(),15);
+        size_type tmpStepCount;
         double s,e;
         s = omp_get_wtime();
         while (running && getMaxIterations() > ++iterationCount)
@@ -24,11 +26,16 @@ namespace Simulation
             running = false;
             for (size_type i = 0; i < solver.size(); ++i)
             {
-                if(solver[i]->solve(10) == std::numeric_limits<size_type>::max())
+                if((tmpStepCount = solver[i]->solve(numSteps[i])) == std::numeric_limits<size_type>::max())
                 {
                     LOGGER_WRITE("Abort simulation at " + to_string(solver[i]->getCurrentTime()) , Util::LC_SOLVER, Util::LL_ERROR);
                     return;
                 }
+                if(tmpStepCount < numSteps[i] && numSteps[i] > 1)
+                    --numSteps[i];
+                else
+                    ++numSteps[i];
+                LOGGER_WRITE("(" + to_string(i) + ") numSteps: " + to_string(numSteps[i]),Util::LC_SOLVER, Util::LL_ERROR);
                 if (solver[i]->getCurrentTime() < getSimulationEndTime())
                     running = true;
                 else

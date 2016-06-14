@@ -7,16 +7,16 @@
 		<csvFileWriter id="0" resultFile="result_simpleview.csv" numOutputSteps="100" />
 	</writer>
 	<fmus>
-		<fmu name="BouncingBall" path="test/data/BouncingBall.fmu" loader="fmuSdk" solver="euler" relativeTolerance="1.0e-5" />
-		<fmu name="SimpleView" path="test/data/SimpleView.fmu" loader="fmuSdk" solver="euler" relativeTolerance="1.0e-5" defaultStepSize="0.1"/>
+		<fmu name="BouncingBall_gravity_input" path="test/data/BouncingBall_gravity_input.fmu" loader="fmuSdk" solver="euler" relativeTolerance="1.0e-5" />
+		<fmu name="Blower" path="test/data/Blower.fmu" loader="fmuSdk" solver="euler" relativeTolerance="1.0e-5"/>
 	</fmus>
 	<connections>
-		<connection source="BouncingBall" dest="SimpleView">
-			<real out="0" in="0" />
+		<connection source="Blower" dest="BouncingBall_gravity_input">
+			<real out="0" in="4" />
 		</connection>
 	</connections>
 	<scheduling>
-		<nodes numNodes="1" numCoresPerNode="1" numFmusPerCore="2"/>
+		<nodes numNodes="1" numCoresPerNode="2" numFmusPerCore="1"/>
 	</scheduling>
 	<simulation startTime="0.0" endTime="5.0" globalTolerance="1.0e-5" globalMaxError="1.0e-6" globalDefaultStepSize="1.0e-3" globalEventInterval="2.0e-5"/>
 </configuration>

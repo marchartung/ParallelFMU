@@ -73,7 +73,7 @@ namespace Synchronization
 
             this->setFmuInputValuesAtT(fmu->getTime(), fmu);
 
-            FMI::ValueCollection newValues = fmu->getValues();  // Collection in where inputs are set
+            FMI::ValueCollection newValues = fmu->getValues(FMI::ReferenceContainerType::ALL);  // Collection in where inputs are set
             /////////////////////////////////////////////////////////
             ///////////////////// SEND OUTPUTS //////////////////////
             /////////////////////////////////////////////////////////
@@ -104,7 +104,7 @@ namespace Synchronization
          */
         void setFmuInputValuesAtT(const real_type & t, FMI::AbstractFmu* fmu) override
         {
-            FMI::ValueCollection fmuValues = fmu->getValues();
+            FMI::ValueCollection fmuValues = fmu->getValues(FMI::ReferenceContainerType::ALL);
             for (const size_type conId : _communicator.getInConnectionIds(fmu))
             {
                 FMI::ValueCollection tmpColl = _history.getInputValues(conId, t);  // Implicit interpolation for time [curTime]
@@ -203,7 +203,7 @@ namespace Synchronization
         bool sendSingleOutput(real_type curTime, size_type solveOrder, const FMI::AbstractFmu* fmu, const size_type & conId)
         {
             if(_communicator.send(
-                HistoryEntry(curTime, solveOrder, _valuePacking[conId].pack(fmu->getValues()), true), conId))
+                HistoryEntry(curTime, solveOrder, _valuePacking[conId].pack(fmu->getValues(FMI::ReferenceContainerType::ALL)), true), conId))
                 _lastCommTime[conId] = curTime;
             else
                 return false;
@@ -329,7 +329,7 @@ namespace Synchronization
         bool sendOutputs(real_type curTime, size_type solveOrder, FMI::AbstractFmu* fmu,
                               const Solver::SolverStepInfo & stepInfo)
         {
-            const FMI::ValueCollection fmuValues = fmu->getValues();
+            const FMI::ValueCollection fmuValues = fmu->getValues(FMI::ReferenceContainerType::ALL);
             for (size_type conId : _communicator.getOutConnectionIds(fmu))
             {
                 if (_lastCommTime[conId] < curTime)  // check if the time wasn't already written

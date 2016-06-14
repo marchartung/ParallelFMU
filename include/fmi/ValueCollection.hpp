@@ -139,7 +139,7 @@ namespace FMI
         vector<int_type> _intValues;
 
         /// Storage of values of type bool_type.
-        vector<bool_type> _bool_typeValues;
+        vector<bool_type> _boolValues;
 
         /// Storage of values of type string.
         vector<string_type > _stringValues;

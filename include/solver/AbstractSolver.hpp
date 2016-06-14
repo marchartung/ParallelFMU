@@ -110,7 +110,7 @@ namespace Solver
             _dependencyInfo.depStatus = DependencyStatus::BLOCKED;
             _fmu.getStates(_states);
             _prevStates = _states;
-            _tmpValues = FMI::ValueCollection(_fmu.getValues());
+            _tmpValues = FMI::ValueCollection(_fmu.getValues(FMI::ReferenceContainerType::ALL));
             _fmu.getEventIndicators(_prevEventIndicators);
 
             if (_tolerance <= 0.0 || _maxError <= 0.0 || _initStepSize <= 0.0)
@@ -160,7 +160,7 @@ namespace Solver
         bool_type isFinished() const
         {
             //return (_savedSolverStep && _currentTime >= _endTime);
-            if (_dependencyInfo.depStatus == DependencyStatus::FREE && _currentTime >= _endTime)
+            if (_dependencyInfo.depStatus == DependencyStatus::FREE && _currentTime >= _endTime && _savedStep)
                 return true;
             else
                 return false;
@@ -231,7 +231,7 @@ namespace Solver
                             break;
 
                         case DependencyStatus::BLOCKED:
-
+                            return rCount;
                             break;
                         case DependencyStatus::ABORT_SIM:
                             return std::numeric_limits<size_type>::max();
@@ -256,86 +256,6 @@ namespace Solver
                     handleEvents();
                     _savedStep = false;
                 }
-
-                /*
-                 if(!_savedStep)
-                 _savedStep = _dataManager->saveSolverStep(&_fmu, _stepInfo, getSolverOrder());
-                 else if (_dependencyInfo.depStatus == DependencyStatus::BLOCKED)
-                 {
-                 _dependencyInfo = _dataManager->getDependencyInfo(&_fmu);
-
-                 if (_dependencyInfo.depStatus == DependencyStatus::FREE)
-                 {
-                 if (_sEventInfo.eventOccured)
-                 {
-                 doEventStepping();
-                 }
-                 else
-                 {
-                 _curStepSize = _tmpStepSize;
-                 _stepInfo.clear();
-                 if (_currentTime + _curStepSize >= _dataManager->getNextOutputTime(_currentTime))
-                 {
-                 _tmpStepSize = _curStepSize;
-                 _stepInfo.setWriteStep(true);
-                 _curStepSize = std::min(_dataManager->getNextOutputTime(_currentTime), _endTime) - _currentTime;
-                 }
-
-                 doSolverStepErrorHandled(std::min(_curStepSize, _endTime - _currentTime));  // do normal step + complete this step
-                 _freshStep = true;
-                 }
-                 }
-                 else if (_dependencyInfo.depStatus == DependencyStatus::EVENT)  // check for events of output fmus
-                 {
-                 _sEventInfo.eventOccured = true;
-                 _sEventInfo.eventTimeStart = std::min(_sEventInfo.eventTimeStart, _dependencyInfo.eventTimeStart);  // which event happend earlier?
-                 _sEventInfo.eventTimeEnd = std::min(_sEventInfo.eventTimeEnd, _dependencyInfo.eventTimeEnd);  // which event happend earlier?
-                 }
-                 }
-                 if (_freshStep)
-                 {
-                 handleEvents();  // check for local events
-                 _freshStep = false;
-                 }
-                 */
-                /* if (_dependencyInfo.depStatus != DependencyStatus::BLOCKED)
-                 {
-                 handleEvents();
-
-                 if (_sEventInfo.eventOccured)
-                 {
-                 doEventStepping();  // before this call _sEventInfo has to be set properly
-                 }
-                 else if (_writeResults)
-                 {
-                 _curStepSize = _tmpStepSize;
-                 _writeResults = false;
-                 if (isFinished())
-                 break;
-                 //LOGGER_WRITE("[0]: " + to_string(_states[0]) + " [1]: " + to_string(_states[1]), Util::LC_SOLVER, Util::LL_DEBUG);
-                 }
-                 else
-                 {
-                 if (_currentTime + _curStepSize > _dataManager->getNextOutputTime(_currentTime))
-                 {
-                 _writeResults = true;  // need to reset step size
-                 _tmpStepSize = _curStepSize;
-                 _stepInfo.setWriteStep(true);
-                 _curStepSize = std::min(_dataManager->getNextOutputTime(_currentTime), _endTime) - _currentTime;
-                 }
-
-                 doSolverStepErrorHandled(std::min(_curStepSize, _endTime - _currentTime));  // do normal step + complete this step
-                 }
-                 _dependencyInfo = _dataManager->saveSolverStep(&_fmu, _stepInfo, getSolverOrder());
-                 ++rCount;
-
-                 }
-                 else
-                 _dependencyInfo = _dataManager->saveSolverStep(&_fmu, _stepInfo, getSolverOrder());*/
-
-                //std::cout << "curTime: " << _currentTime << "\n";
-                //LOGGER_WRITE(_fmu.getName() + " curtime: " + to_string(_currentTime) + " (dTime: " + to_string(_curStepSize) + ")" , Util::LC_SOLVER,Util::LL_WARNING);
-                //LOGGER_WRITE(to_string(_currentTime) + " [0]: " + to_string(_states[0]), Util::LC_SOLVER, Util::LL_DEBUG);
             }
             return rCount;
         }
@@ -386,7 +306,7 @@ namespace Solver
             _dataManager->setFmuInputValuesAtT(_currentTime, &_fmu);
 
             _fmu.getStateDerivatives(_stateDerivatives);
-            _stepInfo.setEvent<0>(_currentTime, _fmu.getValues());
+            _stepInfo.setEvent<0>(_currentTime, _fmu.getValues(FMI::ReferenceContainerType::ALL));
 
             _currentTime = _sEventInfo.eventTimeEnd;
             doSolverStep(_currentTime - _prevTime);
@@ -404,7 +324,7 @@ namespace Solver
                 _fmu.getStates(_states);
             // write results for after event
             //_fmu.getStateDerivatives(_stateDerivatives);
-            _stepInfo.setEvent<1>(_currentTime, _fmu.getValues());
+            _stepInfo.setEvent<1>(_currentTime, _fmu.getValues(FMI::ReferenceContainerType::ALL));
             _sEventInfo.eventOccured = false;
             ++_eventCounter;
             real_type newTime = std::max(_tolerance, _prevTime + _curStepSize - _currentTime);

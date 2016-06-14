@@ -15,11 +15,11 @@ namespace Synchronization
         if(_knownFmus.insert(fmu->getFmuName()).second)
         {
             if(_history.size() < fmu->getLocalId()+1)
-                _history.resize(fmu->getLocalId()+1,RingBufferSubHistory(Interpolation(),fmu->getValues()));
+                _history.resize(fmu->getLocalId()+1,RingBufferSubHistory(Interpolation(),fmu->getValues(FMI::ReferenceContainerType::ALL)));
             for(ConnectionSPtr & con : connList)
             {
                 if(_inputHistory.size() < con->getLocalId()+1)
-                    _inputHistory.resize(con->getLocalId()+1,RingBufferSubHistory(Interpolation(),fmu->getValues()));
+                    _inputHistory.resize(con->getLocalId()+1,RingBufferSubHistory(Interpolation(),fmu->getValues(FMI::ReferenceContainerType::ALL)));
             }
         }
         else
