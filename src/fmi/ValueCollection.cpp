@@ -23,7 +23,8 @@ namespace FMI
     {
     }
 
-    ValueCollection::ValueCollection(const vector<real_type> & real, const vector<int_type> & integer, const vector<bool_type> & bool_typeean, const vector<string_type> & str)
+    ValueCollection::ValueCollection(const vector<real_type> & real, const vector<int_type> & integer, const vector<bool_type> & bool_typeean,
+                                     const vector<string_type> & str)
             : _realValues(real),
               _intValues(integer),
               _bool_typeValues(bool_typeean),
@@ -101,10 +102,9 @@ namespace FMI
         return _bool_typeValues.size() + _intValues.size() + _stringValues.size() + _realValues.size();
     }
 
-
     bool_type ValueCollection::empty() const
     {
-    	return _bool_typeValues.empty() && _intValues.empty() && _stringValues.empty() && _realValues.empty();
+        return _bool_typeValues.empty() && _intValues.empty() && _stringValues.empty() && _realValues.empty();
     }
 
     ostream & operator<<(ostream & out, const ValueCollection & in)
@@ -135,7 +135,7 @@ namespace FMI
 
 } /* namespace FMI */
 
-string_type  to_string(const FMI::ValueCollection & in)
+string_type to_string(const FMI::ValueCollection & in)
 {
     std::stringstream res;
     res << in;

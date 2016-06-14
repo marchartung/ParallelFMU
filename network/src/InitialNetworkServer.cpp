@@ -13,11 +13,10 @@
 namespace Network
 {
     InitialNetworkServer::InitialNetworkServer(const int & port, Initialization::ProgramPlan & plan)
-            : _port(port),
-              _plan(plan),
+            : _plan(plan),
               _offsets(4, 0)
     {
-
+        _networkPlan.server = std::shared_ptr<NetOff::SimulationServer>(new NetOff::SimulationServer(port));
     }
 
     InitialNetworkServer::~InitialNetworkServer()
@@ -33,14 +32,13 @@ namespace Network
     void InitialNetworkServer::start()
     {
         NetOff::SimulationServer & server = *_networkPlan.server.get();
-        _networkPlan.server = std::shared_ptr<NetOff::SimulationServer>(new NetOff::SimulationServer(_port));
         if (!server.initializeConnection())
             throw std::runtime_error("Couldn't initialize network connection.");
 
         bool run = true;
         while (run)
         {
-            NetOff::InitialClientMessageSpecifyer spec;
+            NetOff::InitialClientMessageSpecifyer spec = server.getInitialClientRequest();
             switch (spec)
             {
                 case NetOff::InitialClientMessageSpecifyer::ADD_SIM:
@@ -94,12 +92,17 @@ namespace Network
             const FMI::ValueReferenceCollection & refs = fmu->getAllValueReferences();
             const FMI::ValueInfo & vi = fmu->getValueInfo();
 
-            *_networkPlan.fmuNet[newId].outputMap = getMappingFromNameList(refs, server.getSelectedInputVariables(newId), vi, true);
-            *_networkPlan.fmuNet[newId].inputMap = getMappingFromNameList(refs, server.getSelectedOutputVariables(newId), vi, false);
+            _networkPlan.fmuNet[newId].outputMap = getMappingFromNameList(refs, server.getSelectedInputVariables(newId), vi, true);
+            _networkPlan.fmuNet[newId].inputMap = getMappingFromNameList(refs, server.getSelectedOutputVariables(newId), vi, false);
 
             fmu->load(true);
         }
-        NetOff::ValueContainer initialValues = *_networkPlan.fmuNet[newId].outputMap.pack(fmu->getValues(FMI::ReferenceContainerType::ALL));
+
+        FMI::ValueCollection tmpVals = _networkPlan.fmuNet[newId].outputMap.pack(fmu->getValues(FMI::ReferenceContainerType::ALL));
+        NetOff::ValueContainer & initialValues = server.getOutputValueContainer(newId);
+        initialValues.setRealValues(tmpVals.getValues<real_type>().data());
+        initialValues.setIntValues(tmpVals.getValues<int_type>().data());
+        initialValues.setBoolValues(tmpVals.getValues<bool_type>().data());
         server.confirmSimulationInit(newId, initialValues);
     }
 
@@ -153,7 +156,7 @@ namespace Network
         const FMI::ValueInfo & info = _tmpFmus[newId]->getValueInfo();
 
         NetOff::VariableList inputVarNames(info.getInputValueNames<real_type>(), info.getInputValueNames<int_type>(), info.getInputValueNames<bool_type>()),
-                outputVarNames(info.getValueNames<real_type>(), info.getValueNames<int_type>(), info.getValueNames<bool_type>());
+                             outputVarNames(info.getValueNames<real_type>(), info.getValueNames<int_type>(), info.getValueNames<bool_type>());
         server.confirmSimulationAdd(newId, inputVarNames, outputVarNames);
     }
 

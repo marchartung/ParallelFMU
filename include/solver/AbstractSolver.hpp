@@ -40,8 +40,9 @@ namespace Solver
 
      protected:
         virtual void doSolverStep(const real_type & h) = 0;
-
      public:
+        virtual ErrorInfo getErrorInfo() const = 0;
+        virtual size_type getSolverOrder() const = 0;
 
         typedef vector<real_type> vector1D;
         typedef vector<vector1D> vector2D;
@@ -218,7 +219,7 @@ namespace Solver
                             else
                             {
                                 _savedStep = _dataManager->saveSolverStep(&_fmu, _stepInfo, getSolverOrder());
-                                if(_savedStep)
+                                if (_savedStep)
                                     _stepInfo.clear();
                             }
                             break;
@@ -339,11 +340,6 @@ namespace Solver
             return rCount;
         }
 
-        virtual ErrorInfo getErrorInfo() const = 0;
-
-        /// Pure virtual function. The implementation for a particular solver will return its order.
-        virtual size_type getSolverOrder() const = 0;
-
         /**
          * Executes doSolverStep as long as a valid step is done. Due to error handling, it can be that
          * a step is invalid. So use doSolverStep only, if it is ensured that the error will be fine.
@@ -353,9 +349,9 @@ namespace Solver
         virtual void doSolverStepErrorHandled(const real_type & h)
         {
             double step = h;
-            if(_prevTime > _currentTime)
+            if (_prevTime > _currentTime)
                 throw std::runtime_error("Prevtime is gt than current.");
-            if( 0 > _curStepSize)
+            if (0 > _curStepSize)
                 throw std::runtime_error("Step size is negative.");
             _prevTime = _currentTime;
             _prevStates.swap(_states);  // save current states in previous states
@@ -368,7 +364,7 @@ namespace Solver
             }
             _currentTime += step;
             _curStepSize = std::min(_initStepSize, getErrorInfo().getStepSize());
-            if( 0 > _curStepSize)
+            if (0 > _curStepSize)
                 throw std::runtime_error("Step size is negative.");
 
             _fmu.setTime(_currentTime);
@@ -381,7 +377,8 @@ namespace Solver
             //keep the new state values, because they are the after event start values
             //it's too late at this location to write the pre-event-values
             //_fmu.getStates(eventStateValues.data());
-            LOGGER_WRITE("Event stepping: t0=" + to_string(_sEventInfo.eventTimeStart) + " , t1=" +to_string(_sEventInfo.eventTimeEnd),Util::LC_SOLVER,Util::LL_DEBUG);
+            LOGGER_WRITE("Event stepping: t0=" + to_string(_sEventInfo.eventTimeStart) + " , t1=" + to_string(_sEventInfo.eventTimeEnd), Util::LC_SOLVER,
+                         Util::LL_DEBUG);
             _currentTime = _sEventInfo.eventTimeStart;
             doSolverStep(_currentTime - _prevTime);
             _fmu.setTime(_currentTime);
@@ -410,7 +407,7 @@ namespace Solver
             _stepInfo.setEvent<1>(_currentTime, _fmu.getValues());
             _sEventInfo.eventOccured = false;
             ++_eventCounter;
-            real_type newTime = std::max(_tolerance,_prevTime+_curStepSize-_currentTime);
+            real_type newTime = std::max(_tolerance, _prevTime + _curStepSize - _currentTime);
             _prevTime = _currentTime;
             _prevStates = _states;
             doSolverStepErrorHandled(newTime);
@@ -524,10 +521,10 @@ namespace Solver
                     tMin = t;
             }
             LOGGER_WRITE(string_type("Interpolated event time point_type to ") + to_string(t), Util::LC_EVT, Util::LL_DEBUG);
-            if(tMin <= _prevTime)
-                tMin = std::nextafter(_prevTime,DBL_MAX);
-            if(tMax >= _currentTime)
-                tMax = std::nextafter(_currentTime,DBL_MIN);
+            if (tMin <= _prevTime)
+                tMin = std::nextafter(_prevTime, DBL_MAX);
+            if (tMax >= _currentTime)
+                tMax = std::nextafter(_currentTime, DBL_MIN);
 
             return
             {   true,std::max(tMin,t-_tolerance), std::min(tMax,t+_tolerance)};

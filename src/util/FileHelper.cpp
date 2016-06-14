@@ -7,6 +7,8 @@
 
 #include <boost/filesystem.hpp>
 
+#include "util/FileHelper.hpp"
+
 namespace Util
 {
     std::string FileHelper::find(const std::string & path, const std::string & fileName, const bool & recursive)
@@ -20,13 +22,13 @@ namespace Util
         }
         else
         {
-            for (fs::directory_iterator it = bpath; it != fs::directory_iterator(); ++it)
+            for (fs::directory_iterator it = fs::directory_iterator(bpath); it != fs::directory_iterator(); ++it)
             {
                 if (fs::is_directory(*it))
                 {
                     if (recursive)
                     {
-                        res = find((std::string) bpath, fileName, recursive);
+                        res = find(bpath.string(), fileName, recursive);
                     }
                 }
                 else if (fs::is_regular(*it) && it->path().filename() == fileName)
@@ -39,4 +41,14 @@ namespace Util
         }
         return res;
     }
+}
+
+std::string Util::FileHelper::absoluteFilePath(const std::string& fileName)
+{
+    std::string res("");
+    namespace fs = boost::filesystem;
+    fs::path bpath(fileName);
+    if(fs::is_regular(bpath))
+        res = bpath.string();
+    return res;
 }

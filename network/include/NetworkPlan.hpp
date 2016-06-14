@@ -8,9 +8,14 @@
 #ifndef NETWORK_INCLUDE_NETWORKPLAN_HPP_
 #define NETWORK_INCLUDE_NETWORKPLAN_HPP_
 
-#include "VariableList.hpp"
-#include "SimulationServer.hpp"
 #include <memory>
+
+#include <VariableList.hpp>
+#include <SimulationServer.hpp>
+
+#include "Stdafx.hpp"
+#include "fmi/InputMapping.hpp"
+
 namespace Network
 {
     struct NetworkFmuInformation
@@ -27,9 +32,6 @@ namespace Network
         std::shared_ptr<NetOff::SimulationServer> server;
         std::vector<NetworkFmuInformation> fmuNet;
     };
-
-    void appendNetworkInformation(Initialization::ProgramPlan & plan, NetworkPlan & netPlan);
-
 }
 
 #endif /* NETWORK_INCLUDE_NETWORKPLAN_HPP_ */

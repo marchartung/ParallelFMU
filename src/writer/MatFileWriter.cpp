@@ -174,7 +174,7 @@ namespace Writer
         size_type uilongest = 12;  // help variable for temp buffer size
         size_type uilongestName = 5;    // because of "Time"
         size_type uilongestDesc = 12;  // because of "Time in [s]"
-        list<string_type> valueNamesList = variables.getAllValueNames();
+        std::vector<string_type> valueNamesList = variables.getAllValueNames();
         vector<string_type> valueNames = vector<string_type>(valueNamesList.begin(), valueNamesList.end());
         size_type uiVarCount = valueNames.size() + 1;  // all variables, all parameters + time
 

@@ -29,6 +29,7 @@
 #include <limits>
 #include <assert.h>
 #include <type_traits>
+#include <utility>
 
 using std::list;
 using std::deque;

@@ -8,7 +8,7 @@
 #ifndef NETWORK_INCLUDE_EMPTYFMU_HPP_
 #define NETWORK_INCLUDE_EMPTYFMU_HPP_
 
-#include <fmi/AbstractFmu.hpp>
+#include "fmi/AbstractFmu.hpp"
 
 namespace FMI
 {
@@ -16,7 +16,7 @@ namespace FMI
     class EmptyFmu : public AbstractFmu
     {
      public:
-        EmptyFmu();
+        EmptyFmu(const Initialization::FmuPlan & in);
 
         virtual ~EmptyFmu();
 

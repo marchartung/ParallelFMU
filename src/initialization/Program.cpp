@@ -10,10 +10,13 @@
 #include "initialization/XMLConfigurationReader.hpp"
 #include "simulation/AbstractSimulation.hpp"
 
+#ifdef USE_MPI
 #include <mpi.h>
+#endif
 
 #ifdef USE_NETWORK_OFFLOADER
-#include "../../network/include/InitialNetworkServer.hpp"
+#include "InitialNetworkServer.hpp"
+#include "NetworkFunctions.hpp"
 #endif
 
 namespace Initialization
@@ -45,6 +48,11 @@ namespace Initialization
         if (_isInitialized)
             return;
         Util::Logger::initialize(_commandLineArgs.getLogSettings());
+        //create simulation plan, i.e. multiple simulation plans if mpi should be used (for each mpi process one plan)
+        // read config file:
+        XMLConfigurationReader reader(_commandLineArgs.getConfigFilePath());
+        _pp = reader.getProgramPlan();
+        printProgramInfo(_pp);
 
         // test for MPI initialization:
         int rank = 0, numRanks = 1;
@@ -52,19 +60,12 @@ namespace Initialization
             if (!initMPI(rank, numRanks))
                 throw std::runtime_error("Couldn't initialize simulation. MPI couldn't be initialized.");
 
-        // read config file:
-        XMLConfigurationReader reader(_commandLineArgs.getConfigFilePath());
-
         // initialize server if needed
         if (_commandLineArgs.isSimulationServer())
         {
-            if (!initNetworkConnection(rank, reader))
+            if (!initNetworkConnection(rank))
                 throw std::runtime_error("Simulation server couldn't be initialized");
         }
-
-        //create simulation plan, i.e. multiple simulation plans if mpi should be used (for each mpi process one plan)
-        _pp = reader.getProgramPlan();
-        printProgramInfo(_pp);
 
         // initialize and create simulation:
         MainFactory mf;
@@ -132,7 +133,7 @@ namespace Initialization
 #endif
     }
 
-    bool Program::initNetworkConnection(const int & rank, XMLConfigurationReader & reader)
+    bool Program::initNetworkConnection(const int & rank)
     {
         // Need to tread special cases. In a network server case the socket can only be hold by one process. The addional information need to be send via mpi
 #ifdef USE_NETWORK_OFFLOADER
@@ -141,113 +142,117 @@ namespace Initialization
         {
             // initial network phase. Gather which information need to be collected and send to the client:
             Network::InitialNetworkServer initServer(_commandLineArgs.getSimulationServerPort(), _pp);
+            initServer.start();
             np = initServer.getNetworkPlan();
 #ifdef USE_MPI
-            int num = np.fmuNet.size();
-            MPI_Bcast(&num,1,MPI_INT,0,MPI_COMM_WORLD);
-            for(const auto & addFmu : np.fmuNet)
+            if (_usingMPI)
             {
-                // sim num
-                MPI_Bcast((void*)(&addFmu.simPos),1,MPI_UINT32_T,0,MPI_COMM_WORLD);
-                // core num
-                MPI_Bcast((void*)(&addFmu.corePos),1,MPI_UINT32_T,0,MPI_COMM_WORLD);
-                // solver num
-                MPI_Bcast((void*)(&addFmu.solverPos),1,MPI_UINT32_T,0,MPI_COMM_WORLD);
+                int num = np.fmuNet.size();
+                MPI_Bcast(&num, 1, MPI_INT, 0, MPI_COMM_WORLD);
+                for (const auto & addFmu : np.fmuNet)
+                {
+                    // sim num
+                    MPI_Bcast((void*) (&addFmu.simPos), 1, MPI_UINT32_T, 0, MPI_COMM_WORLD);
+                    // core num
+                    MPI_Bcast((void*) (&addFmu.corePos), 1, MPI_UINT32_T, 0, MPI_COMM_WORLD);
+                    // solver num
+                    MPI_Bcast((void*) (&addFmu.solverPos), 1, MPI_UINT32_T, 0, MPI_COMM_WORLD);
 
-                // inputs
-                num = addFmu.inputMap.size<real_type>();
-                MPI_Bcast(&num,1,MPI_INT,0,MPI_COMM_WORLD);
-                MPI_Bcast((void*)addFmu.inputMap.data<real_type>(),2*addFmu.inputMap.size<real_type>(),MPI_UINT32_T,0,MPI_COMM_WORLD);
+                    // inputs
+                    num = addFmu.inputMap.size<real_type>();
+                    MPI_Bcast(&num, 1, MPI_INT, 0, MPI_COMM_WORLD);
+                    MPI_Bcast((void*) addFmu.inputMap.data<real_type>(), 2 * addFmu.inputMap.size<real_type>(), MPI_UINT32_T, 0, MPI_COMM_WORLD);
 
-                num = addFmu.inputMap.size<int_type>();
-                MPI_Bcast(&num,1,MPI_INT,0,MPI_COMM_WORLD);
-                MPI_Bcast((void*)addFmu.inputMap.data<int_type>(),2*addFmu.inputMap.size<int_type>(),MPI_UINT32_T,0,MPI_COMM_WORLD);
+                    num = addFmu.inputMap.size<int_type>();
+                    MPI_Bcast(&num, 1, MPI_INT, 0, MPI_COMM_WORLD);
+                    MPI_Bcast((void*) addFmu.inputMap.data<int_type>(), 2 * addFmu.inputMap.size<int_type>(), MPI_UINT32_T, 0, MPI_COMM_WORLD);
 
-                num = addFmu.inputMap.size<bool_type>();
-                MPI_Bcast(&num,1,MPI_INT,0,MPI_COMM_WORLD);
-                MPI_Bcast((void*)addFmu.inputMap.data<bool_type>(),2*addFmu.inputMap.size<bool_type>(),MPI_UINT32_T,0,MPI_COMM_WORLD);
+                    num = addFmu.inputMap.size<bool_type>();
+                    MPI_Bcast(&num, 1, MPI_INT, 0, MPI_COMM_WORLD);
+                    MPI_Bcast((void*) addFmu.inputMap.data<bool_type>(), 2 * addFmu.inputMap.size<bool_type>(), MPI_UINT32_T, 0, MPI_COMM_WORLD);
 
-                num = addFmu.inputMap.size<string_type>();
-                MPI_Bcast(&num,1,MPI_INT,0,MPI_COMM_WORLD);
-                MPI_Bcast((void*)addFmu.inputMap.data<string_type>(),2*addFmu.inputMap.size<string_type>(),MPI_UINT32_T,0,MPI_COMM_WORLD);
+                    num = addFmu.inputMap.size<string_type>();
+                    MPI_Bcast(&num, 1, MPI_INT, 0, MPI_COMM_WORLD);
+                    MPI_Bcast((void*) addFmu.inputMap.data<string_type>(), 2 * addFmu.inputMap.size<string_type>(), MPI_UINT32_T, 0, MPI_COMM_WORLD);
 
-                //outputs
-                num = addFmu.outputMap.size<real_type>();
-                MPI_Bcast(&num,1,MPI_INT,0,MPI_COMM_WORLD);
-                MPI_Bcast((void*)addFmu.outputMap.data<real_type>(),2*addFmu.outputMap.size<real_type>(),MPI_UINT32_T,0,MPI_COMM_WORLD);
+                    //outputs
+                    num = addFmu.outputMap.size<real_type>();
+                    MPI_Bcast(&num, 1, MPI_INT, 0, MPI_COMM_WORLD);
+                    MPI_Bcast((void*) addFmu.outputMap.data<real_type>(), 2 * addFmu.outputMap.size<real_type>(), MPI_UINT32_T, 0, MPI_COMM_WORLD);
 
-                num = addFmu.outputMap.size<int_type>();
-                MPI_Bcast(&num,1,MPI_INT,0,MPI_COMM_WORLD);
-                MPI_Bcast((void*)addFmu.outputMap.data<int_type>(),2*addFmu.outputMap.size<int_type>(),MPI_UINT32_T,0,MPI_COMM_WORLD);
+                    num = addFmu.outputMap.size<int_type>();
+                    MPI_Bcast(&num, 1, MPI_INT, 0, MPI_COMM_WORLD);
+                    MPI_Bcast((void*) addFmu.outputMap.data<int_type>(), 2 * addFmu.outputMap.size<int_type>(), MPI_UINT32_T, 0, MPI_COMM_WORLD);
 
-                num = addFmu.outputMap.size<bool_type>();
-                MPI_Bcast(&num,1,MPI_INT,0,MPI_COMM_WORLD);
-                MPI_Bcast((void*)addFmu.outputMap.data<bool_type>(),2*addFmu.outputMap.size<bool_type>(),MPI_UINT32_T,0,MPI_COMM_WORLD);
+                    num = addFmu.outputMap.size<bool_type>();
+                    MPI_Bcast(&num, 1, MPI_INT, 0, MPI_COMM_WORLD);
+                    MPI_Bcast((void*) addFmu.outputMap.data<bool_type>(), 2 * addFmu.outputMap.size<bool_type>(), MPI_UINT32_T, 0, MPI_COMM_WORLD);
 
-                num = addFmu.outputMap.size<string_type>();
-                MPI_Bcast(&num,1,MPI_INT,0,MPI_COMM_WORLD);
-                MPI_Bcast((void*)addFmu.outputMap.data<string_type>(),2*addFmu.outputMap.size<string_type>(),MPI_UINT32_T,0,MPI_COMM_WORLD);
+                    num = addFmu.outputMap.size<string_type>();
+                    MPI_Bcast(&num, 1, MPI_INT, 0, MPI_COMM_WORLD);
+                    MPI_Bcast((void*) addFmu.outputMap.data<string_type>(), 2 * addFmu.outputMap.size<string_type>(), MPI_UINT32_T, 0, MPI_COMM_WORLD);
+                }
             }
 #endif
         }
         else
         {
 #ifdef USE_MPI
-
+            if(!_usingMPI)
+                throw std::runtime_error("Cannot start mpi simulation.");
             // quick and dirty bcast for the remote simulation data aka. for the NetworkPlan
             int num = 0;
-            MPI_Recv(&num,1,MPI_INT,0,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-            std::vector<std::tuple<size_type,size_type> > tmp1, tmp2, tmp3, tmp4;
-            for(int i = 0;i<num;++i)
+            MPI_Recv(&num, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            std::vector<std::tuple<size_type, size_type> > tmp1, tmp2, tmp3, tmp4;
+            for (int i = 0; i < num; ++i)
             {
                 np.fmuNet.push_back(Network::NetworkFmuInformation());
 
                 // sim num
-                MPI_Recv((void*)(&np.fmuNet.back().simPos),1,MPI_UINT32_T,0,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                MPI_Recv((void*) (&np.fmuNet.back().simPos), 1, MPI_UINT32_T, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
                 // core num
-                MPI_Recv((void*)(&np.fmuNet.back().corePos),1,MPI_UINT32_T,0,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                MPI_Recv((void*) (&np.fmuNet.back().corePos), 1, MPI_UINT32_T, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
                 // solver num
-                MPI_Recv((void*)(&np.fmuNet.back().solverPos),1,MPI_UINT32_T,0,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                MPI_Recv((void*) (&np.fmuNet.back().solverPos), 1, MPI_UINT32_T, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
                 //inputs
-                MPI_Recv(&num,1,MPI_INT,0,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                MPI_Recv(&num, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
                 tmp1.resize(num);
-                MPI_Recv((void*)tmp1.data(),2*num,MPI_UINT32_T,0,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                MPI_Recv((void*) tmp1.data(), 2 * num, MPI_UINT32_T, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-                MPI_Recv(&num,1,MPI_INT,0,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                MPI_Recv(&num, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
                 tmp2.resize(num);
-                MPI_Recv((void*)tmp2.data(),2*num,MPI_UINT32_T,0,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                MPI_Recv((void*) tmp2.data(), 2 * num, MPI_UINT32_T, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-                MPI_Recv(&num,1,MPI_INT,0,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                MPI_Recv(&num, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
                 tmp3.resize(num);
-                MPI_Recv((void*)tmp3.data(),2*num,MPI_UINT32_T,0,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                MPI_Recv((void*) tmp3.data(), 2 * num, MPI_UINT32_T, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-                MPI_Recv(&num,1,MPI_INT,0,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                MPI_Recv(&num, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
                 tmp4.resize(num);
-                MPI_Recv((void*)tmp4.data(),2*num,MPI_UINT32_T,0,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                MPI_Recv((void*) tmp4.data(), 2 * num, MPI_UINT32_T, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-                np.fmuNet.back().inputMap = FMI::InputMapping(tmp1,tmp2,tmp3,tmp4);
+                np.fmuNet.back().inputMap = FMI::InputMapping(tmp1, tmp2, tmp3, tmp4);
 
                 //inputs
-                MPI_Recv(&num,1,MPI_INT,0,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                MPI_Recv(&num, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
                 tmp1.resize(num);
-                MPI_Recv((void*)tmp1.data(),2*num,MPI_UINT32_T,0,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                MPI_Recv((void*) tmp1.data(), 2 * num, MPI_UINT32_T, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-                MPI_Recv(&num,1,MPI_INT,0,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                MPI_Recv(&num, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
                 tmp2.resize(num);
-                MPI_Recv((void*)tmp2.data(),2*num,MPI_UINT32_T,0,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                MPI_Recv((void*) tmp2.data(), 2 * num, MPI_UINT32_T, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-                MPI_Recv(&num,1,MPI_INT,0,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                MPI_Recv(&num, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
                 tmp3.resize(num);
-                MPI_Recv((void*)tmp3.data(),2*num,MPI_UINT32_T,0,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                MPI_Recv((void*) tmp3.data(), 2 * num, MPI_UINT32_T, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-                MPI_Recv(&num,1,MPI_INT,0,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                MPI_Recv(&num, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
                 tmp4.resize(num);
-                MPI_Recv((void*)tmp4.data(),2*num,MPI_UINT32_T,0,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                MPI_Recv((void*) tmp4.data(), 2 * num, MPI_UINT32_T, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-                np.fmuNet.back().outputMap = FMI::InputMapping(tmp1,tmp2,tmp3,tmp4);
+                np.fmuNet.back().outputMap = FMI::InputMapping(tmp1, tmp2, tmp3, tmp4);
             }
-
 
 #else
             // test if the rank is on default (0), if not somethings wrong with @param rank.

@@ -10,8 +10,8 @@
 namespace FMI
 {
 
-    EmptyFmu::EmptyFmu()
-        : AbstractFmu(Initialization::DefaultValues::fmuPlan())
+    EmptyFmu::EmptyFmu(const Initialization::FmuPlan & in)
+        : AbstractFmu(in)
     {
 
     }

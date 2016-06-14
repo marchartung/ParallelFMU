@@ -13,7 +13,7 @@
 #include "fmi/InputMapping.hpp"
 
 #ifdef USE_NETWORK_OFFLOADER
-#include "SimulationServer.hpp"
+#include "NetworkPlan.hpp"
 #endif
 
 namespace Initialization
@@ -55,8 +55,8 @@ namespace Initialization
         ConnectionPlan swapSourceAndDest() const
         {
             ConnectionPlan res;
-            std::swap(destFmu,sourceFmu);
-            std::swap(sourceRank,destRank);
+            std::swap(res.destFmu,res.sourceFmu);
+            std::swap(res.sourceRank,res.destRank);
             return res;
         }
     };

@@ -106,13 +106,13 @@ namespace FMI
         template<typename T>
         const size_type * data() const
         {
-            return _connectedVars[dataIndex<T>()].data();
+            return reinterpret_cast<const size_type *>(_connectedVars[dataIndex<T>()].data());
         }
 
         template<typename T>
         size_type * data()
         {
-            return _connectedVars[dataIndex<T>()].data();
+            return reinterpret_cast<size_type *>(_connectedVars[dataIndex<T>()].data());
         }
 
      private:

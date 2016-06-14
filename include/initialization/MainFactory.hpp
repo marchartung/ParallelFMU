@@ -42,6 +42,11 @@
 #include "synchronization/mpi/MPIConnection.hpp"
 #endif
 
+#ifdef USE_NETWORK_OFFLOADER
+#include "EmptyFmu.hpp"
+#include "NetworkSolver.hpp"
+#endif
+
 namespace Initialization
 {
     /**
@@ -106,7 +111,7 @@ namespace Initialization
 #ifdef USE_NETWORK_OFFLOADER
             else if(in.fmu->loader == "network")
             {
-                res = new Solver::AbstractSolver<DataManagerClass, FMI::EmptyFmu>(dm,in);
+                res = new Solver::AbstractSolver<DataManagerClass, FMI::EmptyFmu>(in,FMI::EmptyFmu(*in.fmu),dm);
             }
 #endif
             else

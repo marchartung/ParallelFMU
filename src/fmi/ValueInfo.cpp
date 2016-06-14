@@ -19,7 +19,7 @@ namespace FMI
     {
     }
 
-    size_t ValueInfo::size() const
+    size_type ValueInfo::size() const
     {
         size_t counter = 0;
         for (size_t i = 0; i < _valueReferenceToNamesMapping.size(); ++i)
@@ -28,11 +28,11 @@ namespace FMI
         return counter;
     }
 
-    list<string_type> ValueInfo::getAllValueNames() const
+    std::vector<string_type> ValueInfo::getAllValueNames() const
     {
-        list<string_type> valueNames;
-        list<string_type> valueNamesTmp;
-        list<string_type>::iterator it;
+        std::vector<string_type> valueNames;
+        std::vector<string_type> valueNamesTmp;
+        std::vector<string_type>::iterator it;
 
         valueNamesTmp = getValueNames<double>();
         it = valueNames.end();

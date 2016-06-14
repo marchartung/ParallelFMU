@@ -11,6 +11,7 @@
 #include "Stdafx.hpp"
 #include "BasicTypedefs.hpp"
 
+
 namespace FMI
 {
     /**
@@ -118,6 +119,18 @@ namespace FMI
 
         bool_type empty() const;
 
+        template <typename T>
+        T * data()
+        {
+            return getValues<T>().data();
+        }
+
+        template <typename T>
+        const T * data() const
+        {
+            return getValues<T>().data();
+        }
+
      private:
         /// Storage of values of type real.
         vector<real_type> _realValues;
@@ -143,6 +156,7 @@ namespace FMI
         {
             std::copy(in.getValues<T>().begin(), in.getValues<T>().end(), getValues<T>().begin());
         }
+
     };
 
     template<> vector<double>& ValueCollection::getValues();

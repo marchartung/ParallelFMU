@@ -8,7 +8,9 @@
 #ifndef NETWORK_INCLUDE_INITIALNETWORKSERVER_HPP_
 #define NETWORK_INCLUDE_INITIALNETWORKSERVER_HPP_
 
-#include "NetworkPlan.hpp"
+#include "initialization/Plans.hpp"
+#include "fmi/AbstractFmu.hpp"
+
 namespace Network
 {
     class InitialNetworkServer : private FMI::ValueSwitch
@@ -19,15 +21,15 @@ namespace Network
 
         NetworkPlan getNetworkPlan();
 
+
+        void start();
+
      private:
-        int _port;
         Initialization::ProgramPlan & _plan;
         NetworkPlan _networkPlan;
         std::vector<size_type> _offsets;
 
         std::vector<std::shared_ptr<FMI::AbstractFmu>> _tmpFmus;
-
-        void start();
 
         void addSim();
 

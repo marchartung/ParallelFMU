@@ -44,7 +44,7 @@ namespace Initialization
         Simulation::AbstractSimulationSPtr _simulation;
 
         bool initMPI(int & rank, int & numRanks);
-        bool initNetworkConnection(const int & rank, Initialization::XMLConfigurationReader & reader);
+        bool initNetworkConnection(const int & rank);
 
         void deinitMPI();
     };

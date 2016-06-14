@@ -35,7 +35,7 @@ namespace FMI
          */
         virtual ~ValueInfo();
 
-        list<string_type> getAllValueNames() const;
+        std::vector<string_type> getAllValueNames() const;
 
         list<std::pair<string_type ,size_type> > getAllReferences() const;
 
@@ -102,10 +102,10 @@ namespace FMI
                                            list<size_type>& stringValueIndices) const;
 
         template<typename T>
-        list<string_type> getValueNames() const
+        std::vector<string_type> getValueNames() const
         {
             const map<size_type, vector<string_type> >& values = _valueReferenceToNamesMapping[dataIndex<T>()];
-            list<string_type> res;
+            std::vector<string_type> res;
             for (map<size_type, vector<string_type> >::const_iterator it = values.begin();it!=values.end();++it)
             {
                 for (size_type i=0;i<it->second.size();++i)
