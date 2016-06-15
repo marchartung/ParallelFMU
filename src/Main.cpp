@@ -34,10 +34,9 @@ int_type main(int_type argc, char *argv[])
     try
     {
         Initialization::Program prog(&argc, &argv);
-
-        Simulation::AbstractSimulationSPtr simulation = prog.getSimulation();
-        simulation->initialize();
-        simulation->simulate();
+        prog.initialize();
+        prog.simulate();
+        prog.deinitialize();
 
     }
     catch (exception &ex)

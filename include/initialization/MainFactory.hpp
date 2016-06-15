@@ -172,19 +172,17 @@ namespace Initialization
         vector<std::shared_ptr<Solver::ISolver>> createSolversWithDataManager(const SimulationPlan & in) const
         {
             std::shared_ptr<Synchronization::DataManager<HistoryClass, WriterClass> > dm = createDataManager<HistoryClass, WriterClass>(in);
-            size_type numSolvers = 0;
-            for (auto& l : in.dataManager.solvers)
-                numSolvers += l.size();
+            size_type numSolvers = in.dataManager.solvers.size();
+
             vector<std::shared_ptr<Solver::ISolver>> res(numSolvers);
             size_type i = 0;
-            for (const auto & vsp : in.dataManager.solvers)
-                for (const auto & sp : vsp)
-                {
+            for (const auto & sp : in.dataManager.solvers)
+            {
                     res[i] = std::shared_ptr<Solver::ISolver>(createSolver<Synchronization::DataManager<HistoryClass, WriterClass>>(dm, *sp));
                     auto conns = createConnectionsOfSolver(*sp);
                     res[i].get()->getFmu()->setConnections(conns);
                     ++i;
-                }
+            }
             return res;
         }
 
@@ -216,10 +214,12 @@ namespace Initialization
             {
                 res = Simulation::AbstractSimulationSPtr(new SimulationClass(in, createSolvers<Synchronization::SerialDataHistory>(in)));
             }
-            else if (in.dataManager.history.kind == "openmp")
-            {
-                res = Simulation::AbstractSimulationSPtr(new SimulationClass(in, createSolvers<Synchronization::OpenMPDataHistory>(in)));
-            }
+            //else if (in.dataManager.history.kind == "openmp")
+            //{
+            //    res = Simulation::AbstractSimulationSPtr(new SimulationClass(in, createSolvers<Synchronization::OpenMPDataHistory>(in)));
+            //}
+            else
+                throw std::runtime_error("History type is not supported.");
             return res;
 
         }

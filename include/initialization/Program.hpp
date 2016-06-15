@@ -29,6 +29,8 @@ namespace Initialization
 
         void deinitialize();
 
+        void simulate();
+
         Simulation::AbstractSimulationSPtr getSimulation();
 
         void printProgramInfo(const ProgramPlan & in) const;
@@ -37,11 +39,12 @@ namespace Initialization
 
         bool _isInitialized;
         bool _usingMPI;
+        bool _usingOMP;
 
         CommandLineArgs _commandLineArgs;
         ProgramPlan _pp;
 
-        Simulation::AbstractSimulationSPtr _simulation;
+        std::vector<Simulation::AbstractSimulationSPtr> _simulations;
 
         bool initMPI(int & rank, int & numRanks);
         bool initNetworkConnection(const int & rank);

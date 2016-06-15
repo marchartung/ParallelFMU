@@ -42,7 +42,7 @@ namespace Initialization
 
         ProgramPlan getProgramPlan();
 
-        vector<SimulationPlan> getSimulationPlans(const std::list<SolverPlan> & solverPlans, const SchedulePlan & schedPlan, const SimulationPlan simPlan);
+        vector<vector<SimulationPlan>> getSimulationPlans(const std::list<SolverPlan> & solverPlans, const SchedulePlan & schedPlan, const SimulationPlan simPlan);
 
      protected:
 

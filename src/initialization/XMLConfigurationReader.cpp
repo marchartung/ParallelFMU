@@ -297,10 +297,14 @@ namespace Initialization
             throw std::runtime_error("XmlReader: There is an error in the scheduling.");
     }
 
-    vector<SimulationPlan> XMLConfigurationReader::getSimulationPlans(const std::list<SolverPlan> & solverPlans, const SchedulePlan & schedPlan,
+    vector<vector<SimulationPlan>> XMLConfigurationReader::getSimulationPlans(const std::list<SolverPlan> & solverPlans, const SchedulePlan & schedPlan,
                                                                       const SimulationPlan simPlan)
     {
-        vector<SimulationPlan> res(schedPlan.nodeStructure.size(), simPlan);
+        vector<vector<SimulationPlan>> res(schedPlan.nodeStructure.size(),vector<SimulationPlan>(0));
+        for(size_type i=0;i<res.size();++i)
+        {
+                res[i].resize(schedPlan.nodeStructure[i].size(),simPlan);
+        }
         vector<size_type> numSolver(res.size(), 0);
         WriterPlan wp = getWriterPlan();
 
@@ -309,24 +313,29 @@ namespace Initialization
         {
             size_type nodeId, coreId;
             std::tie(nodeId, coreId) = schedPlan.solvIdToCore[sp.id];
-            DataManagerPlan & dm = res[nodeId].dataManager;
-            if (res[nodeId].dataManager.solvers.size() <= coreId)
-                res[nodeId].dataManager.solvers.resize(coreId + 1);
-            res[nodeId].dataManager.solvers[coreId].push_back(std::shared_ptr<SolverPlan>(new SolverPlan(sp)));
-            res[nodeId].dataManager.outConnections.insert(res[nodeId].dataManager.outConnections.begin(), sp.outConnections.begin(), sp.outConnections.end());
-            res[nodeId].dataManager.inConnections.insert(res[nodeId].dataManager.inConnections.begin(), sp.inConnections.begin(), sp.inConnections.end());
+            DataManagerPlan & dm = res[nodeId][coreId].dataManager;
+            if (res[nodeId][coreId].dataManager.solvers.size() <= coreId)
+                res[nodeId][coreId].dataManager.solvers.resize(coreId + 1);
+            res[nodeId][coreId].dataManager.solvers.push_back(std::shared_ptr<SolverPlan>(new SolverPlan(sp)));
+            res[nodeId][coreId].dataManager.outConnections.insert(res[nodeId][coreId].dataManager.outConnections.begin(), sp.outConnections.begin(),
+                                                                  sp.outConnections.end());
+            res[nodeId][coreId].dataManager.inConnections.insert(res[nodeId][coreId].dataManager.inConnections.begin(), sp.inConnections.begin(),
+                                                                 sp.inConnections.end());
             dm.writer = wp;
             ++numSolver[nodeId];
         }
         // Setting history and Sim kind:
         for (size_type i = 0; i < res.size(); ++i)
         {
-            res[i].dataManager.writer.startTime = simPlan.startTime;  // Maybe different to the others
-            res[i].dataManager.writer.endTime = simPlan.endTime;
-            res[i].dataManager.writer.filePath = std::string("p") + to_string(i) + std::string("_") + res[i].dataManager.writer.filePath;
-            res[i].dataManager.history.kind = (res[i].dataManager.solvers.size() > 1) ? "openmp" : "serial";  // is only for extension (work in progress) to support different kinds of data histories
+            for (size_type j = 0; j < res[i].size(); ++j)
+            {
+                res[i][j].dataManager.writer.startTime = simPlan.startTime;  // Maybe different to the others
+                res[i][j].dataManager.writer.endTime = simPlan.endTime;
+                res[i][j].dataManager.writer.filePath = std::string("p") + to_string(i) + std::string("_") + res[i][j].dataManager.writer.filePath;
+                res[i][j].dataManager.history.kind =  "serial";  // is only for extension (work in progress) to support different kinds of data histories
 
-            res[i].kind = (res[i].dataManager.solvers.size() > 1) ? "openmp" : "serial";
+                res[i][j].kind = "serial";
+            }
         }
         return res;
     }

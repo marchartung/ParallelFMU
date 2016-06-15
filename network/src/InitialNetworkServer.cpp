@@ -110,11 +110,10 @@ namespace Network
     {
         std::shared_ptr<Initialization::FmuPlan> res;
         size_type simId = 0, coreId = 0, solveId = 0;
-        for (const auto & simPlan : _plan.simPlans)
-        {
-            for (const auto & solvVec : simPlan.dataManager.solvers)
+        for (const auto & simPlanVec : _plan.simPlans)
+            for (const auto & simPlan : simPlanVec)
             {
-                for (const std::shared_ptr<Initialization::SolverPlan> & solvPlan : solvVec)
+                for (const auto & solvPlan : simPlan.dataManager.solvers)
                 {
                     if (fmuPath == solvPlan->fmu->path || fmuPath == solvPlan->fmu->name)
                     {
@@ -128,8 +127,8 @@ namespace Network
                 }
                 ++coreId;
             }
-            ++simId;
-        }
+        ++simId;
+
         return res;
     }
 
@@ -156,7 +155,7 @@ namespace Network
         const FMI::ValueInfo & info = _tmpFmus[newId]->getValueInfo();
 
         NetOff::VariableList inputVarNames(info.getInputValueNames<real_type>(), info.getInputValueNames<int_type>(), info.getInputValueNames<bool_type>()),
-                             outputVarNames(info.getValueNames<real_type>(), info.getValueNames<int_type>(), info.getValueNames<bool_type>());
+                outputVarNames(info.getValueNames<real_type>(), info.getValueNames<int_type>(), info.getValueNames<bool_type>());
         server.confirmSimulationAdd(newId, inputVarNames, outputVarNames);
     }
 

@@ -102,7 +102,7 @@ namespace Initialization
     {
         WriterPlan writer;
         HistoryPlan history;
-        vector<vector<shared_ptr<SolverPlan> > > solvers;
+        vector<shared_ptr<SolverPlan> > solvers;
         std::list<shared_ptr<ConnectionPlan>> outConnections;
         std::list<shared_ptr<ConnectionPlan>> inConnections;
     };
@@ -133,7 +133,8 @@ namespace Initialization
 
     struct ProgramPlan
     {
-        vector<SimulationPlan> simPlans; //for mpi
+        //vec2D represents node/thread mapping. simPlans[nodeNum][threadNum]
+        vector<vector<SimulationPlan>> simPlans; //for mpi
     };
 
 

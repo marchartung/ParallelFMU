@@ -257,7 +257,7 @@ namespace Solver
                     _savedStep = false;
                 }
             }
-            return rCount;
+            return count;
         }
 
         /**

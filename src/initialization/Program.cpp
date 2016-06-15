@@ -24,6 +24,7 @@ namespace Initialization
     Program::Program(const CommandLineArgs & cla)
             : _isInitialized(false),
               _usingMPI(false),
+              _usingOMP(false),
               _commandLineArgs(cla)
     {
         initialize();
@@ -32,6 +33,7 @@ namespace Initialization
     Program::Program(int* argc, char** argv[])
             : _isInitialized(false),
               _usingMPI(false),
+              _usingOMP(false),
               _commandLineArgs(CommandLineArgs(argc, argv))
     {
         initialize();
@@ -69,8 +71,34 @@ namespace Initialization
 
         // initialize and create simulation:
         MainFactory mf;
-        _simulation = mf.createSimulation(_pp.simPlans[rank]);
+        if (_usingOMP)
+        {
+#ifdef USE_OPENMP
+            #pragma omp parallel num_threads(_simulations.size())
+            {
+                _simulations[omp_get_thread_num()] = mf.createSimulation(_pp.simPlans[rank][omp_get_thread_num()]);
+            }
+#else
+            throw std::runtime_error("OpenMP simulations are not supported be this version. Please rebuild with OpenMP support.");
+#endif
+        }
+        else
+        {
+            _simulations[0] = mf.createSimulation(_pp.simPlans[rank][0]);
+        }
         _isInitialized = true;
+    }
+
+    void Program::simulate()
+    {
+#ifdef USE_OPENMP
+#pragma omp parallel num_threads(_simulations.size())
+        {
+        _simulations[omp_get_thread_num()]->simulate();
+        }
+#else
+        _simulations[0]->simulate();
+#endif
     }
 
     void Program::deinitialize()
@@ -84,13 +112,32 @@ namespace Initialization
 
     Simulation::AbstractSimulationSPtr Program::getSimulation()
     {
-        return _simulation;
+#ifdef USE_OPENMP
+        return _simulations[omp_get_thread_num()];
+#else
+        return _simulations[0];
+#endif
     }
 
     void Program::printProgramInfo(const ProgramPlan& in) const
     {
         LOGGER_WRITE("", Util::LC_LOADER, Util::LL_INFO);
 
+
+        LOGGER_WRITE("--~~~####ParallelFmu Simulation####~~~--", Util::LC_LOADER, Util::LL_INFO);
+        LOGGER_WRITE("", Util::LC_LOADER, Util::LL_INFO);
+        LOGGER_WRITE("simulating following FMUs:", Util::LC_LOADER, Util::LL_INFO);
+        for(size_type i=0;i<in.simPlans.size();++i)
+            for(size_type j=0;j<in.simPlans[i].size();++j)
+                for(size_type k=0;k<in.simPlans[i][j].dataManager.solvers.size();++k)
+                {
+                    const auto & fmu = *in.simPlans[i][j].dataManager.solvers[k]->fmu;
+                    LOGGER_WRITE("name:              " + fmu.name, Util::LC_LOADER, Util::LL_INFO);
+                    LOGGER_WRITE("path:              " + fmu.path, Util::LC_LOADER, Util::LL_INFO);
+                    LOGGER_WRITE("working directory: " + fmu.workingPath, Util::LC_LOADER, Util::LL_INFO);
+                    LOGGER_WRITE("node/core:         " + to_string(i) + "/" + to_string(j), Util::LC_LOADER, Util::LL_INFO);
+                    LOGGER_WRITE("", Util::LC_LOADER, Util::LL_INFO);
+                }
         LOGGER_WRITE("Program info: ", Util::LC_LOADER, Util::LL_INFO);
         LOGGER_WRITE("numNodes:     " + to_string(in.simPlans.size()), Util::LC_LOADER, Util::LL_INFO);
         LOGGER_WRITE("Node infos:   ", Util::LC_LOADER, Util::LL_INFO);
@@ -98,10 +145,10 @@ namespace Initialization
         {
             LOGGER_WRITE("Node      " + to_string(i) + ":", Util::LC_LOADER, Util::LL_INFO);
             size_type numFmus = 0;
-            for (size_type j = 0; j < in.simPlans[i].dataManager.solvers.size(); ++j)
-                numFmus += in.simPlans[i].dataManager.solvers[j].size();
+            for (size_type j = 0; j < in.simPlans[i].size(); ++j)
+                numFmus += in.simPlans[i][j].dataManager.solvers.size();
             LOGGER_WRITE("NumFmus:      " + to_string(numFmus), Util::LC_LOADER, Util::LL_INFO);
-            LOGGER_WRITE("NumCores:     " + to_string(in.simPlans[i].dataManager.solvers.size()), Util::LC_LOADER, Util::LL_INFO);
+            LOGGER_WRITE("NumCores:     " + to_string(in.simPlans[i].size()), Util::LC_LOADER, Util::LL_INFO);
             LOGGER_WRITE("\n", Util::LC_LOADER, Util::LL_INFO);
         }
 
@@ -198,7 +245,7 @@ namespace Initialization
         else
         {
 #ifdef USE_MPI
-            if(!_usingMPI)
+            if (!_usingMPI)
                 throw std::runtime_error("Cannot start mpi simulation.");
             // quick and dirty bcast for the remote simulation data aka. for the NetworkPlan
             int num = 0;

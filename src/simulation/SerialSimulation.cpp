@@ -31,11 +31,11 @@ namespace Simulation
                     LOGGER_WRITE("Abort simulation at " + to_string(solver[i]->getCurrentTime()) , Util::LC_SOLVER, Util::LL_ERROR);
                     return;
                 }
-                if(tmpStepCount < numSteps[i] && numSteps[i] > 1)
+                if(tmpStepCount < numSteps[i])
                     --numSteps[i];
                 else
                     ++numSteps[i];
-                LOGGER_WRITE("(" + to_string(i) + ") numSteps: " + to_string(numSteps[i]),Util::LC_SOLVER, Util::LL_ERROR);
+                //LOGGER_WRITE("(" + to_string(i) + ") numSteps: " + to_string(numSteps[i]),Util::LC_SOLVER, Util::LL_ERROR);
                 if (solver[i]->getCurrentTime() < getSimulationEndTime())
                     running = true;
                 else

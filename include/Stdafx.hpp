@@ -8,6 +8,7 @@
 #ifndef INCLUDE_STDAFX_HPP_
 #define INCLUDE_STDAFX_HPP_
 
+
 #include <cstring>
 #include <cmath>
 

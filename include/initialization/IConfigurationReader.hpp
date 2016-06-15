@@ -22,7 +22,7 @@ namespace Initialization
 
         virtual ProgramPlan getProgramPlan() = 0;
 
-        virtual vector<SimulationPlan> getSimulationPlans(const std::list<SolverPlan> & solverPlans, const SchedulePlan & schedPlan,
+        virtual vector<vector<SimulationPlan>> getSimulationPlans(const std::list<SolverPlan> & solverPlans, const SchedulePlan & schedPlan,
                                                           const SimulationPlan simPlan) = 0;
     };
 } /* namespace Initialization */

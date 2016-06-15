@@ -225,7 +225,8 @@ INSTALL (TARGETS ParallelFmu DESTINATION ".")
 
 # adding testsuit if possible
 IF(BUILD_PARALLELFMU_TEST)	
-	#compile FMUs	
+	#compile FMUs
+	MESSAGE(STATUS "Building FMUs for testing")	
 	IF(NOT (EXISTS "${CMAKE_CURRENT_BINARY_DIR}/test/data/BouncingBall.fmu") OR "${CMAKE_CURRENT_SOURCE_DIR}/test/data/BouncingBall.mos" IS_NEWER_THAN "${CMAKE_CURRENT_BINARY_DIR}/test/data/BouncingBall.fmu")
 		FILE(COPY "${CMAKE_CURRENT_SOURCE_DIR}/test/data" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/test_tmp")
 		EXECUTE_PROCESS(COMMAND "${OMC_COMPILER}" "${CMAKE_CURRENT_BINARY_DIR}/test_tmp/data/BouncingBall.mos" WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/test_tmp/data" RESULT_VARIABLE OMC_RESULT OUTPUT_VARIABLE OMC_ERROR)
