@@ -27,7 +27,6 @@ namespace Initialization
               _usingOMP(false),
               _commandLineArgs(cla)
     {
-        initialize();
     }
 
     Program::Program(int* argc, char** argv[])
@@ -36,7 +35,6 @@ namespace Initialization
               _usingOMP(false),
               _commandLineArgs(CommandLineArgs(argc, argv))
     {
-        initialize();
     }
 
     Program::~Program()
@@ -54,7 +52,6 @@ namespace Initialization
         // read config file:
         XMLConfigurationReader reader(_commandLineArgs.getConfigFilePath());
         _pp = reader.getProgramPlan();
-        printProgramInfo(_pp);
 
         // test for MPI initialization:
         int rank = 0, numRanks = 1;
@@ -62,6 +59,8 @@ namespace Initialization
             if (!initMPI(rank, numRanks))
                 throw std::runtime_error("Couldn't initialize simulation. MPI couldn't be initialized.");
 
+        if(rank == 0)
+            printProgramInfo(_pp);
         // initialize server if needed
         if (_commandLineArgs.isSimulationServer())
         {
@@ -82,17 +81,18 @@ namespace Initialization
 
     void Program::simulate()
     {
+        size_type threadNum = 0;
         // not in parallel, Communicator::addFmu is not safe to call
         for (auto & sim : _simulations)
             sim->initialize();
-#ifdef USE_OPENMP
-#pragma omp parallel num_threads(_simulations.size())
+        #pragma omp parallel num_threads(_simulations.size())
         {
-            _simulations[omp_get_thread_num()]->simulate();
+            #ifdef USE_OPENMP
+            threadNum = omp_get_thread_num();
+            #endif
+    
+            _simulations[threadNum]->simulate();
         }
-#else
-        _simulations[0]->simulate();
-#endif
     }
 
     void Program::deinitialize()
