@@ -8,7 +8,7 @@ namespace Initialization
     {
     }
 
-    Simulation::AbstractSimulationSPtr MainFactory::createSimulation(const SimulationPlan & in) const
+    Simulation::AbstractSimulationSPtr MainFactory::createSimulation(SimulationPlan & in) const
     {
         if(in.kind == "serial")
             return createSimulationWithKnownType<Simulation::SerialSimulation>(in);

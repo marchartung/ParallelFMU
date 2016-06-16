@@ -38,15 +38,15 @@ namespace Synchronization
          * @param writer Writer object to write simulation results.
          */
         //DataManager(const vector<FMI::InputMappingSPtr> & connections, value_type _simStart = 0.0, value_type _stepSize = 0.001);
-        DataManager(const Initialization::DataManagerPlan & in, const HistoryClass & history, const WriterClass & writer, const Communicator & communicator)
+        DataManager(const Initialization::DataManagerPlan & in, const HistoryClass & history, const WriterClass & writer, shared_ptr<Synchronization::Communicator> & communicator)
                 : IDataManager(in),
                   _history(history),
-                  _communicator(communicator),
+                  _commPtr(communicator),
+                  _communicator(*communicator),
                   _writer(writer),
                   _simStart(in.writer.startTime),
                   _stepSize((in.writer.endTime - in.writer.startTime) / in.writer.numSteps),
-                  _numManagedFmus(0),
-                  _numManagedConnections(0)
+                  _numManagedFmus(0)
         {
         }
 
@@ -162,22 +162,8 @@ namespace Synchronization
         void addFmu(FMI::AbstractFmu * fmu) override
         {
             fmu->setLocalId(_numManagedFmus++);
-            size_type numNewCons = 0;
-            for (auto & con : fmu->getConnections())
-            {
-                size_type conId;
-                auto it = _knownConIds.find(con->getStartTag());
-                if (it == _knownConIds.end())
-                {
-                    conId = _numManagedConnections++;
-                    _knownConIds[con->getStartTag()] = conId;
-                    _valuePacking.push_back(con->getPacking());
-                    ++numNewCons;
-                }
-                else
-                    conId = it->second;
-                con->setLocalId(conId);
-            }
+            size_type numNewCons = _communicator.addFmu(fmu,_valuePacking);
+
 
             _lastCommTime.resize(_lastCommTime.size() + numNewCons, -1.0 * std::numeric_limits<real_type>::infinity());
             _lastEventWritten.resize(_lastEventWritten.size() + numNewCons, -1.0 * std::numeric_limits<real_type>::infinity());
@@ -185,7 +171,7 @@ namespace Synchronization
             _lastEventReadState.resize(_lastEventReadState.size() + numNewCons, true);
             _lastEventWriteState.resize(_lastEventReadState.size() + numNewCons, true);
             _history.addFmu(fmu, fmu->getConnections());
-            _communicator.addFmu(fmu, fmu->getConnections());
+
             if (!_writer.isInitialized())
             {
                 _writer.initialize();
@@ -221,7 +207,8 @@ namespace Synchronization
         /**
          * Communicator that handles data exchange (output values, input values) between several data managers.
          */
-        Communicator _communicator;
+        shared_ptr<Synchronization::Communicator> _commPtr;
+        Communicator & _communicator;
 
         /**
          * ConnectionMappings are for packing and unpacking of output and input values, accessible via connectionId.
@@ -249,9 +236,6 @@ namespace Synchronization
         real_type _stepSize;
 
         size_type _numManagedFmus;
-        size_type _numManagedConnections;
-
-        std::map<size_type, size_type> _knownConIds;
 
         std::list<Solver::DependencySolverInfo> _upcomingEvents;
 

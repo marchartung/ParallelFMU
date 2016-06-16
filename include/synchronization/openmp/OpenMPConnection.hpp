@@ -20,7 +20,7 @@ namespace Synchronization
     class OpenMPConnection : public AbstractConnection
     {
      public:
-        OpenMPConnection(const Initialization::ConnectionPlan & in, bool outgoing);
+        OpenMPConnection(const Initialization::ConnectionPlan & in);
 
         ~OpenMPConnection();
 
@@ -30,6 +30,11 @@ namespace Synchronization
          * @return Success status.
          */
         bool send(const HistoryEntry & in) override;
+
+        bool isShared() const override
+        {
+            return true;
+        }
 
         /**
          * Receive DataHistoryElement from source FMU.

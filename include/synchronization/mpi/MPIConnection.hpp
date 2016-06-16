@@ -20,7 +20,7 @@ namespace Synchronization
     class MPIConnection : public AbstractConnection
     {
      public:
-        MPIConnection(const Initialization::ConnectionPlan & in, bool outgoing);
+        MPIConnection(const Initialization::ConnectionPlan & in);
 
         ~MPIConnection();
 
@@ -30,6 +30,8 @@ namespace Synchronization
          * @return Success status.
          */
         bool send(const HistoryEntry & in) override;
+
+        void initialize(const std::string & fmuName) override;
 
         /**
          * Receive DataHistoryElement from source FMU.

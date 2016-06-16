@@ -29,14 +29,12 @@ namespace Synchronization
          * Create a connection between two FMUs.
          * @param bufferScheme Pattern for recv and send data
          */
-        AbstractConnection(const Initialization::ConnectionPlan & in, bool outGoing)
+        AbstractConnection(const Initialization::ConnectionPlan & in)
                 : _buffer(vector<HistoryEntryBuffer>(in.bufferSize, HistoryEntryBuffer(HistoryEntry(in.inputMapping.getPackedValueCollection()),true))),
-                  _packing(in.inputMapping),
                   _currentReceiveIndex(0),
                   _currentSendIndex(0),
-                  _isOutgoing(outGoing),
                   _localId(0),
-                  _startTag(in.startTag)
+                  _plan(in)
         {
         }
 
@@ -66,14 +64,17 @@ namespace Synchronization
          */
         virtual int_type hasFreeBuffer() = 0;
 
-        bool isOutgoing() const
+        virtual void initialize(const std::string & fmuName)
+        {}
+
+        bool isOutgoing(const std::string & fmuName) const
         {
-            return _isOutgoing;
+            return _plan.sourceFmu == fmuName;
         }
 
-        void setIsOutgoing(bool isOutgoing)
+        virtual bool isShared() const
         {
-            _isOutgoing = isOutgoing;
+            return false;
         }
 
         size_type getLocalId() const
@@ -88,22 +89,20 @@ namespace Synchronization
 
         const FMI::InputMapping& getPacking() const
         {
-            return _packing;
+            return _plan.inputMapping;
         }
 
         const size_type & getStartTag() const
         {
-            return _startTag;
+            return _plan.startTag;
         }
 
      protected:
         vector<HistoryEntryBuffer> _buffer;
-        FMI::InputMapping _packing;
         size_type _currentReceiveIndex;
         size_type _currentSendIndex;
-        bool _isOutgoing;
         size_type _localId;
-        size_type _startTag;
+        const Initialization::ConnectionPlan _plan;
 
         size_t nextSendIndex() const
         {

@@ -23,7 +23,7 @@ namespace Synchronization
         /**
          * Create a serial connection between two FMUs.
          */
-        SerialConnection(const Initialization::ConnectionPlan & in, bool outgoing);
+        SerialConnection(const Initialization::ConnectionPlan & in);
 
         /**
          * Destroy the connection between the two FMUs.

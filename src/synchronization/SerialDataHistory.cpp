@@ -49,7 +49,7 @@ namespace Synchronization
             }
             if (it->second.count == _history.size())
             {
-                LOGGER_WRITE("Popping stack at " + to_string(it->first), Util::LC_SOLVER, Util::LL_DEBUG);
+                //LOGGER_WRITE("Popping stack at " + to_string(it->first), Util::LC_SOLVER, Util::LL_DEBUG);
                 popWriteStack();
             }
         }

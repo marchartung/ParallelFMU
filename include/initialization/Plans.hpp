@@ -102,6 +102,7 @@ namespace Initialization
     {
         WriterPlan writer;
         HistoryPlan history;
+        shared_ptr<Synchronization::Communicator> commnicator;
         vector<shared_ptr<SolverPlan> > solvers;
         std::list<shared_ptr<ConnectionPlan>> outConnections;
         std::list<shared_ptr<ConnectionPlan>> inConnections;

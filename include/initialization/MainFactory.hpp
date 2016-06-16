@@ -123,11 +123,11 @@ namespace Initialization
         {
             Synchronization::ConnectionSPtr res;
             if (in.kind == "serial")
-                res = Synchronization::ConnectionSPtr(new Synchronization::SerialConnection(in, outgoing));
+                res = Synchronization::ConnectionSPtr(new Synchronization::SerialConnection(in));
             else if (in.kind == "openmp")
-                res = Synchronization::ConnectionSPtr(new Synchronization::OpenMPConnection(in, outgoing));
+                res = Synchronization::ConnectionSPtr(new Synchronization::OpenMPConnection(in));
             else if (in.kind == "mpi")
-                res = Synchronization::ConnectionSPtr(new Synchronization::MPIConnection(in, outgoing));
+                res = Synchronization::ConnectionSPtr(new Synchronization::MPIConnection(in));
             else
                 throw std::runtime_error("MainFactory: Unkown connection type " + in.kind);
             return res;
@@ -146,12 +146,12 @@ namespace Initialization
         }
 
         template<class HistoryClass, class WriterClass>
-        std::shared_ptr<Synchronization::DataManager<HistoryClass, WriterClass> > createDataManager(const SimulationPlan & in) const
+        std::shared_ptr<Synchronization::DataManager<HistoryClass, WriterClass> > createDataManager(SimulationPlan & in) const
         {
             return std::shared_ptr<Synchronization::DataManager<HistoryClass, WriterClass> >(
                     new Synchronization::DataManager<HistoryClass, WriterClass>(in.dataManager, createHistory<HistoryClass>(in.dataManager.history),
                                                                                 createWriter<WriterClass>(in.dataManager.writer),
-                                                                                Synchronization::Communicator(in)));
+                                                                                in.dataManager.commnicator));
         }
 
         std::vector<Synchronization::ConnectionSPtr> createConnectionsOfSolver(const SolverPlan & in) const
@@ -169,7 +169,7 @@ namespace Initialization
         }
 
         template<class HistoryClass, class WriterClass>
-        vector<std::shared_ptr<Solver::ISolver>> createSolversWithDataManager(const SimulationPlan & in) const
+        vector<std::shared_ptr<Solver::ISolver>> createSolversWithDataManager(SimulationPlan & in) const
         {
             std::shared_ptr<Synchronization::DataManager<HistoryClass, WriterClass> > dm = createDataManager<HistoryClass, WriterClass>(in);
             size_type numSolvers = in.dataManager.solvers.size();
@@ -187,7 +187,7 @@ namespace Initialization
         }
 
         template<class HistoryClass>
-        vector<std::shared_ptr<Solver::ISolver>> createSolvers(const SimulationPlan & in) const
+        vector<std::shared_ptr<Solver::ISolver>> createSolvers(SimulationPlan & in) const
         {
             if (in.dataManager.writer.kind == "csvFileWriter")
             {
@@ -206,7 +206,7 @@ namespace Initialization
         }
 
         template<class SimulationClass>
-        Simulation::AbstractSimulationSPtr createSimulationWithKnownType(const SimulationPlan & in) const
+        Simulation::AbstractSimulationSPtr createSimulationWithKnownType(SimulationPlan & in) const
         {
             Simulation::AbstractSimulationSPtr res;
 
@@ -224,7 +224,7 @@ namespace Initialization
 
         }
 
-        Simulation::AbstractSimulationSPtr createSimulation(const SimulationPlan & in) const;
+        Simulation::AbstractSimulationSPtr createSimulation(SimulationPlan & in) const;
     };
 
 } /* namespace Initialization */

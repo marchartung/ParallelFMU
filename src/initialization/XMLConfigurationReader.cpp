@@ -1,5 +1,6 @@
 #include "initialization/XMLConfigurationReader.hpp"
 #include "initialization/DefaultValues.hpp"
+#include "synchronization/Communicator.hpp"
 
 #include <boost/optional/optional.hpp>
 
@@ -314,12 +315,10 @@ namespace Initialization
             size_type nodeId, coreId;
             std::tie(nodeId, coreId) = schedPlan.solvIdToCore[sp.id];
             DataManagerPlan & dm = res[nodeId][coreId].dataManager;
-            if (res[nodeId][coreId].dataManager.solvers.size() <= coreId)
-                res[nodeId][coreId].dataManager.solvers.resize(coreId + 1);
-            res[nodeId][coreId].dataManager.solvers.push_back(std::shared_ptr<SolverPlan>(new SolverPlan(sp)));
-            res[nodeId][coreId].dataManager.outConnections.insert(res[nodeId][coreId].dataManager.outConnections.begin(), sp.outConnections.begin(),
+            dm.solvers.push_back(std::shared_ptr<SolverPlan>(new SolverPlan(sp)));
+            dm.outConnections.insert(res[nodeId][coreId].dataManager.outConnections.begin(), sp.outConnections.begin(),
                                                                   sp.outConnections.end());
-            res[nodeId][coreId].dataManager.inConnections.insert(res[nodeId][coreId].dataManager.inConnections.begin(), sp.inConnections.begin(),
+            dm.inConnections.insert(res[nodeId][coreId].dataManager.inConnections.begin(), sp.inConnections.begin(),
                                                                  sp.inConnections.end());
             dm.writer = wp;
             ++numSolver[nodeId];
@@ -327,12 +326,14 @@ namespace Initialization
         // Setting history and Sim kind:
         for (size_type i = 0; i < res.size(); ++i)
         {
+            std::shared_ptr<Synchronization::Communicator> tmpCom(new Synchronization::Communicator());
             for (size_type j = 0; j < res[i].size(); ++j)
             {
                 res[i][j].dataManager.writer.startTime = simPlan.startTime;  // Maybe different to the others
                 res[i][j].dataManager.writer.endTime = simPlan.endTime;
                 res[i][j].dataManager.writer.filePath = std::string("p") + to_string(i) + std::string("_") + res[i][j].dataManager.writer.filePath;
                 res[i][j].dataManager.history.kind =  "serial";  // is only for extension (work in progress) to support different kinds of data histories
+                res[i][j].dataManager.commnicator = tmpCom;
 
                 res[i][j].kind = "serial";
             }

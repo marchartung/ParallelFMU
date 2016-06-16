@@ -71,30 +71,24 @@ namespace Initialization
 
         // initialize and create simulation:
         MainFactory mf;
-        if (_usingOMP)
-        {
-#ifdef USE_OPENMP
-            #pragma omp parallel num_threads(_simulations.size())
-            {
-                _simulations[omp_get_thread_num()] = mf.createSimulation(_pp.simPlans[rank][omp_get_thread_num()]);
-            }
-#else
-            throw std::runtime_error("OpenMP simulations are not supported be this version. Please rebuild with OpenMP support.");
-#endif
-        }
-        else
-        {
-            _simulations[0] = mf.createSimulation(_pp.simPlans[rank][0]);
-        }
+        _simulations.resize(_pp.simPlans[rank].size());
+
+        // not in parallel because FmuSdkFMU::load and FmiLibFmu::load is not save to call in parallel
+        for(size_type i=0;i<_simulations.size();++i)
+            _simulations[i] = mf.createSimulation(_pp.simPlans[rank][i]);
+
         _isInitialized = true;
     }
 
     void Program::simulate()
     {
+        // not in parallel, Communicator::addFmu is not safe to call
+        for (auto & sim : _simulations)
+            sim->initialize();
 #ifdef USE_OPENMP
 #pragma omp parallel num_threads(_simulations.size())
         {
-        _simulations[omp_get_thread_num()]->simulate();
+            _simulations[omp_get_thread_num()]->simulate();
         }
 #else
         _simulations[0]->simulate();
@@ -123,13 +117,12 @@ namespace Initialization
     {
         LOGGER_WRITE("", Util::LC_LOADER, Util::LL_INFO);
 
-
         LOGGER_WRITE("--~~~####ParallelFmu Simulation####~~~--", Util::LC_LOADER, Util::LL_INFO);
         LOGGER_WRITE("", Util::LC_LOADER, Util::LL_INFO);
         LOGGER_WRITE("simulating following FMUs:", Util::LC_LOADER, Util::LL_INFO);
-        for(size_type i=0;i<in.simPlans.size();++i)
-            for(size_type j=0;j<in.simPlans[i].size();++j)
-                for(size_type k=0;k<in.simPlans[i][j].dataManager.solvers.size();++k)
+        for (size_type i = 0; i < in.simPlans.size(); ++i)
+            for (size_type j = 0; j < in.simPlans[i].size(); ++j)
+                for (size_type k = 0; k < in.simPlans[i][j].dataManager.solvers.size(); ++k)
                 {
                     const auto & fmu = *in.simPlans[i][j].dataManager.solvers[k]->fmu;
                     LOGGER_WRITE("name:              " + fmu.name, Util::LC_LOADER, Util::LL_INFO);

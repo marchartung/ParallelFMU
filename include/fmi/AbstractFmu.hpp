@@ -479,6 +479,16 @@ namespace FMI
             _fmuCons = in;
         }
 
+        size_type getSharedId() const
+        {
+            return _sharedId;
+        }
+
+        void setSharedId(size_type sharedId)
+        {
+            _sharedId = sharedId;
+        }
+
      protected:
         /**
          * Set arbitrary values of the FMU.
@@ -512,6 +522,7 @@ namespace FMI
         /// Unique identifier.
         const size_type _id;
         size_type _localId;
+        size_type _sharedId;
         /// Name of the FMU.
         std::string _name;
         /// (Absolute) Path to the FMU.

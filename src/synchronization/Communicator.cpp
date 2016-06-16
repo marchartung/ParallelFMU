@@ -3,34 +3,64 @@
 namespace Synchronization
 {
 
-    Communicator::Communicator(const Initialization::SimulationPlan & in)
+    Communicator::Communicator()
+        : _numManagedCons(0),
+          _numManagedFmus(0)
     {
     }
 
 
-    void Synchronization::Communicator::addFmu(const FMI::AbstractFmu* in, std::vector<ConnectionSPtr>& connList)
+    size_type Synchronization::Communicator::addFmu(FMI::AbstractFmu* in, vector<FMI::InputMapping> & valuePacking)
     {
+        std::vector<ConnectionSPtr>& connList = in->getConnections();
+        size_type numNewCons = 0;
+        for (auto & con : connList)
+        {
+            con->initialize(in->getFmuName());
+            size_type conId;
+            auto it = _knownConIds.find(con->getStartTag());
+            if (it == _knownConIds.end())
+            {
+                valuePacking.push_back(con->getPacking());
+                conId = _numManagedCons++;
+                _knownConIds[con->getStartTag()] = conId;
+                ++numNewCons;
+            }
+            else
+            {
+                conId = it->second;
+                if(con->isShared())
+                {
+                    ++numNewCons;
+                    valuePacking.push_back(con->getPacking());
+                }
+            }
+            con->setLocalId(conId);
+            in->setSharedId(_numManagedFmus++);
+        }
+
         for(auto & con : connList)
             if(con->getLocalId()+1 > _connections.size())
             {
                 _connections.resize(con->getLocalId()+1);
                 _connections[con->getLocalId()] = con;
             }
-        if(_outConnectionIds.size()<in->getLocalId()+1)
-            _outConnectionIds.resize(in->getLocalId()+1);
-        if(_inConnectionIds.size()<in->getLocalId()+1)
-            _inConnectionIds.resize(in->getLocalId()+1);
+        if(_outConnectionIds.size()<in->getSharedId()+1)
+            _outConnectionIds.resize(in->getSharedId()+1);
+        if(_inConnectionIds.size()<in->getSharedId()+1)
+            _inConnectionIds.resize(in->getSharedId()+1);
         for(size_type i=0;i<connList.size();++i)
         {
-            if(connList[i]->isOutgoing())
+            if(connList[i]->isOutgoing(in->getFmuName()))
             {
-                _outConnectionIds[in->getLocalId()].push_back(connList[i]->getLocalId());
+                _outConnectionIds[in->getSharedId()].push_back(connList[i]->getLocalId());
             }
             else
             {
-                _inConnectionIds[in->getLocalId()].push_back(connList[i]->getLocalId());
+                _inConnectionIds[in->getSharedId()].push_back(connList[i]->getLocalId());
             }
         }
+        return numNewCons;
     }
 
     bool_type Communicator::send(HistoryEntry const & in, size_type communicationId)
@@ -50,12 +80,12 @@ namespace Synchronization
 
     const vector<size_type> & Communicator::getInConnectionIds(const FMI::AbstractFmu * in) const
     {
-        return _inConnectionIds[in->getLocalId()];
+        return _inConnectionIds[in->getSharedId()];
     }
 
     const vector<size_type> & Communicator::getOutConnectionIds(const FMI::AbstractFmu * in) const
     {
-        return _outConnectionIds[in->getLocalId()];
+        return _outConnectionIds[in->getSharedId()];
     }
 
     size_type Communicator::getNumInConnections() const

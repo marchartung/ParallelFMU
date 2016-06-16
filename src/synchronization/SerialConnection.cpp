@@ -4,8 +4,8 @@
 namespace Synchronization
 {
 
-    SerialConnection::SerialConnection(const Initialization::ConnectionPlan & in, bool outgoing)
-            : AbstractConnection(in,outgoing),
+    SerialConnection::SerialConnection(const Initialization::ConnectionPlan & in)
+            : AbstractConnection(in),
               _isFree(vector<bool_type>(in.bufferSize, true))
     {
     }

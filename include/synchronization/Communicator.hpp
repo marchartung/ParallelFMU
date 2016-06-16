@@ -54,7 +54,7 @@ namespace Synchronization
          * @param outConnectionIds
          * @param inConnectionIds
          */
-        Communicator(const Initialization::SimulationPlan & in);
+        Communicator();
 
         /**
          * Destroy the communicator.
@@ -63,7 +63,7 @@ namespace Synchronization
         {
         }
 
-        void addFmu(const FMI::AbstractFmu * in, std::vector<ConnectionSPtr> & connList);
+        size_type addFmu(FMI::AbstractFmu * in, vector<FMI::InputMapping> & _valuePacking);
 
         /**
          * Send output values to dependent FMU of particular connection. The send method for the connection is called.
@@ -127,6 +127,11 @@ namespace Synchronization
          * All connections managed by this communicator instance.
          */
         vector<ConnectionSPtr> _connections;
+
+        size_type _numManagedCons;
+        size_type _numManagedFmus;
+
+        std::map<size_type, size_type> _knownConIds;
 
         //Todo: Create buffer for communication, i.e., to store received values (later transfered to DataManager::DataHistory).
     };

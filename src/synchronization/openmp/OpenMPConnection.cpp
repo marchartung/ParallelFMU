@@ -3,8 +3,8 @@
 namespace Synchronization
 {
 
-    OpenMPConnection::OpenMPConnection(const Initialization::ConnectionPlan & in, bool outgoing)
-            : AbstractConnection(in, outgoing)
+    OpenMPConnection::OpenMPConnection(const Initialization::ConnectionPlan & in)
+            : AbstractConnection(in)
     {
         omp_init_lock(&_writersLock);
         omp_unset_lock(&_writersLock);
