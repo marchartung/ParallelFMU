@@ -224,7 +224,7 @@ namespace Initialization
     }
 
     void XMLConfigurationReader::appendConnectionInformation(std::list<SolverPlan> & solverPlans, std::list<ConnectionPlan> & connPlans,
-                                                             const SchedulePlan schedPlan)
+                                                             const SchedulePlan & schedPlan)
     {
         map<string_type, SolverPlan*> fmuNameToSolver;
         shared_ptr<ConnectionPlan> tmp;

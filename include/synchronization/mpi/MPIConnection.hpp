@@ -47,7 +47,6 @@ namespace Synchronization
 
      private:
         vector<MPI_Request> _isFree;
-        int _target;
         size_type _numOpenConns;
     };
 

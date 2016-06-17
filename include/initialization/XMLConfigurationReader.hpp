@@ -68,7 +68,7 @@ namespace Initialization
 
         SimulationPlan getDefaultSimulationPlan();
 
-        void appendConnectionInformation(std::list<SolverPlan> & solverPlans, std::list<ConnectionPlan> & connPlans, const SchedulePlan schedPlan);
+        void appendConnectionInformation(std::list<SolverPlan> & solverPlans, std::list<ConnectionPlan> & connPlans, const SchedulePlan & schedPlan);
 
         WriterPlan getWriterPlan();
 

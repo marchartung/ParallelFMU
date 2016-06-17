@@ -307,6 +307,7 @@ namespace Initialization
 
     void Program::deinitMPI()
     {
+        _isInitialized = false;
 #ifdef USE_MPI
         if (_usingMPI)
             MPI_Finalize();

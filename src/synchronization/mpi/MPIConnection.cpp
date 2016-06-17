@@ -6,7 +6,6 @@ namespace Synchronization
     MPIConnection::MPIConnection(const Initialization::ConnectionPlan & in)
             : AbstractConnection(in),
               _isFree(vector<MPI_Request>(in.bufferSize)),
-              _target(),
               _numOpenConns(1u)
     {
 
@@ -21,16 +20,12 @@ namespace Synchronization
     {
         if (!isOutgoing(fmuName))
         {
-
-            _target = _plan.destRank;
             for (size_type i = 0; i < _numOpenConns; ++i)
             {
                 //  // Call recv, so the corresponding MPI_Isends aren't blocked
-                MPI_Irecv(_buffer[i].data(), _buffer[i].dataSize(), MPI_BYTE, _target, getStartTag() + i, MPI_COMM_WORLD, &_isFree[i]);
+                MPI_Irecv(_buffer[i].data(), _buffer[i].dataSize(), MPI_BYTE, _plan.sourceRank, getStartTag() + i, MPI_COMM_WORLD, &_isFree[i]);
             }
         }
-        else
-            _target = _plan.sourceRank;
     }
 
     bool MPIConnection::send(const HistoryEntry & in)
@@ -45,7 +40,7 @@ namespace Synchronization
         if (tmpBool > 0)
         {
             _buffer[_currentSendIndex] = in;  // todo fast copy
-            MPI_Isend(_buffer[_currentSendIndex].data(), _buffer[_currentSendIndex].dataSize(), MPI_BYTE, _target, getStartTag() + _currentSendIndex,
+            MPI_Isend(_buffer[_currentSendIndex].data(), _buffer[_currentSendIndex].dataSize(), MPI_BYTE, _plan.destRank, getStartTag() + _currentSendIndex,
             MPI_COMM_WORLD,
                       &_isFree[_currentSendIndex]);
             _currentSendIndex = nextSendIndex();
@@ -64,7 +59,7 @@ namespace Synchronization
         {
             HistoryEntry res = _buffer[_currentReceiveIndex];  // todo real copy
             _currentReceiveIndex = nextReceiveIndex();
-            MPI_Irecv(_buffer[_currentReceiveIndex].data(), _buffer[_currentReceiveIndex].dataSize(), MPI_BYTE, _target, getStartTag() + _currentReceiveIndex,
+            MPI_Irecv(_buffer[_currentReceiveIndex].data(), _buffer[_currentReceiveIndex].dataSize(), MPI_BYTE, _plan.sourceRank, getStartTag() + _currentReceiveIndex,
             MPI_COMM_WORLD,
                       &_isFree[_currentReceiveIndex]);  //keep listening for the next communication on this buffer
             return res;
