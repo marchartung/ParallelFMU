@@ -36,8 +36,8 @@ namespace Synchronization
                 }
             }
             con->setLocalId(conId);
-            in->setSharedId(_numManagedFmus++);
         }
+        in->setSharedId(_numManagedFmus++);
 
         for(auto & con : connList)
             if(con->getLocalId()+1 > _connections.size())

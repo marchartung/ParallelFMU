@@ -16,11 +16,7 @@ namespace Util
         namespace fs = boost::filesystem;
         std::string res;
         fs::path bpath(path);
-        if (!fs::is_directory(bpath))
-        {
-            std::cout << "Given path is not a directory";
-        }
-        else
+        if (fs::is_directory(bpath))
         {
             for (fs::directory_iterator it = fs::directory_iterator(bpath); it != fs::directory_iterator(); ++it)
             {

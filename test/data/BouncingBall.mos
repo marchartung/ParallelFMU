@@ -1,5 +1,5 @@
 loadModel(Modelica, {"3.2.1"}); getErrorString();
 loadFile("BouncingBall.mo"); getErrorString();
-setDebugFlags("hardcodedStartValues,visxml"); getErrorString();
+setDebugFlags("hardcodedStartValues,visxml,infoXmlOperations"); getErrorString();
 setCommandLineOptions("+simCodeTarget=Cpp"); getErrorString();
 translateModelFMU(BouncingBall, version="1.0", fmuType="me"); getErrorString();

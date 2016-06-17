@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<writer>
+		<csvFileWriter id="0" resultFile="result_bouncing1k_openmp.csv" />
+	</writer>
+	<fmus>
+		<multipleFmu  name="BouncingBall" path="test/data/BouncingBall.fmu" loader="fmuSdk" solver="euler" num="1000">
+			<varRange type="real" valStart="1.0" valEnd="20.0" ></varRange> 
+		</multipleFmu>
+	</fmus>
+	<scheduling>
+		<nodes numNodes="2" numCoresPerNode="2" numFmusPerCore="250"/>
+	</scheduling>
+	<simulation startTime="0.0" endTime="2.0" globalTolerance="1.0e-5" globalMaxError="1.0e-6" globalDefaultStepSize="1.0e-3" globalEventInterval="2.0e-5"/>
+</configuration>
