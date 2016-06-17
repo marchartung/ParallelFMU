@@ -9,7 +9,7 @@
 		</multipleFmu>
 	</fmus>
 	<scheduling>
-		<nodes numNodes="2" numCoresPerNode="1" numFmusPerCore="500"/>
+		<nodes numNodes="4" numCoresPerNode="1" numFmusPerCore="250"/>
 	</scheduling>
 	<simulation startTime="0.0" endTime="2.0" globalTolerance="1.0e-5" globalMaxError="1.0e-6" globalDefaultStepSize="1.0e-3" globalEventInterval="2.0e-5"/>
 </configuration>
