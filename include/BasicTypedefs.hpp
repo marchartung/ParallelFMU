@@ -20,10 +20,6 @@ typedef std::string string_type;
 
 typedef uint32_t size_type;
 
-namespace FMI
-{
-}
-
 namespace Synchronization
 {
     class AbstractConnection;
