@@ -11,6 +11,10 @@
 #include "initialization/Plans.hpp"
 #include "fmi/AbstractFmu.hpp"
 
+#include <memory>
+#include <vector>
+#include <tuple>
+
 namespace Network
 {
     class InitialNetworkServer : private FMI::ValueSwitch
