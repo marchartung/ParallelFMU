@@ -67,7 +67,7 @@ namespace Initialization
         std::string kind;
         size_type id;
 
-        shared_ptr<FmuPlan> fmu;
+        std::shared_ptr<FmuPlan> fmu;
 
         real_type startTime;
         real_type endTime;
@@ -76,8 +76,8 @@ namespace Initialization
         real_type maxError;
         real_type eventInterval;
 
-        std::list<shared_ptr<ConnectionPlan>> outConnections;
-        std::list<shared_ptr<ConnectionPlan>> inConnections;
+        std::list<std::shared_ptr<ConnectionPlan>> outConnections;
+        std::list<std::shared_ptr<ConnectionPlan>> inConnections;
 
 #ifdef USE_NETWORK_OFFLOADER
         Network::NetworkPlan networkPlan;
@@ -102,10 +102,10 @@ namespace Initialization
     {
         WriterPlan writer;
         HistoryPlan history;
-        shared_ptr<Synchronization::Communicator> commnicator;
-        vector<shared_ptr<SolverPlan> > solvers;
-        std::list<shared_ptr<ConnectionPlan>> outConnections;
-        std::list<shared_ptr<ConnectionPlan>> inConnections;
+        std::shared_ptr<Synchronization::Communicator> commnicator;
+        std::vector<std::shared_ptr<SolverPlan> > solvers;
+        std::list<std::shared_ptr<ConnectionPlan>> outConnections;
+        std::list<std::shared_ptr<ConnectionPlan>> inConnections;
     };
 
 
@@ -114,7 +114,7 @@ namespace Initialization
     {
         std::vector<std::vector<std::vector<size_type> > > nodeStructure; // node -> core -> solv
 
-        std::vector<tuple<size_type, size_type>> solvIdToCore; // solv -> (node,core)
+        std::vector<std::tuple<size_type, size_type>> solvIdToCore; // solv -> (node,core)
     };
 
     struct SimulationPlan
