@@ -175,7 +175,7 @@ namespace Initialization
 
     bool Program::initNetworkConnection(const int & rank)
     {
-        // Need to tread special cases. In a network server case the socket can only be hold by one process. The addional information need to be send via mpi
+        // Need to tread special cases. In a network server case the socket can only be hold by one process. The additional information need to be send via MPI.
 #ifdef USE_NETWORK_OFFLOADER
         Network::NetworkPlan np;
         if (rank == 0)
