@@ -15,7 +15,7 @@
 namespace Initialization
 {
 
-    CommandLineArgs::CommandLineArgs(const std::string& configFile, const Util::LogLevel& logLvl)
+    CommandLineArgs::CommandLineArgs(const std::string & configFile, const Util::LogLevel & logLvl)
             : _configFilePath(configFile),
               _logSettings(Util::LogSettings()),
               _simulationServerPort(-1),
@@ -26,7 +26,7 @@ namespace Initialization
         _logSettings.setAll(logLvl);
     }
 
-    CommandLineArgs::CommandLineArgs(int* argc, char** argv[])
+    CommandLineArgs::CommandLineArgs(int * argc, char ** argv[])
             : _configFilePath(""),
               _logSettings(Util::LogSettings()),
               _simulationServerPort(-1),
@@ -42,24 +42,24 @@ namespace Initialization
         return _configFilePath;
     }
 
-    const Util::LogSettings& CommandLineArgs::getLogSettings() const
+    const Util::LogSettings & CommandLineArgs::getLogSettings() const
     {
         return _logSettings;
     }
 
-    Util::LogSettings& CommandLineArgs::getLogSettings()
+    Util::LogSettings & CommandLineArgs::getLogSettings()
     {
         return _logSettings;
     }
 
-    tuple<int*, char***> CommandLineArgs::getProgramArgs()
+    tuple<int *, char ***> CommandLineArgs::getProgramArgs()
     {
         //if(_argc == nullptr || _argv == nullptr)
         //throw std::runtime_error("CommandLineArgs: cannot access program arguments, they wasn't set.");
         return make_tuple(_argc, _argv);
     }
 
-    tuple<const int*, const char***> CommandLineArgs::getProgramArgs() const
+    tuple<const int *, const char ***> CommandLineArgs::getProgramArgs() const
     {
         return getProgramArgs();
     }
@@ -72,14 +72,9 @@ namespace Initialization
 
         namespace po = boost::program_options;
         po::options_description desc("Options");
-        desc.add_options()
-                ("help", "Print help messages")
-                ("configFile,c", boost::program_options::value<std::string>()->required(),
-                                                          "Path to the configuration file containing detailed information about the FMUs")(
-                "log-settings,V", po::value<vector<std::string> >(), "log information: loader, event, solver, system, other")(
-                //"numThreads,n", po::value<size_type>(), "The number of threads respectively processes to use")(
-                "server,S",po::value<int>(), "Setting up an simulation server based on NetworkOffloader interface. Takes the port on which it should open")(
-                "client,C", "Starting a client program for remote connection based on the NetworkOffload interface");
+        desc.add_options()("help", "Print help messages")("configFile,c", boost::program_options::value<std::string>()->required(), "Path to the configuration file containing detailed information about the FMUs")("log-settings,V", po::value<vector<std::string> >(), "log information: loader, event, solver, system, other")(
+        //"numThreads,n", po::value<size_type>(), "The number of threads respectively processes to use")(
+                "server,S", po::value<int>(), "Setting up an simulation server based on NetworkOffloader interface. Takes the port on which it should open")("client,C", "Starting a client program for remote connection based on the NetworkOffload interface");
 
         po::variables_map vm;
         this->_argc = argc;
@@ -114,7 +109,7 @@ namespace Initialization
 #endif
             }
 
-            if (vm.count("configFile") )
+            if (vm.count("configFile"))
                 this->_configFilePath = vm["configFile"].as<std::string>();
             else
                 throw runtime_error("Path to configuration file required, but missing.");
@@ -128,8 +123,7 @@ namespace Initialization
                     tmpvec.clear();
                     boost::split(tmpvec, log_vec[i], boost::is_any_of("="));
 
-                    if (tmpvec.size() > 1 && logLvlMap.find(tmpvec[1]) != logLvlMap.end()
-                            && (tmpvec[0] == "all" || logCatMap.find(tmpvec[0]) != logCatMap.end()))
+                    if (tmpvec.size() > 1 && logLvlMap.find(tmpvec[1]) != logLvlMap.end() && (tmpvec[0] == "all" || logCatMap.find(tmpvec[0]) != logCatMap.end()))
                     {
                         if (tmpvec[0] == "all")
                         {
@@ -179,7 +173,6 @@ namespace Initialization
 
     map<std::string, Util::LogLevel> CommandLineArgs::getLogLvlMap()
     {
-
         map<std::string, Util::LogLevel> logLvlMap;
         logLvlMap["error"] = Util::LL_ERROR;
         logLvlMap["warning"] = Util::LL_WARNING;
