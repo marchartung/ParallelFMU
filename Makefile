@@ -1,20 +1,24 @@
 
 ROOT_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 
-.PHONY: all build eclipse doc testFmus
+.PHONY: all build eclipse doc parallelFmu xeonPhi
 
-all: testFmus build
+all: parallelFmu build
 
-
-testFmus:
+parallelFmu:
 	cd test/data && make build && make clean
-build: testFmus
+build: parallelFmu
 	mkdir -p build_tmp
 	cd ./build_tmp && CC=$(CC) CXX=$(CXX) cmake -DBUILD_DOCUMENTATION=true -DFMILIB_HOME=$(FMILIB_HOME) -DMATIO_HOME=$(MATIO_HOME) -DRAPIDXML_ROOT=$(RAPIDXML_ROOT) -DCMAKE_INSTALL_PREFIX:PATH="../build" -DCMAKE_BUILD_TYPE=Debug ../
 	make -C build_tmp VERBOSE=1
 	make -C build_tmp install
 
-eclipse: testFmus
+xeonPhi:
+	mkdir -p xeonPhi_build
+	cd ./xeonPhi_build && CC=icc CXX=icpc FC=ifort CFLAGS="-mmic" CXXFLAGS=$CFLAGS FFLAGS=$CFLAGS MPI_C=mpiicc MPI_CXX=mpiicpc cmake -DCMAKE_TOOLCHAIN_FILE="../cmake/toolchain_xeon_phi.cmake" -DFMILIB_HOME=$(FMILIB_HOME) -DMATIO_HOME=$(MATIO_HOME) -DRAPIDXML_ROOT=$(RAPIDXML_ROOT) -DCMAKE_INSTALL_PREFIX:PATH="../xeonPhi_build" -DCMAKE_BUILD_TYPE=RELEASE ../
+	make -C xeonPhi_build VERBOSE=1	
+	
+eclipse: parallelFmu
 	mkdir -p ../parallel_fmu_eclipse
 	cd ../parallel_fmu_eclipse && CC=$(CC) CXX=$(CXX) cmake -DFMILIB_HOME=$(FMILIB_HOME) -DMATIO_HOME=$(MATIO_HOME) -DRAPIDXML_ROOT=$(RAPIDXML_ROOT) -G"Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug $(ROOT_DIR) -DCMAKE_INSTALL_PREFIX:PATH="$(ROOT_DIR)/build"
 

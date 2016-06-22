@@ -1,0 +1,15 @@
+--- ./FindMPI.cmake.orig	2012-11-27 05:26:32.000000000 -0800
++++ ./FindMPI.cmake	2013-04-12 06:22:17.444189000 -0700
+@@ -250,8 +250,11 @@
+ 
+         # If we have compile-info, also have link-info.
+         if (MPI_COMPILER_RETURN EQUAL 0)
++	SET(LI_MPI_FLAGS ${CMAKE_${lang}_FLAGS})
++	SEPARATE_ARGUMENTS(LI_MPI_FLAGS)
++	LIST(APPEND LI_MPI_FLAGS "-link-info")
+           execute_process(
+-            COMMAND ${MPI_${lang}_COMPILER} -link-info
++            COMMAND ${MPI_${lang}_COMPILER} ${LI_MPI_FLAGS}
+             OUTPUT_VARIABLE  MPI_LINK_CMDLINE OUTPUT_STRIP_TRAILING_WHITESPACE
+             ERROR_VARIABLE   MPI_LINK_CMDLINE ERROR_STRIP_TRAILING_WHITESPACE
+             RESULT_VARIABLE  MPI_COMPILER_RETURN)
