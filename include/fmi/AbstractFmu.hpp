@@ -554,12 +554,6 @@ namespace FMI
     };
 } /* namespace FMI */
 
-template<class T>
-struct is_fmu_type
-{
-    static const bool value = std::is_base_of<T, FMI::AbstractFmu>();
-};
-
 #endif /* INCLUDE_FMI_ABSTRACTFMU_HPP_ */
 /**
  * @}
