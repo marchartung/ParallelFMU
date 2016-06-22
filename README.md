@@ -29,7 +29,7 @@ required.
     1. C++ Compiler
         - Supporting C++ standard 2011 (-std=c++11)
 
-    2. FMU SDK (?)
+    2. FMU SDK (BSD)
         - https://www.qtronic.de/de/fmusdk.html
         - Is "shipped" as thirdparty
         - Linux: 
