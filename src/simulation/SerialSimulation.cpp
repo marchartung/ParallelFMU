@@ -1,5 +1,6 @@
 #include "simulation/SerialSimulation.hpp"
-#include <omp.h>
+//#include <omp.h>
+
 namespace Simulation
 {
 
@@ -20,7 +21,7 @@ namespace Simulation
         std::vector<size_type> numSteps(solver.size(),15);
         size_type tmpStepCount;
         double s,e;
-        s = omp_get_wtime();
+        //s = omp_get_wtime();
         while (running && getMaxIterations() > ++iterationCount)
         {
             running = false;
@@ -42,8 +43,8 @@ namespace Simulation
                     LOGGER_WRITE("(" + to_string(i) + ") Stopping at " + to_string(solver[i]->getCurrentTime()), Util::LC_SOLVER,Util::LL_DEBUG);
             }
         }
-        e = omp_get_wtime();
-        LOGGER_WRITE("thread " + to_string(omp_get_thread_num()) + " time: " + to_string(e - s), Util::LC_SOLVER, Util::LL_INFO);
+        //e = omp_get_wtime();
+        LOGGER_WRITE("thread 0 time: " + to_string(e - s), Util::LC_SOLVER, Util::LL_INFO);
     }
 
     string_type SerialSimulation::getSimulationType() const

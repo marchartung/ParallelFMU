@@ -5,7 +5,9 @@ namespace FMI
 
     ValueInfo::ValueInfo()
             : ValueSwitch(),
-              _valueReferenceToNamesMapping(4, std::map<size_type, vector<string_type> >())
+              _valueReferenceToNamesMapping(4, std::map<size_type, vector<string_type> >()),
+              _valueInputReferenceToNamesMapping(4, std::map<size_type, string_type>()),
+              _valueReferenceToDescriptionMapping(4, std::map<size_type, vector<string_type> >())
     {
     }
 

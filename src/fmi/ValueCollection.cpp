@@ -15,10 +15,10 @@ namespace FMI
     {
     }
 
-    ValueCollection::ValueCollection(size_type realSize, size_type intSize, size_type bool_typeSize, size_type stringSize)
+    ValueCollection::ValueCollection(size_type realSize, size_type intSize, size_type boolSize, size_type stringSize)
             : _realValues(vector<real_type>(realSize)),
               _intValues(vector<int_type>(intSize)),
-              _boolValues(vector<bool_type>(bool_typeSize)),
+              _boolValues(vector<bool_type>(boolSize)),
               _stringValues(vector<string_type>(stringSize))
     {
     }

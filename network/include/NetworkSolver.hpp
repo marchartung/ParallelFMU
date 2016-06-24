@@ -38,7 +38,6 @@ namespace Solver
         {
             if (!_simServer->isActive())
                 throw std::runtime_error("SimulationServer isn't active. Abort.");
-            initialize();
         }
 
         size_type solve(const size_type & numSteps) override
@@ -86,7 +85,9 @@ namespace Solver
 
             _dataManager->addFmu(&_fmu);
 
-            //TODO outConns
+            for(auto& con : _fmu.getConnections())
+                if(con->isOutgoing(_fmu.getFmuName()))
+                    _outConns.push_back(con);
             _simServer->confirmStart();
         }
 
@@ -152,12 +153,12 @@ namespace Solver
 
         const FMI::AbstractFmu* getFmu() const
         {
-            return nullptr;
+            return &_fmu;
         }
 
         FMI::AbstractFmu* getFmu() override
         {
-            return nullptr;
+            return &_fmu;
         }
 
         real_type getTolerance() const
@@ -187,7 +188,7 @@ namespace Solver
         real_type _endTime;
 
         std::shared_ptr<NetOff::SimulationServer> _simServer;
-        std::vector<Synchronization::ConnectionSPtr> outConns;  // refs simNum to connection
+        std::vector<Synchronization::ConnectionSPtr> _outConns;  // refs simNum to connection
         NetOff::ClientMessageSpecifyer _spec;
 
         const Initialization::SolverPlan _solvPlan;
@@ -202,7 +203,7 @@ namespace Solver
             real_type remoteTime = _simServer->getLastReceivedTime(fmuId);
             if (!_outputsSent)
             {
-                if (_dataManager->sendSingleOutput(remoteTime, 1, &_fmu, outConns[fmuId]->getLocalId()))
+                if (_dataManager->sendSingleOutput(remoteTime, 1, &_fmu, _outConns[fmuId]->getLocalId()))
                     _outputsSent = true;
                 else
                 {

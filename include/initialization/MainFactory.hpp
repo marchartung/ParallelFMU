@@ -124,10 +124,14 @@ namespace Initialization
             Synchronization::ConnectionSPtr res;
             if (in.kind == "serial")
                 res = Synchronization::ConnectionSPtr(new Synchronization::SerialConnection(in));
+#ifdef USE_OPENMP
             else if (in.kind == "openmp")
                 res = Synchronization::ConnectionSPtr(new Synchronization::OpenMPConnection(in));
+#endif
+#ifdef USE_MPI
             else if (in.kind == "mpi")
                 res = Synchronization::ConnectionSPtr(new Synchronization::MPIConnection(in));
+#endif
             else
                 throw std::runtime_error("MainFactory: Unkown connection type " + in.kind);
             return res;

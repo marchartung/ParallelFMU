@@ -87,16 +87,16 @@ namespace Network
         int newId = server.getLastSimId();
 
         FMI::AbstractFmu * fmu = _tmpFmus[newId].get();
-        if (!fmu->isLoaded())
+        if (fmu->isLoaded())
         {
             const FMI::ValueReferenceCollection & refs = fmu->getAllValueReferences();
             const FMI::ValueInfo & vi = fmu->getValueInfo();
 
-            _networkPlan.fmuNet[newId].outputMap = getMappingFromNameList(refs, server.getSelectedInputVariables(newId), vi, true);
-            _networkPlan.fmuNet[newId].inputMap = getMappingFromNameList(refs, server.getSelectedOutputVariables(newId), vi, false);
-
-            fmu->load(true);
+            _networkPlan.fmuNet[newId].outputMap = getMappingFromNameList(refs, server.getSelectedOutputVariables(newId), vi, true);
+            _networkPlan.fmuNet[newId].inputMap = getMappingFromNameList(refs, server.getSelectedInputVariables(newId), vi, false);
         }
+        else
+            throw std::runtime_error("Remote simulation failed. Fmu couldn't be initialized.");
 
         FMI::ValueCollection tmpVals = _networkPlan.fmuNet[newId].outputMap.pack(fmu->getValues(FMI::ReferenceContainerType::ALL));
         NetOff::ValueContainer & initialValues = server.getOutputValueContainer(newId);
@@ -115,7 +115,7 @@ namespace Network
             {
                 for (const auto & solvPlan : simPlan.dataManager.solvers)
                 {
-                    if (fmuPath == solvPlan->fmu->path || fmuPath == solvPlan->fmu->name)
+                    if (fmuPath == Util::FileHelper::absoluteFilePath(solvPlan->fmu->path) || fmuPath == solvPlan->fmu->name || fmuPath == solvPlan->fmu->name + std::string(".fmu"))
                     {
                         res = solvPlan->fmu;
                         netInfo.simPos = simId;
@@ -173,7 +173,7 @@ namespace Network
         addRefsToMapping<real_type>(mapping, vars.getReals(), vi, refs, fromFmu);
         addRefsToMapping<int_type>(mapping, vars.getInts(), vi, refs, fromFmu);
         addRefsToMapping<bool_type>(mapping, vars.getBools(), vi, refs, fromFmu);
-
+        return mapping;
     }
 
 }

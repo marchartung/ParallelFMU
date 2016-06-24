@@ -122,6 +122,7 @@ namespace FMI
             switch (varCausality)
             {
                 case VarCausality::varCausalityInput:
+                    _valueInfo.addInputNameReferencePair<T>(varName, valueReference);
                     _inputValueReferences.getValues<T>().push_back(valueReference);
                     //_startValueReferences.getValues<T>().push_back(valueReference);
                     //_startValues.getValues<T>().push_back(std::numeric_limits<T>::max());
