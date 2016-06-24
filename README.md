@@ -106,4 +106,47 @@ targets:
   * doc: Builds documentation.
   * clean-eclipse: Removes Eclipse project folder.
 
+
+\subsubsection usage Usage
+To execute ParallelFMU:
+\code
+~> ParallelFMU -c /path/to/Simulation_config.xml
+\endcode
+
+Simulation_config.xml determines which FMUs should be simulated and how they are connected. Example:
+\code
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<fmus>
+		<fmu name="BouncingBall" path="test/data/BouncingBall.fmu" loader="fmuSdk" solver="euler" relativeTolerance="1.0e-5" />
+		<fmu name="SimpleView" path="test/data/SimpleView.fmu" loader="fmuSdk" solver="euler" relativeTolerance="1.0e-5" defaultStepSize="0.1"/>
+	</fmus>
+	<connections>
+		<connection source="BouncingBall" dest="SimpleView">
+			<real out="0" in="0" />
+		</connection>
+	</connections>
+	<writer>
+		<csvFileWriter id="0" resultFile="result_simpleview.csv" numOutputSteps="100" />
+	</writer>
+	<scheduling>
+		<nodes numNodes="1" numCoresPerNode="1" numFmusPerCore="2"/>
+	</scheduling>
+	<simulation startTime="0.0" endTime="5.0" globalTolerance="1.0e-5" globalMaxError="1.0e-6" globalDefaultStepSize="1.0e-3" globalEventInterval="2.0e-5"/>
+</configuration>
+\endcode
+   * in fmus:
+	* it's necessary to define at least one fmu-tag
+	* the "name" attribute can be defined by the user and it should be unique in the simulation
+	* "path" is the absolute or relative path to the FMU file
+	* "solver" attribute defines which solver should be used for solving the fmu (in the moment only euler is available, and onle FMI1.0 me is supported.)
+   * in connections
+	* "connection" defines one output - input link between tow fmus.
+	* for every variable connected the hast to be a variable tag
+	* variable tags are "real", "bool", "int" (strings currently not supported)
+	* the attributes "out" and "in" of a variable tag defines which variable reference of the source fmu is connected to which variable reference of the target fmu
+  * in writer
+
+  * in simulation 
+
 */
