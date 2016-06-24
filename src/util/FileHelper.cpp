@@ -45,6 +45,6 @@ std::string Util::FileHelper::absoluteFilePath(const std::string& fileName)
     namespace fs = boost::filesystem;
     fs::path bpath(fileName);
     if(fs::is_regular(bpath))
-        res = bpath.string();
+        res = fs::absolute(bpath).string();
     return res;
 }
