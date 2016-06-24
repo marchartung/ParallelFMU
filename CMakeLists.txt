@@ -28,15 +28,19 @@ ELSE(MPI_C_FOUND)
 ENDIF(MPI_C_FOUND)
 
 # Find OpenMP
-FIND_PACKAGE(OpenMP)
-IF(OPENMP_FOUND)
-  MESSAGE(STATUS "OpenMP enabled")
-  ADD_DEFINITIONS(-DUSE_OPENMP)
-  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-ELSE(OPENMP_FOUND)
-  MESSAGE(STATUS "OpenMP disabled")
-ENDIF(OPENMP_FOUND)
+IF(USE_OPENMP)
+  FIND_PACKAGE(OpenMP)
+  IF(OPENMP_FOUND)
+    MESSAGE(STATUS "OpenMP enabled")
+    SET(INTERNAL_USE_OPENMP TRUE)
+    ADD_DEFINITIONS(-DUSE_OPENMP)
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+  ELSE(OPENMP_FOUND)
+    SET(INTERNAL_USE_OPENMP FALSE)
+    MESSAGE(STATUS "OpenMP disabled")
+  ENDIF(OPENMP_FOUND)
+ENDIF(USE_OPENMP)
 
 # Find Lapack
 FIND_PACKAGE(Lapack)
@@ -102,11 +106,27 @@ ADD_DEFINITIONS(-DUSE_LOGGER)
 
 
 # Remove OpenMP-Files if no OpenMP is available
-IF(NOT(USE_OPENMP_))
-  #MESSAGE(STATUS "Pre: ${SRCS}")
-  LIST(REMOVE_ITEM SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src/simulation/OpenMPSimulation.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/src/synchronization/OpenMPConnection.cpp")
-  #MESSAGE(STATUS "Post: ${SRCS}")
-ENDIF(NOT(USE_OPENMP_))
+#SET(INTERNAL_USE_OPENMP FALSE) #for debugging only
+IF(NOT(INTERNAL_USE_OPENMP))
+#   MESSAGE(STATUS "Pre: ${SRCS}")
+  LIST(REMOVE_ITEM SRCS 
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/synchronization//openmp/OpenMPConnection.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/synchronization//openmp/OpenMPCounter.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/synchronization//openmp/OpenMPDataHistory.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/simulation//openmp/OpenMPSimulation.cpp"
+  )
+  LIST(REMOVE_ITEM HEADERS 
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/simulation/openmp/OpenMPSimulation.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/synchronization/openmp/OpenMPConnection.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/synchronization/openmp/OpenMPCounter.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/synchronization/openmp/OpenMPDataHistory.hpp"
+  )
+# src/simulation/openmp/OpenMPSimulation.cpp" ) 
+# "${CMAKE_CURRENT_SOURCE_DIR}/include/simulation/openmp/OpenMPSimulation.hpp" # 
+# "${CMAKE_CURRENT_SOURCE_DIR}/src/synchronization/openmp/*" # 
+# "${CMAKE_CURRENT_SOURCE_DIR}/include/synchronization/openmp/")
+#   MESSAGE(STATUS "Post: ${SRCS}")
+ENDIF(NOT(INTERNAL_USE_OPENMP))
 
 # Looking for visualization
 #FIND_PACKAGE(OMVis)
