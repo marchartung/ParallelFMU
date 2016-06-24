@@ -25,7 +25,7 @@ namespace Synchronization
         else
         {
             LOGGER_WRITE("DataHistory: FMU " + fmu->getFmuName() + " already registered.", Util::LC_LOADER, Util::LL_ERROR);
-            throw std::runtime_error("AbstractDahistory initialization fail.");
+            throw std::runtime_error("AbstractDataHistory initialization fail.");
         }
     }
 
