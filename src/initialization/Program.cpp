@@ -296,7 +296,7 @@ namespace Initialization
 
 #else
             // test if the rank is on default (0), if not somethings wrong with @param rank.
-            throw std::runtime_error("Internal error. Rank missmatch in network initialization.");
+            throw std::runtime_error("Internal error. Rank mismatch in network initialization.");
 #endif
         }
         // adding network fmu and connections to program plan
