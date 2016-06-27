@@ -45,7 +45,8 @@ namespace Network
 
             newInputCon->startTag = numCons;
             newInputCon->inputMapping = extender.inputMap;
-            ++numCons;
+            if (extender.simPos != netSimId)
+                ++numCons;
 
             newOutputCon->startTag = numCons;
             newOutputCon->inputMapping = extender.outputMap;
@@ -56,7 +57,8 @@ namespace Network
                 newInputCon->kind = "mpi";
                 newOutputCon->kind = "mpi";
 
-                plan.simPlans[extender.simPos][extender.corePos].dataManager.inConnections.push_back(newInputCon);
+                if (extender.inputMap.size() > 0)
+                    plan.simPlans[extender.simPos][extender.corePos].dataManager.inConnections.push_back(newInputCon);
                 plan.simPlans[extender.simPos][extender.corePos].dataManager.outConnections.push_back(newOutputCon);
             }
             else if (extender.corePos != netCoreId)
@@ -64,7 +66,8 @@ namespace Network
                 newInputCon->kind = "openmp";
                 newOutputCon->kind = "openmp";
 
-                plan.simPlans[extender.simPos][extender.corePos].dataManager.inConnections.push_back(newInputCon);
+                if (extender.inputMap.size() > 0)
+                    plan.simPlans[extender.simPos][extender.corePos].dataManager.inConnections.push_back(newInputCon);
                 plan.simPlans[extender.simPos][extender.corePos].dataManager.outConnections.push_back(newOutputCon);
             }
             else
@@ -74,14 +77,20 @@ namespace Network
             }
 
             //Add additional connection so network fmu's simulation plan
-            plan.simPlans[netSimId][netCoreId].dataManager.outConnections.push_back(newInputCon);
-            plan.simPlans[netSimId][netCoreId].dataManager.solvers.back()->outConnections.push_back(newInputCon);
+            if (extender.inputMap.size() > 0)
+            {
+                plan.simPlans[netSimId][netCoreId].dataManager.outConnections.push_back(newInputCon);
+                plan.simPlans[netSimId][netCoreId].dataManager.solvers.back()->outConnections.push_back(newInputCon);
+            }
 
-            plan.simPlans[netSimId][netCoreId].dataManager.inConnections.push_back(newOutputCon);
-            plan.simPlans[netSimId][netCoreId].dataManager.solvers.back()->inConnections.push_back(newOutputCon);
-
+            if (extender.inputMap.size() > 0)
+            {
+                plan.simPlans[netSimId][netCoreId].dataManager.inConnections.push_back(newOutputCon);
+                plan.simPlans[netSimId][netCoreId].dataManager.solvers.back()->inConnections.push_back(newOutputCon);
+            }
             //Add additional connection so dependend fmu's simulation plan
-            plan.simPlans[extender.simPos][extender.corePos].dataManager.solvers[extender.solverPos]->inConnections.push_back(newInputCon);
+            if (extender.inputMap.size() > 0)
+                plan.simPlans[extender.simPos][extender.corePos].dataManager.solvers[extender.solverPos]->inConnections.push_back(newInputCon);
             plan.simPlans[extender.simPos][extender.corePos].dataManager.solvers[extender.solverPos]->outConnections.push_back(newOutputCon);
         }
     }
