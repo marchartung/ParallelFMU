@@ -25,7 +25,9 @@ namespace Initialization
             : _isInitialized(false),
               _usingMPI(false),
               _usingOMP(false),
-              _commandLineArgs(cla)
+              _commandLineArgs(cla),
+              _pp(),
+              _simulations()
     {
     }
 
@@ -33,7 +35,9 @@ namespace Initialization
             : _isInitialized(false),
               _usingMPI(false),
               _usingOMP(false),
-              _commandLineArgs(CommandLineArgs(argc, argv))
+              _commandLineArgs(CommandLineArgs(argc, argv)),
+              _pp(),
+              _simulations()
     {
     }
 
