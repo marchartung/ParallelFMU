@@ -115,12 +115,15 @@ namespace FMI
     void FmuSdkFmu::unload()
     {
         AbstractFmu::unload();
-        _fmu->freeModelInstance(_component);
-        --std::get<1>(_knownFmus.at(std::string(_fmu->path)));
-        if (std::get<1>(_knownFmus.at(std::string(_fmu->path))) == 0)
+        if (_fmu != nullptr)
         {
-            _knownFmus.erase(std::string(_fmu->path));
-            unloadFMU(_fmu);
+            _fmu->freeModelInstance(_component);
+            --std::get<1>(_knownFmus.at(std::string(_fmu->path)));
+            if (std::get<1>(_knownFmus.at(std::string(_fmu->path))) == 0)
+            {
+                _knownFmus.erase(std::string(_fmu->path));
+                unloadFMU(_fmu);
+            }
         }
         //TODO
     }
