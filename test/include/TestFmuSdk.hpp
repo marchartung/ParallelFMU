@@ -35,20 +35,20 @@ TEST_F (FmuSdkFixture, TestInitialization)
     ASSERT_DOUBLE_EQ(1.0, stateValues[0]);
 }
 
-//TEST_F (FmuSdkFixture, TestFmuSdkEventHandling)
-//{
-//    //first event of should occur approximately at t=0.45
-//    ASSERT_EQ(1, _simulation->getSolver().size());
-//    ASSERT_EQ(_simulation->getSimulationType(), "serial");
-//    _simulation->setSimulationEndTime(0.8);
-//    _simulation->initialize();
-//    FMI::AbstractFmu* fmu = _simulation->getSolver().back()->getFmu();
-//    ASSERT_STREQ("BouncingBall", fmu->getFmuName().c_str());  //check if we are really using the bouncing ball model
-//    vector<double> stateValues = vector<double>(fmu->getNumStates(), 0.0);
-//    fmu->getStates(stateValues.data());
-//    ASSERT_DOUBLE_EQ(1.0, stateValues[0]);  //check if ball start with height of 1.0
-//    _simulation->simulate();
-//    ASSERT_EQ(2, _simulation->getSolver().back()->getEventCounter());
-//}
+TEST_F (FmuSdkFixture, TestFmuSdkEventHandling)
+{
+    //first event of should occur approximately at t=0.45
+    ASSERT_EQ(1, _simulation->getSolver().size());
+    ASSERT_EQ(_simulation->getSimulationType(), "serial");
+    _simulation->setSimulationEndTime(0.8);
+    _simulation->initialize();
+    FMI::AbstractFmu* fmu = _simulation->getSolver().back()->getFmu();
+    ASSERT_STREQ("BouncingBall", fmu->getFmuName().c_str());  //check if we are really using the bouncing ball model
+    vector<double> stateValues = vector<double>(fmu->getNumStates(), 0.0);
+    fmu->getStates(stateValues.data());
+    ASSERT_DOUBLE_EQ(1.0, stateValues[0]);  //check if ball start with height of 1.0
+    _simulation->simulate();
+    ASSERT_EQ(2, _simulation->getSolver().back()->getEventCounter());
+}
 
 #endif /* INCLUDE_TEST_TESTFMUSDK_H_ */
