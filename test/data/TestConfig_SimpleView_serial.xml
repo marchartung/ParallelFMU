@@ -7,7 +7,7 @@
 		<csvFileWriter id="0" resultFile="result_simpleview.csv" numOutputSteps="100" />
 	</writer>
 	<fmus>
-		<fmu name="BouncingBall" path="test/data/BouncingBall.fmu" loader="fmuSdk" solver="euler" relativeTolerance="1.0e-5" />
+		<fmu name="BouncingBall" path="test/data/BouncingBall.fmu" loader="fmuSdk" solver="euler" relativeTolerance="1.0e-5" defaultStepSize="0.1"/>
 		<fmu name="SimpleView" path="test/data/SimpleView.fmu" loader="fmuSdk" solver="euler" relativeTolerance="1.0e-5" defaultStepSize="0.1"/>
 	</fmus>
 	<connections>
