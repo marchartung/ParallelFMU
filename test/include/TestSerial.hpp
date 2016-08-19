@@ -28,7 +28,7 @@ class Serial : public TestCommon
 TEST_F (Serial, TestDependenciesSerial)
 {
     ASSERT_TRUE(_simulation->getSimulationType() == "serial");
-    ASSERT_GT(_simulation->getSolver().size(),1);
+    ASSERT_EQ(_simulation->getSolver().size(), 2);
     _simulation->setSimulationEndTime(0.5);
     _simulation->initialize();
     _simulation->simulate();
