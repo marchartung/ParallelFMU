@@ -65,6 +65,7 @@ namespace FMI
                   _numberOfEventIndicators(-1)
         {
         }
+
         /**
          * Destroy the FMU object and unload the resources if necessary.
          */
