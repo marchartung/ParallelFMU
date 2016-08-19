@@ -13,7 +13,9 @@ namespace FMI
 
     ValueInfo::ValueInfo(const ValueInfo& obj)
         : ValueSwitch(),
-          _valueReferenceToNamesMapping(obj._valueReferenceToNamesMapping)
+          _valueReferenceToNamesMapping(obj._valueReferenceToNamesMapping),
+          _valueInputReferenceToNamesMapping(obj._valueInputReferenceToNamesMapping),
+          _valueReferenceToDescriptionMapping(obj._valueReferenceToDescriptionMapping)
     {
     }
 
