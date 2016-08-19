@@ -40,6 +40,7 @@ namespace Solver
 
      protected:
         virtual void doSolverStep(const real_type & h) = 0;
+
      public:
         virtual ErrorInfo getErrorInfo() const = 0;
         virtual size_type getSolverOrder() const = 0;
@@ -68,11 +69,18 @@ namespace Solver
                   _eventCounter(0),
                   _tolerance(in.fmu->relTol),
                   _maxError(in.maxError),
+                  _states(),
+                  _prevStates(),
+                  _stateDerivatives(),
+                  _eventIndicators(),
+                  _prevEventIndicators(),
+                  _tmpEventIndicators(),
                   _freshStep(false),
                   _savedStep(false),
                   _fmu(fmu),
                   _id(in.id),
-                  _dataManager(dataManager)
+                  _dataManager(dataManager),
+                  _depHist()
         {
             //assert(dataManager != nullptr);
         }
@@ -80,7 +88,10 @@ namespace Solver
         /**
          * Destroy solver.
          */
-        virtual ~AbstractSolver() = default;
+        virtual ~AbstractSolver()
+        {
+            _fmu.unload();
+        }
 
         virtual void initialize()
         {
@@ -338,6 +349,7 @@ namespace Solver
         {
             _endTime = simTime;
         }
+
         const Synchronization::IDataManager* getDataManager() const
         {
             return *_dataManager;
@@ -347,7 +359,6 @@ namespace Solver
         {
             _tolerance = tolerance;
             _fmu.setRelativeTolerance(tolerance);
-
         }
 
         Synchronization::IDataManager* getDataManager() override
