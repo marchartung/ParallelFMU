@@ -1,12 +1,12 @@
 #include <gtest/gtest.h>
 
 
-#include "TestSerial.hpp"
+//#include "TestSerial.hpp"
 #ifdef USE_FMILIB
 //#include "TestFmuFMI.hpp"
 #endif
-#include "TestOpenMP.hpp"
-#include "TestMPI.hpp"
+//#include "TestOpenMP.hpp"
+//#include "TestMPI.hpp"
 #include "TestFmuSdk.hpp"
 
 /*#include "TestXmlReader.hpp"

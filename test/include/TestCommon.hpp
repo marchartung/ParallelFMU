@@ -41,6 +41,7 @@ class TestCommon : public ::testing::Test
 
     virtual void SetUp()
     {
+        _program.initialize();
         _simulation = _program.getSimulation();
         //_simulation->initialize();
     }
