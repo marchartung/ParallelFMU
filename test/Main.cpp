@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 
-//#include "TestSerial.hpp"
+#include "TestSerial.hpp"
 #ifdef USE_FMILIB
 //#include "TestFmuFMI.hpp"
 #endif
