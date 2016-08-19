@@ -141,8 +141,8 @@ namespace FMI
         {
             throw std::runtime_error("FmuSdk: Unkown type for start value.");
         }
-    }
-    ;
+    };
+
 
     template<>
     real_type FmuSdkFmu::getStartValue<real_type>(ScalarVariable * variable, ValueStatus & vs);
