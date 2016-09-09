@@ -126,8 +126,7 @@ namespace Solver
 
             if (_tolerance <= 0.0 || _maxError <= 0.0 || _initStepSize <= 0.0)
             {
-                throw std::runtime_error(
-                        "FMU values not set correctly. " + to_string(_tolerance) + "|" + to_string(_maxError) + "|" + to_string(_initStepSize));
+                throw std::runtime_error("FMU values not set correctly. " + to_string(_tolerance) + "|" + to_string(_maxError) + "|" + to_string(_initStepSize));
             }
 
         }
@@ -308,8 +307,7 @@ namespace Solver
             //keep the new state values, because they are the after event start values
             //it's too late at this location to write the pre-event-values
             //_fmu.getStates(eventStateValues.data());
-            LOGGER_WRITE("Event stepping: t0=" + to_string(_sEventInfo.eventTimeStart) + " , t1=" + to_string(_sEventInfo.eventTimeEnd), Util::LC_SOLVER,
-                         Util::LL_DEBUG);
+            LOGGER_WRITE("Event stepping: t0=" + to_string(_sEventInfo.eventTimeStart) + " , t1=" + to_string(_sEventInfo.eventTimeEnd), Util::LC_SOLVER, Util::LL_DEBUG);
             _currentTime = _sEventInfo.eventTimeStart;
             doSolverStep(_currentTime - _prevTime);
             _fmu.setTime(_currentTime);
@@ -492,8 +490,7 @@ namespace Solver
             {
                 if (hasZeroCrossing(k))
                 {
-                    LOGGER_WRITE(string_type("(" + to_string(_fmu.getLocalId()) + ") Found event at index '") + to_string(k) + string_type("'"), Util::LC_EVT,
-                                 Util::LL_DEBUG);
+                    LOGGER_WRITE(string_type("(" + to_string(_fmu.getLocalId()) + ") Found event at index '") + to_string(k) + string_type("'"), Util::LC_EVT, Util::LL_DEBUG);
                     hTmp = interpolateZeroCrossing(k);
                     //LOGGER_WRITE(string_type("Interpolated event time point_type to ") + to_string(hTmp), Util::LC_EVT, Util::LL_DEBUG);
                     if (h > hTmp)
@@ -524,8 +521,7 @@ namespace Solver
             if (eventHappend)
                 _sEventInfo = event;
             else
-                _sEventInfo =
-                {   false,std::numeric_limits<real_type>::infinity(),std::numeric_limits<real_type>::infinity()};
+                _sEventInfo = {false, std::numeric_limits<real_type>::infinity(), std::numeric_limits<real_type>::infinity()};
 
             return _sEventInfo;
         }
