@@ -13,6 +13,7 @@
 
 namespace FMI
 {
+
     class FmuSdkFmu : public AbstractFmu
     {
      public:
@@ -67,8 +68,8 @@ namespace FMI
         void (*_Nullifier)(FMU*) = [](FMU * in)
         {   in = nullptr;};
 
-        static map<string_type,tuple<FMU *,size_type>> _knownFmus;
-        static map<string_type,FmuSdkFmu*> _presentFmus;
+        static map<string_type, tuple<FMU *, size_type>> _knownFmus;
+        static map<string_type, FmuSdkFmu*> _presentFmus;
 
         FMU * _fmu;
         fmiComponent _component;
@@ -110,7 +111,7 @@ namespace FMI
                                 _startValues.getValues<T>().push_back(res);
                             }
                             //else
-                              //  _startValues.getValues<T>().push_back(0);
+                            //  _startValues.getValues<T>().push_back(0);
                         default:
                             ;
                     }
@@ -142,7 +143,6 @@ namespace FMI
             throw std::runtime_error("FmuSdk: Unkown type for start value.");
         }
     };
-
 
     template<>
     real_type FmuSdkFmu::getStartValue<real_type>(ScalarVariable * variable, ValueStatus & vs);
