@@ -37,7 +37,6 @@ int_type main(int_type argc, char *argv[])
         prog.initialize();
         prog.simulate();
         prog.deinitialize();
-
     }
     catch (exception &ex)
     {
