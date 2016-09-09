@@ -28,6 +28,7 @@ namespace Simulation
          */
         //OpenMPSimulation(vector<Solver::AbstractSolverSPtr> solvers, const string_type & scheduleKind = "auto");
         OpenMPSimulation(const Initialization::SimulationPlan & in, const vector<std::shared_ptr<Solver::ISolver>> & solver);
+
         /**
          * Destructor. Destroys OpenMP simulation object and frees allocates resources.
          */
