@@ -4,6 +4,7 @@
 
 namespace Initialization
 {
+
     MainFactory::MainFactory()
     {
     }
@@ -17,4 +18,5 @@ namespace Initialization
         else
             throw std::runtime_error("MainFactoy: There's no simulation type " + in.kind);
     }
+
 } /* namespace Initialization */
