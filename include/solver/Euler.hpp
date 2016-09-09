@@ -12,6 +12,7 @@
 
 namespace Solver
 {
+
     /**
      * This class implements the forward Euler solver for time integration.
      */
@@ -31,6 +32,7 @@ namespace Solver
                 : AbstractSolver<DataManagerClass, FmuClass>(in, fmu, dm)
         {
         }
+
         /**
          * Destroy Euler solver and free resources.
          */
@@ -72,7 +74,6 @@ namespace Solver
         using AbstractSolver<DataManagerClass, FmuClass>::_currentTime;
         using AbstractSolver<DataManagerClass, FmuClass>::_curStepSize;
         using AbstractSolver<DataManagerClass, FmuClass>::_maxError;
-     private:
     };
 
 } /* namespace Solver */
