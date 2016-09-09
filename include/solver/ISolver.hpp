@@ -12,14 +12,16 @@
 
 namespace Solver
 {
-/**
- * Interface for every solver class. Enables high-level view and hides templates of explicit solver classes
- */
+
+    /**
+     * Interface for every solver class. Enables high-level view and hides templates of explicit solver classes
+     */
     class ISolver
     {
      public:
         virtual ~ISolver()
-        { }
+        {
+        }
 
         virtual size_type solve(const size_type & numSteps) = 0;
         virtual void initialize() = 0;
@@ -50,9 +52,6 @@ namespace Solver
         virtual void setMaxError(const real_type & maxError) = 0;
 
         virtual size_type getEventCounter() const = 0;
-
-     private:
-
     };
 
 } /* namespace Solver */
