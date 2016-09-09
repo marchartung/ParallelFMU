@@ -17,6 +17,7 @@
 
 namespace Network
 {
+
     class InitialNetworkServer : private FMI::ValueSwitch
     {
      public:
@@ -24,7 +25,6 @@ namespace Network
         ~InitialNetworkServer();
 
         NetworkPlan getNetworkPlan();
-
 
         void start();
 
@@ -45,21 +45,19 @@ namespace Network
 
         std::shared_ptr<Initialization::FmuPlan> findFmuInProgramPlan(const std::string fmuPath, Network::NetworkFmuInformation & netInfo);
 
-        FMI::InputMapping getMappingFromNameList(const FMI::ValueReferenceCollection & refs, const NetOff::VariableList & vars, const FMI::ValueInfo & vi,
-                                                 bool fromFmu);
+        FMI::InputMapping getMappingFromNameList(const FMI::ValueReferenceCollection & refs, const NetOff::VariableList & vars, const FMI::ValueInfo & vi, bool fromFmu);
 
         template<typename T>
-        void addRefsToMapping(FMI::InputMapping & mapping, const std::vector<std::string> & inputs, const FMI::ValueInfo & vi,
-                              const FMI::ValueReferenceCollection & refs, bool fromFmu)
+        void addRefsToMapping(FMI::InputMapping & mapping, const std::vector<std::string> & inputs, const FMI::ValueInfo & vi, const FMI::ValueReferenceCollection & refs, bool fromFmu)
         {
-            for (size_type i = 0; i < inputs.size(); ++i) // i is index of network vars
+            for (size_type i = 0; i < inputs.size(); ++i)  // i is index of network vars
             {
                 size_type ref = vi.getReference<T>(inputs[i]);
-                for (size_type j = 0; j < refs.getValues<T>().size(); ++j) // j is index of fmu
+                for (size_type j = 0; j < refs.getValues<T>().size(); ++j)  // j is index of fmu
                 {
                     if (refs.getValues<T>()[j] == ref)
                     {
-                        mapping.push_back<T>(((!fromFmu) ? std::make_tuple(i+_offsets[dataIndex<T>()], j) : std::make_tuple(j, i+_offsets[dataIndex<T>()])));
+                        mapping.push_back<T>(((!fromFmu) ? std::make_tuple(i + _offsets[dataIndex<T>()], j) : std::make_tuple(j, i + _offsets[dataIndex<T>()])));
                         ++_offsets[dataIndex<T>()];
                         break;
                     }
@@ -67,5 +65,7 @@ namespace Network
             }
         }
     };
-}
+
+} /* namespace Network */
+
 #endif /* NETWORK_INCLUDE_INITIALNETWORKSERVER_HPP_ */
