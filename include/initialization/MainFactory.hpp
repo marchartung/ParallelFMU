@@ -74,7 +74,7 @@ namespace Initialization
             else if (in.kind == "ros2")
                 res = new Solver::Ros2<DataManagerClass, FmuClass>(in, FmuClass(*in.fmu), dm);
             else
-                throw std::runtime_error("MainFactory: Unkown solver type " + in.kind);
+                throw std::runtime_error("MainFactory: Unknown solver type " + in.kind);
             return res;
         }
 
@@ -94,7 +94,7 @@ namespace Initialization
             }
 #endif
             else
-                throw std::runtime_error("MainFactory: Unkown fmu loader type " + plan.loader);
+                throw std::runtime_error("MainFactory: Unknown FMU loader type " + plan.loader);
             return res;
         }
 
@@ -115,7 +115,7 @@ namespace Initialization
             }
 #endif
             else
-                throw std::runtime_error("MainFactory: Unkown fmu loader type " + in.fmu->loader);
+                throw std::runtime_error("MainFactory: Unknown FMU loader type " + in.fmu->loader);
             return res;
         }
 
@@ -133,7 +133,7 @@ namespace Initialization
                 res = Synchronization::ConnectionSPtr(new Synchronization::MPIConnection(in));
 #endif
             else
-                throw std::runtime_error("MainFactory: Unkown connection type " + in.kind);
+                throw std::runtime_error("MainFactory: Unknown connection type " + in.kind);
             return res;
         }
 
