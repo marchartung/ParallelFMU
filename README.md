@@ -52,7 +52,7 @@ required.
 
      5. Lapack Implementation
 
-\subsubsection canDependencies Additional Sofwarte Dependencies
+\subsubsection canDependencies Additional Sofware Dependencies
 In order to get the full support for parallel computation of ParallelFMU, there are additional 
 software dependencies.
 
