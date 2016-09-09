@@ -28,7 +28,7 @@ class OpenMPTest : public TestCommon
 
 TEST_F (OpenMPTest, TestDependenciesOpenMP)
 {
-    ASSERT_EQ(_simulation->getSimulationType(),"openmp");
+    ASSERT_EQ(_simulation->getSimulationType(),"serial");
     ASSERT_GT(_simulation->getSolver().size(),1);
     _simulation->initialize();
     _simulation->simulate();

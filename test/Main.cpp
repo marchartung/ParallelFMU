@@ -2,12 +2,15 @@
 
 
 #include "TestSerial.hpp"
-#ifdef USE_FMILIB
-//#include "TestFmuFMI.hpp"
+//#ifdef USE_FMILIB
+//    #include "TestFmuFMI.hpp"
+//#endif
+
+#ifdef USE_OPENMP
+    #include "TestOpenMP.hpp"
 #endif
-//#include "TestOpenMP.hpp"
 //#include "TestMPI.hpp"
-#include "TestFmuSdk.hpp"
+//#include "TestFmuSdk.hpp"
 
 /*#include "TestXmlReader.hpp"
 #include "TestRos2.hpp"
