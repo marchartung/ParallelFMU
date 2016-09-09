@@ -163,7 +163,6 @@ namespace Network
     {
         for (const auto & fmu : _tmpFmus)
             fmu->unload();
-
     }
 
     FMI::InputMapping InitialNetworkServer::getMappingFromNameList(const FMI::ValueReferenceCollection& refs, const NetOff::VariableList& vars,
