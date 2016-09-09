@@ -51,7 +51,6 @@ namespace FMI
         }
         else
         {
-
             _workingPath = boost::filesystem::absolute(_workingPath).string();
             ModelDescription *modelDescription = _fmu->modelDescription;
             string_type guid = string_type(getString(modelDescription, att_guid));
@@ -95,6 +94,7 @@ namespace FMI
             //std::cout << "start vals: [" << _startValues << "]\n";
             _presentFmus[_path] = this;
         }
+
         AbstractFmu::load(alsoInit);
         if (!_startValueReferences.getValues<real_type>().empty())
             _fmu->setReal(_component, _startValueReferences.getValues<real_type>().data(), _startValueReferences.getValues<real_type>().size(),
