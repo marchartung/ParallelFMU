@@ -8,7 +8,6 @@ namespace Simulation
             : _solver(solver),
               _maxIterations(std::numeric_limits<size_type>::max() - 2)
     {
-
         assert(solver.size() > 0);
         _simulationEndTime = std::numeric_limits<real_type>::max();
         for (size_type i = 0; i < _solver.size(); ++i)
@@ -34,9 +33,7 @@ namespace Simulation
     void AbstractSimulation::initialize()
     {
         for (Solver::SolverSPtr& solver : _solver)
-        {
             solver->initialize();
-        }
     }
 
     void AbstractSimulation::setSimulationEndTime(real_type simEnd)
