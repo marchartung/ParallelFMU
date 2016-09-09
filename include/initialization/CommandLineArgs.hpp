@@ -12,6 +12,7 @@
 
 namespace Initialization
 {
+
     class CommandLineArgs
     {
      public:
@@ -52,6 +53,7 @@ namespace Initialization
 
         static map<std::string, Util::LogLevel> getLogLvlMap();
     };
-}
+
+} /* namespace Initialization */
 
 #endif /* INCLUDE_INITIALIZATION_COMMANDLINEARGS_HPP_ */
