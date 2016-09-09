@@ -14,6 +14,7 @@
 
 namespace Simulation
 {
+
     class AbstractSimulation
     {
      public:
@@ -26,7 +27,7 @@ namespace Simulation
          */
         virtual ~AbstractSimulation()
         {
-        };
+        }
 
         /**
          * As long as the simulation end time is not reached, this method calls
@@ -83,6 +84,7 @@ namespace Simulation
          */
         size_type _maxIterations;
     };
-};
+
+} /* namespace Simulation */
 
 #endif /* INCLUDE_SIMULATION_ABSTRACTSIMULATION_HPP_ */
