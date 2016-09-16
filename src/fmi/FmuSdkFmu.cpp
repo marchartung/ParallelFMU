@@ -282,16 +282,19 @@ namespace FMI
     {
         return getRealStartValue(variable, &vs);
     }
+
     template<>
     int_type FmuSdkFmu::getStartValue<int_type>(ScalarVariable * variable, ValueStatus & vs)
     {
         return getIntStartValue(variable, &vs);
     }
+
     template<>
     bool_type FmuSdkFmu::getStartValue<bool_type>(ScalarVariable * variable, ValueStatus & vs)
     {
         return getBoolStartValue(variable, &vs);
     }
+
     template<>
     string_type FmuSdkFmu::getStartValue<string_type>(ScalarVariable * variable, ValueStatus & vs)
     {
