@@ -61,7 +61,8 @@ namespace Initialization
 
     tuple<const int *, const char ***> CommandLineArgs::getProgramArgs() const
     {
-        return getProgramArgs();
+        // Infinite recursion
+        //return getProgramArgs();
     }
 
     void CommandLineArgs::initialize(int * argc, char ** argv[])
