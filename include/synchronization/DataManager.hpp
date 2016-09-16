@@ -29,6 +29,7 @@ namespace Synchronization
     {
         static_assert(std::is_base_of<AbstractDataHistory,HistoryClass>::value, "DataManager: Template argument 1 need to inherit AbstractDataHistory");
         static_assert(std::is_base_of<Writer::IWriter,WriterClass>::value, "DataManager: Template argument 2 need to inherit IWalther");
+
      public:
         /**
          * Create DataManager for the given FMUs, their connections and the communicator.
@@ -88,8 +89,7 @@ namespace Synchronization
                 _history.insert(HistoryEntry(stepInfo.getEventTime<0>(), solveOrder, stepInfo.getEventValues<0>()), fmu->getLocalId(), WriteInfo::EVENTWRITE);  // event save slightly before event
                 _history.insert(HistoryEntry(stepInfo.getEventTime<1>(), solveOrder, stepInfo.getEventValues<1>()), fmu->getLocalId(), WriteInfo::EVENTWRITE);  // event save slightly after event
             }
-            _history.insert(HistoryEntry(fmu->getTime(), solveOrder, newValues), fmu->getLocalId(),
-                            (stepInfo.hasWriteStep()) ? WriteInfo::WRITE : WriteInfo::NOWRITE);  //normal save
+            _history.insert(HistoryEntry(fmu->getTime(), solveOrder, newValues), fmu->getLocalId(), (stepInfo.hasWriteStep()) ? WriteInfo::WRITE : WriteInfo::NOWRITE);  //normal save
 
             while (_history.hasWriteOutput())
             {
@@ -99,6 +99,7 @@ namespace Synchronization
 
             return true;
         }
+
         /**
          * Sets values in fmu, which were send via connections. Only use if its sure that all values are present
          */
@@ -162,8 +163,7 @@ namespace Synchronization
         void addFmu(FMI::AbstractFmu * fmu) override
         {
             fmu->setLocalId(_numManagedFmus++);
-            size_type numNewCons = _communicator.addFmu(fmu,_valuePacking);
-
+            size_type numNewCons = _communicator.addFmu(fmu, _valuePacking);
 
             _lastCommTime.resize(_lastCommTime.size() + numNewCons, -1.0 * std::numeric_limits<real_type>::infinity());
             _lastEventWritten.resize(_lastEventWritten.size() + numNewCons, -1.0 * std::numeric_limits<real_type>::infinity());
@@ -180,7 +180,7 @@ namespace Synchronization
             _writer.appendHeader(fmu->getFmuName(), fmu->getValueInfo());
         }
 
-        const AbstractDataHistory* getHistory() const
+        const AbstractDataHistory* getHistory() const override
         {
             return &_history;
         }
@@ -188,8 +188,7 @@ namespace Synchronization
         // dirty, passes interface
         bool sendSingleOutput(real_type curTime, size_type solveOrder, const FMI::AbstractFmu* fmu, const size_type & conId)
         {
-            if(_communicator.send(
-                HistoryEntry(curTime, solveOrder, _valuePacking[conId].pack(fmu->getValues(FMI::ReferenceContainerType::ALL)), true), conId))
+            if (_communicator.send(HistoryEntry(curTime, solveOrder, _valuePacking[conId].pack(fmu->getValues(FMI::ReferenceContainerType::ALL)), true), conId))
                 _lastCommTime[conId] = curTime;
             else
                 return false;
@@ -310,8 +309,7 @@ namespace Synchronization
             return res;
         }
 
-        bool sendOutputs(real_type curTime, size_type solveOrder, FMI::AbstractFmu* fmu,
-                              const Solver::SolverStepInfo & stepInfo)
+        bool sendOutputs(real_type curTime, size_type solveOrder, FMI::AbstractFmu* fmu, const Solver::SolverStepInfo & stepInfo)
         {
             const FMI::ValueCollection fmuValues = fmu->getValues(FMI::ReferenceContainerType::ALL);
             for (size_type conId : _communicator.getOutConnectionIds(fmu))
@@ -321,14 +319,12 @@ namespace Synchronization
                     if (stepInfo.hasEventWrite() && _lastEventWritten[conId] < stepInfo.getEventTime<0>())  // check for events and if there weren't already written
                     {
                         // send event in two communications
-                        if (!_communicator.send(
-                                HistoryEntry(stepInfo.getEventTime<0>(), solveOrder, _valuePacking[conId].pack(stepInfo.getEventValues<0>()), true), conId))
+                        if (!_communicator.send(HistoryEntry(stepInfo.getEventTime<0>(), solveOrder, _valuePacking[conId].pack(stepInfo.getEventValues<0>()), true), conId))
                             return false;
                         _lastEventWriteState[conId] = false;
                         _lastCommTime[conId] = curTime;
 
-                        if (!_communicator.send(
-                                HistoryEntry(stepInfo.getEventTime<1>(), solveOrder, _valuePacking[conId].pack(stepInfo.getEventValues<1>()), true), conId))
+                        if (!_communicator.send(HistoryEntry(stepInfo.getEventTime<1>(), solveOrder, _valuePacking[conId].pack(stepInfo.getEventValues<1>()), true), conId))
                             return false;
                         _lastEventWritten[conId] = stepInfo.getEventTime<1>();
                         _lastEventWriteState[conId] = true;
@@ -344,8 +340,7 @@ namespace Synchronization
                 {
                     if (!_lastEventWriteState[conId])
                     {
-                        if (!_communicator.send(
-                                HistoryEntry(stepInfo.getEventTime<1>(), solveOrder, _valuePacking[conId].pack(stepInfo.getEventValues<1>()), true), conId))
+                        if (!_communicator.send(HistoryEntry(stepInfo.getEventTime<1>(), solveOrder, _valuePacking[conId].pack(stepInfo.getEventValues<1>()), true), conId))
                             return false;
                         _lastEventWritten[conId] = stepInfo.getEventTime<1>();
                         _lastEventWriteState[conId] = true;
@@ -357,8 +352,7 @@ namespace Synchronization
             }
             return true;
         }
-    }
-    ;
+    };
 
 } /* namespace Synchronization */
 
