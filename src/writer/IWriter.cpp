@@ -9,7 +9,8 @@ namespace Writer
     }
 
     IWriter::IWriter(const IWriter* in)
-    : _resultFile(in->_resultFile), _initialized(false)
+            : _resultFile(in->_resultFile),
+              _initialized(false)
     {
     }
 
