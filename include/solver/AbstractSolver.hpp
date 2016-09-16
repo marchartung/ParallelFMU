@@ -216,7 +216,6 @@ namespace Solver
 
             while (!isFinished() && count++ < numSteps)
             {
-
                 if (!_savedStep)
                 {
                     switch ((_dependencyInfo = _dataManager->getDependencyInfo(&_fmu)).depStatus)
@@ -249,7 +248,6 @@ namespace Solver
                         default:
                             throw std::runtime_error("AbstractSolver: Unknown dependency");
                     }
-
                 }
                 else
                 {
@@ -260,7 +258,6 @@ namespace Solver
                         _tmpStepSize = _curStepSize;
                         _stepInfo.setWriteStep(true);
                         _curStepSize = std::min(_dataManager->getNextOutputTime(_currentTime), _endTime) - _currentTime;
-
                     }
                     doSolverStepErrorHandled(std::min(_curStepSize, _endTime - _currentTime));
                     handleEvents();
