@@ -77,10 +77,13 @@ namespace Solver
                   _tmpEventIndicators(),
                   _freshStep(false),
                   _savedStep(false),
+                  _sEventInfo(),
+                  _stepInfo(),
+                  _tmpValues(),
                   _fmu(fmu),
+                  _depHist(),
                   _id(in.id),
-                  _dataManager(dataManager),
-                  _depHist()
+                  _dataManager(dataManager)
         {
             //assert(dataManager != nullptr);
         }
