@@ -21,12 +21,7 @@ namespace Network
 
     InitialNetworkServer::~InitialNetworkServer()
     {
-        // [MF] 2016-09-13: This gives another seg fault
-        std::cout << "InitialialNetworkServer::~InitialialNetworkServer" << std::endl;
-        // Unload all FMUs
-        for (auto& fmu : _tmpFmus)
-            fmu->unload();
-        std::cout << "InitialialNetworkServer::~InitialialNetworkServer2" << std::endl;
+
     }
 
     NetworkPlan InitialNetworkServer::getNetworkPlan()
