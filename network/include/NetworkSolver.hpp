@@ -180,7 +180,7 @@ namespace Solver
         {
             return 0;
         }
-     protected:
+
      private:
         size_type _id;
         std::shared_ptr<DataManagerClass> _dataManager;
@@ -233,7 +233,7 @@ namespace Solver
             vals.setIntValues(tmp.getValues<int_type>().data());
             vals.setBoolValues(tmp.getValues<bool_type>().data());
 
-            _lastRequestHandled = _simServer->sendOutputValues(fmuId, _currentTime, vals);
+            _lastRequestHandled = _simServer->sendOutputValues(fmuId, _currentTime);
             return 1;
         }
 
