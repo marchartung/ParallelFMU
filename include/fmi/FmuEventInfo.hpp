@@ -45,63 +45,73 @@ namespace FMI
          * @return True if the event handling has found the root of the zero crossing.
          */
         bool_type isIterationConverged() const;
+
         /**
          * Set the iteration convergence indicator.
          * @param iterationConverged Set to true if the iteration convergence criteria was fulfilled.
          */
         void setIterationConverged(bool_type iterationConverged);
+
         /**
          * Get the point_type in time for the next time event. The value is only useful if upcomingTimeEvent is true.
          * @return The point_type in time for the next time event.
          */
         double getNextEventTime() const;
+
         /**
          * Set the point_type in time for the next time event.
          * @note Don't forget to set upcomingTimeEvent to true.
          * @param nextEventTime The point_type in time for the next time event.
          */
         void setNextEventTime(double nextEventTime);
+
         /**
          * Get an indicator which is true if the state value references have changed during the last event.
          * @return True if the state value references have changed.
          */
         bool_type isStateValueReferencesChanged() const;
+
         /**
          * Set this value to true if the state value references have changed during the last event.
          * @param stateValueReferencesChanged The new indicator value.
          */
         void setStateValueReferencesChanged(bool_type stateValueReferencesChanged);
+
         /**
          * Get an indicator which is true if the state values have changed during the last event.
          * @return True if the state values have changed.
          */
         bool_type isStateValuesChanged() const;
+
         /**
          * Set this value to true if the state values have changed during the last event.
          * @param stateValuesChanged The new indicator value.
          */
         void setStateValuesChanged(bool_type stateValuesChanged);
+
         /**
          * Get an indicator which is true if the simulation should be terminated.
          * @return True if the simulation should be terminated.
          */
         bool_type isTerminateSimulation() const;
+
         /**
          * Set this value to true if the simulation should be terminated.
          * @param terminateSimulation The indicator for the termination.
          */
         void setTerminateSimulation(bool_type terminateSimulation);
+
         /**
          * Get an indicator which is true if an time event is upcoming.
          * @return True if an time event is upcoming.
          */
         bool_type isUpcomingTimeEvent() const;
+
         /**
          * Set this value to true if an time event is upcoming.
          * @param upcomingTimeEvent The time event indicator.
          */
         void setUpcomingTimeEvent(bool_type upcomingTimeEvent);
-
 
         void assign(const fmiEventInfo & in);
 #ifdef USE_FMILIB
