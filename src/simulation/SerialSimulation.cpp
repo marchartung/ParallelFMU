@@ -20,7 +20,7 @@ namespace Simulation
         const vector<shared_ptr<Solver::ISolver>>& solver = getSolver();
         std::vector<size_type> numSteps(solver.size(),15);
         size_type tmpStepCount;
-        double s,e;
+        double s (0.0) , e (0.0);
         //s = omp_get_wtime();
         while (running && getMaxIterations() > ++iterationCount)
         {
