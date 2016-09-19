@@ -104,6 +104,17 @@ namespace FMI
     void EmptyFmu::setNumValues(const size_type& numReals, const size_type& numInts, const size_type& numBools, const size_type& numStrings)
     {
         _values = FMI::ValueCollection(numReals,numInts,numBools,numStrings);
+        FMI::ValueReferenceCollection collection(numReals,numInts,numBools,numStrings);
+        for(size_type i=0;i<collection.getValues<real_type>().size();++i)
+            collection.getValues<real_type>()[i] = i;
+        for(size_type i=0;i<collection.getValues<int_type>().size();++i)
+            collection.getValues<int_type>()[i] = i;
+        for(size_type i=0;i<collection.getValues<bool_type>().size();++i)
+            collection.getValues<bool_type>()[i] = i;
+        for(size_type i=0;i<collection.getValues<string_type>().size();++i)
+            collection.getValues<string_type>()[i] = i;
+        this->_allValueReferences = collection;
+        this->_eventValueReferences = collection;
     }
 
     const FMI::ValueCollection & EmptyFmu::getEmptyFmuValues() const

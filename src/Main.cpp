@@ -31,18 +31,18 @@ string_type getWorkingDirectory()
 
 int_type main(int_type argc, char *argv[])
 {
-    try
-    {
+    //try
+    //{
         Initialization::Program prog(&argc, &argv);
         prog.initialize();
         prog.simulate();
         prog.deinitialize();
-    }
+    /*}
     catch (exception &ex)
     {
         LOGGER_WRITE(string_type("Execution failed. Error: ") + string_type(ex.what()), Util::LC_OTHER, Util::LL_ERROR);
         return -1;
-    }
+    }*/
 
     return 0;
 }

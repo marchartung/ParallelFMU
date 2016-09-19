@@ -6,7 +6,6 @@
 namespace FMI
 {
     map<string_type, tuple<FMU *, size_type>> FmuSdkFmu::_knownFmus;
-    map<string_type, FmuSdkFmu*> FmuSdkFmu::_presentFmus;
 
     FmuSdkFmu::FmuSdkFmu(const Initialization::FmuPlan & in)
             : AbstractFmu(in),
@@ -28,72 +27,48 @@ namespace FMI
 
         _fmu = getFmuHandle(_path);
         _componentEventInfo = fmiEventInfo();
-        if (_fmu == nullptr)
+
+        _workingPath = boost::filesystem::absolute(_workingPath).string();
+        ModelDescription *modelDescription = _fmu->modelDescription;
+        string_type guid = string_type(getString(modelDescription, att_guid));
+        LOGGER_WRITE(string_type("Try to load FMU from ") + _path + string_type(" and work on ") + _workingPath, Util::LC_LOADER, Util::LL_DEBUG);
+
+        _component = _fmu->instantiateModel(getModelIdentifier(modelDescription), guid.c_str(), _callbacks, _loggingEnabled);
+
+        if (_component == nullptr)
+            throw runtime_error("Could not instantiate FMU");
+
+        for (size_type i = 0; modelDescription->modelVariables[i] != nullptr; i++)
         {
-            FmuSdkFmu * same = _presentFmus.at(_path);
-            _fmu = same->_fmu;
-            _workingPath = same->_workingPath;
-            ModelDescription *modelDescription = _fmu->modelDescription;
-            string_type guid = string_type(getString(modelDescription, att_guid));
-            _component = _fmu->instantiateModel(getModelIdentifier(modelDescription), guid.c_str(), _callbacks, _loggingEnabled);
+            ScalarVariable *variable = modelDescription->modelVariables[i];
 
-            _allValueReferences = same->_allValueReferences;
-            _startValueReferences = same->_startValueReferences;
-            _eventValueReferences = same->_eventValueReferences;
-            _continousValueReferences = same->_continousValueReferences;
-            _outputValueReferences = same->_outputValueReferences;
-            _inputValueReferences = same->_inputValueReferences;
-
-            _startValues = same->_startValues;
-            _valueInfo = same->_valueInfo;
-            _numberOfStates = same->_numberOfStates;
-            _numberOfEventIndicators = same->_numberOfEventIndicators;
-        }
-        else
-        {
-            _workingPath = boost::filesystem::absolute(_workingPath).string();
-            ModelDescription *modelDescription = _fmu->modelDescription;
-            string_type guid = string_type(getString(modelDescription, att_guid));
-            LOGGER_WRITE(string_type("Try to load FMU from ") + _path + string_type(" and work on ") + _workingPath, Util::LC_LOADER, Util::LL_DEBUG);
-
-            _component = _fmu->instantiateModel(getModelIdentifier(modelDescription), guid.c_str(), _callbacks, _loggingEnabled);
-
-            if (_component == nullptr)
-                throw runtime_error("Could not instantiate FMU");
-
-            for (size_type i = 0; modelDescription->modelVariables[i] != nullptr; i++)
+            switch (getVariableType(variable))
             {
-                ScalarVariable *variable = modelDescription->modelVariables[i];
-
-                switch (getVariableType(variable))
-                {
-                    case VarType::varReal:
-                        addVariable<real_type>(modelDescription->modelVariables[i]);
-                        break;
-                    case VarType::varInt:
-                        addVariable<int_type>(modelDescription->modelVariables[i]);
-                        break;
-                    case VarType::varBool:
-                        addVariable<bool_type>(modelDescription->modelVariables[i]);
-                        break;
-                    case VarType::varString:
-                        addVariable<string_type>(modelDescription->modelVariables[i]);
-                        break;
-                    case VarType::varEnum:
-                        addVariable<int_type>(modelDescription->modelVariables[i]);  // enums are treated as integers
-                        break;
-                    default:
-                        throw std::runtime_error("FmuSdk: VarType unkown.");
-                }
+                case VarType::varReal:
+                    addVariable<real_type>(modelDescription->modelVariables[i]);
+                    break;
+                case VarType::varInt:
+                    addVariable<int_type>(modelDescription->modelVariables[i]);
+                    break;
+                case VarType::varBool:
+                    addVariable<bool_type>(modelDescription->modelVariables[i]);
+                    break;
+                case VarType::varString:
+                    addVariable<string_type>(modelDescription->modelVariables[i]);
+                    break;
+                case VarType::varEnum:
+                    addVariable<int_type>(modelDescription->modelVariables[i]);  // enums are treated as integers
+                    break;
+                default:
+                    throw std::runtime_error("FmuSdk: VarType unkown.");
             }
-
-            _numberOfStates = getNumberOfStates(modelDescription);
-            _numberOfEventIndicators = getNumberOfEventIndicators(modelDescription);
-
-            //std::cout << "start refs: [" << _startValueReferences << "]\n";
-            //std::cout << "start vals: [" << _startValues << "]\n";
-            _presentFmus[_path] = this;
         }
+
+        _numberOfStates = getNumberOfStates(modelDescription);
+        _numberOfEventIndicators = getNumberOfEventIndicators(modelDescription);
+
+        //std::cout << "start refs: [" << _startValueReferences << "]\n";
+        //std::cout << "start vals: [" << _startValues << "]\n";
 
         AbstractFmu::load(alsoInit);
         if (!_startValueReferences.getValues<real_type>().empty())
@@ -211,7 +186,7 @@ namespace FMI
         if (iter != _knownFmus.end())
         {
             ++std::get<1>(iter->second);
-            return nullptr;
+            return get<0>(iter->second);
         }
 
         FMU *fmu = loadFMU(fmuName.c_str());

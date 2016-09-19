@@ -20,7 +20,7 @@ xeonPhi:
 	
 eclipse-omp: parallelFmu
 	mkdir -p ../parallel_fmu_eclipse-omp
-	cd ../parallel_fmu_eclipse-omp && CC=$(CC) CXX=$(CXX) cmake -DFMILIB_HOME=$(FMILIB_HOME) -DMATIO_HOME=$(MATIO_HOME) -DUSE_OPENMP=true -G"Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug $(ROOT_DIR) -DCMAKE_INSTALL_PREFIX:PATH="$(ROOT_DIR)/build"
+	cd ../parallel_fmu_eclipse-omp && CC=$(CC) CXX=$(CXX) CFLAGS="-g"  cmake -DFMILIB_HOME=$(FMILIB_HOME) -DMATIO_HOME=$(MATIO_HOME) -DUSE_OPENMP=true -G"Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug $(ROOT_DIR)
 
 eclipse: parallelFmu
 	mkdir -p ../parallel_fmu_eclipse

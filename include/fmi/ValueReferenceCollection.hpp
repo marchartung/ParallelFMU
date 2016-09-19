@@ -31,6 +31,9 @@ namespace FMI
          */
         ValueReferenceCollection(const vector<size_type> & realVars = vector<size_type>(), const vector<size_type> & intVars = vector<size_type>(), const vector<size_type> & boolVars = vector<size_type>(), const vector<size_type> & stringVars = vector<size_type>());
 
+        ValueReferenceCollection(const size_type & numReals, const size_type & numInts, const size_type & numBools, const size_type & numStrings);
+
+        ValueReferenceCollection(const ValueReferenceCollection & in);
         /**
          * Destroy reference collection.
          */
@@ -66,6 +69,8 @@ namespace FMI
          * @return Return the number of reference values stored in this collection.
          */
         size_type size() const;
+
+        ValueReferenceCollection & operator=(const ValueReferenceCollection & in);
 
         friend std::ostream & operator<<(std::ostream & s, const ValueReferenceCollection & vrc);
 

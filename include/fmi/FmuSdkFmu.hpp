@@ -69,7 +69,6 @@ namespace FMI
         {   in = nullptr;};
 
         static map<string_type, tuple<FMU *, size_type>> _knownFmus;
-        static map<string_type, FmuSdkFmu*> _presentFmus;
 
         FMU * _fmu;
         fmiComponent _component;

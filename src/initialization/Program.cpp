@@ -74,11 +74,10 @@ namespace Initialization
 
         // initialize and create simulation:
         MainFactory mf;
-        _simulations.resize(_pp.simPlans[rank].size());
 
         // not in parallel because FmuSdkFMU::load and FmiLibFmu::load is not save to call in parallel
-        for(size_type i=0;i<_simulations.size();++i)
-            _simulations[i] = mf.createSimulation(_pp.simPlans[rank][i]);
+        for(size_type i=0;i<_pp.simPlans[rank].size();++i)
+            _simulations.push_back( mf.createSimulation(_pp.simPlans[rank][i]));
 
         _isInitialized = true;
     }

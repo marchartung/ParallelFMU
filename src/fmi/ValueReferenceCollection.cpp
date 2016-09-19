@@ -15,6 +15,13 @@ namespace FMI
          _values[dataIndex<string_type>()] = stringVars;*/
     }
 
+
+    ValueReferenceCollection::ValueReferenceCollection(const size_type& numReals, const size_type& numInts, const size_type& numBools,
+                                                            const size_type& numStrings)
+        : _values({std::vector<size_type>(numReals),std::vector<size_type>(numInts),std::vector<size_type>(numBools),std::vector<size_type>(numStrings)})
+    {
+    }
+
     size_type ValueReferenceCollection::size() const
     {
         size_type sum = 0;
@@ -23,6 +30,16 @@ namespace FMI
         return sum;
     }
 
+    ValueReferenceCollection::ValueReferenceCollection(const ValueReferenceCollection& in)
+        : _values(in._values)
+    {
+    }
+
+    ValueReferenceCollection& ValueReferenceCollection::operator =(const ValueReferenceCollection& in)
+    {
+        _values = in._values;
+        return *this;
+    }
 
     std::ostream & operator<<(std::ostream & s, const ValueReferenceCollection & vrc)
     {
