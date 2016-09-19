@@ -8,7 +8,7 @@
 #ifndef INCLUDE_SIMULATION_SERIALSIMULATION_HPP_
 #define INCLUDE_SIMULATION_SERIALSIMULATION_HPP_
 
-#include <fmi/AbstractFmu.hpp>
+#include "fmi/AbstractFmu.hpp"
 #include "simulation/AbstractSimulation.hpp"
 #include "Stdafx.hpp"
 #include "solver/AbstractSolver.hpp"
@@ -29,6 +29,7 @@ namespace Simulation
          */
         //SerialSimulation(vector<Solver::AbstractSolverSPtr> solvers);
         SerialSimulation(const Initialization::SimulationPlan & in, const vector<std::shared_ptr<Solver::ISolver>> & solver);
+
         /**
          * Destructor. Destroys serial simulation object and frees allocates resources.
          */
@@ -45,7 +46,6 @@ namespace Simulation
          * @return string_type One of: {"serial", "openmp", "mpi"}
          */
         virtual string_type getSimulationType() const;
-
     };
 
 } /* namespace Simulation */

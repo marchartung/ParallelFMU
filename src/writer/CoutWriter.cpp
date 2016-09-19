@@ -5,7 +5,9 @@ namespace Writer
 {
 
     CoutWriter::CoutWriter(const Initialization::WriterPlan & in)
-            : IWriter(in), _lineEndingSign('\n'), _separator(',')
+            : IWriter(in),
+              _lineEndingSign('\n'),
+              _separator(',')
     {
         LOGGER_WRITE("Using CoutWriter", Util::LC_LOADER, Util::LL_INFO);
 
@@ -43,7 +45,7 @@ namespace Writer
     void CoutWriter::appendHeader(const string_type& fmuName, const FMI::ValueInfo& variables)
     {
         assert(isInitialized());
-        for(string_type value : variables.getAllValueNames())
+        for (string_type value : variables.getAllValueNames())
         {
             Util::StringHelper::replaceAll(value, ",", "_");
             std::cout << _separator << fmuName << "." << value;
@@ -53,13 +55,13 @@ namespace Writer
     void CoutWriter::appendResults(const string_type& fmuName, const FMI::ValueCollection& values)
     {
         assert(isInitialized());
-        for(real_type value : values.getValues<real_type>())
+        for (real_type value : values.getValues<real_type>())
             std::cout << _separator << to_string(value);
-        for(int_type value : values.getValues<int_type>())
+        for (int_type value : values.getValues<int_type>())
             std::cout << _separator << to_string(value);
-        for(bool_type value : values.getValues<bool_type>())
+        for (bool_type value : values.getValues<bool_type>())
             std::cout << _separator << to_string(value);
-        for(string_type value : values.getValues<string_type>())
+        for (string_type value : values.getValues<string_type>())
             std::cout << _separator << "\"" << value << "\"";
     }
 

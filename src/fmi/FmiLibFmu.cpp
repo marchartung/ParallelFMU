@@ -260,16 +260,19 @@ namespace FMI
     {
         return fmi1_import_get_real_variable_start(fmi1_import_get_variable_as_real(variable));
     }
+
     template<>
     int_type FmiLibFmu::getStartValue<int_type>(fmi1_import_variable_t * variable)
     {
         return fmi1_import_get_integer_variable_start(fmi1_import_get_variable_as_integer(variable));
     }
+
     template<>
     bool_type FmiLibFmu::getStartValue<bool_type>(fmi1_import_variable_t * variable)
     {
         return fmi1_import_get_boolean_variable_start(fmi1_import_get_variable_as_boolean(variable));
     }
+
     template<>
     string_type FmiLibFmu::getStartValue<string_type>(fmi1_import_variable_t * variable)
     {

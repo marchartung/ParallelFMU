@@ -105,21 +105,25 @@ namespace FMI
         template<typename T>
         T getStartValue(fmi1_import_variable_t * variable)
         {
-            throw std::runtime_error("FmiLibFmu: Unkown type for start value.");
+            throw std::runtime_error("FmiLibFmu: Unknown type for start value.");
         }
     };
 
     template<typename T>
     T getStartValue(fmi1_import_variable_t * variable)
     {
-        throw std::runtime_error("FmiLibFmu: Unkown type for start value.");
+        throw std::runtime_error("FmiLibFmu: Unknown type for start value.");
     }
+
     template<>
     real_type FmiLibFmu::getStartValue<real_type>(fmi1_import_variable_t * variable);
+
     template<>
     int_type FmiLibFmu::getStartValue<int_type>(fmi1_import_variable_t * variable);
+
     template<>
     bool_type FmiLibFmu::getStartValue<bool_type>(fmi1_import_variable_t * variable);
+
     template<>
     string_type FmiLibFmu::getStartValue<string_type>(fmi1_import_variable_t * variable);
 

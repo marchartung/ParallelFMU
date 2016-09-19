@@ -77,10 +77,13 @@ namespace Solver
                   _tmpEventIndicators(),
                   _freshStep(false),
                   _savedStep(false),
+                  _sEventInfo(),
+                  _stepInfo(),
+                  _tmpValues(),
                   _fmu(fmu),
+                  _depHist(),
                   _id(in.id),
-                  _dataManager(dataManager),
-                  _depHist()
+                  _dataManager(dataManager)
         {
             //assert(dataManager != nullptr);
         }
@@ -93,7 +96,7 @@ namespace Solver
             _fmu.unload();
         }
 
-        virtual void initialize()
+        virtual void initialize() override
         {
             if (!_fmu.isLoaded())
                 _fmu.load();
@@ -131,12 +134,12 @@ namespace Solver
 
         }
 
-        real_type getCurrentTime() const
+        real_type getCurrentTime() const override
         {
             return _currentTime;
         }
 
-        real_type getEndTime() const
+        real_type getEndTime() const override
         {
             //return _fmu.getSimEndTime();
             return _endTime;
@@ -146,7 +149,7 @@ namespace Solver
          * Return step size h of the solver.
          * @return
          */
-        real_type getCurrentStepSize() const
+        real_type getCurrentStepSize() const override
         {
             return _curStepSize;
         }
@@ -155,19 +158,19 @@ namespace Solver
          * Set step size h for the solver.
          * @param in Step size h.
          */
-        void setStepSize(const real_type & in)
+        void setStepSize(const real_type & in) override
         {
             _initStepSize = in;
             _curStepSize = in;
             _tmpStepSize = in;
         }
 
-        real_type getStepSize() const
+        real_type getStepSize() const override
         {
             return _initStepSize;
         }
 
-        bool_type isFinished() const
+        bool_type isFinished() const override
         {
             //return (_savedSolverStep && _currentTime >= _endTime);
             if (_dependencyInfo.depStatus == DependencyStatus::FREE && _currentTime >= _endTime && _savedStep)
@@ -176,27 +179,27 @@ namespace Solver
                 return false;
         }
 
-        size_type getId() const
+        size_type getId() const override
         {
             return _id;
         }
 
-        const FMI::AbstractFmu* getFmu() const
+        const FMI::AbstractFmu* getFmu() const override
         {
             return &_fmu;
         }
 
-        FMI::AbstractFmu* getFmu()
+        FMI::AbstractFmu* getFmu() override
         {
             return &_fmu;
         }
 
-        real_type getTolerance() const
+        real_type getTolerance() const override
         {
             return _tolerance;
         }
 
-        real_type getMaxError() const
+        real_type getMaxError() const override
         {
             return _maxError;
         }
@@ -216,7 +219,6 @@ namespace Solver
 
             while (!isFinished() && count++ < numSteps)
             {
-
                 if (!_savedStep)
                 {
                     switch ((_dependencyInfo = _dataManager->getDependencyInfo(&_fmu)).depStatus)
@@ -249,7 +251,6 @@ namespace Solver
                         default:
                             throw std::runtime_error("AbstractSolver: Unknown dependency");
                     }
-
                 }
                 else
                 {
@@ -260,7 +261,6 @@ namespace Solver
                         _tmpStepSize = _curStepSize;
                         _stepInfo.setWriteStep(true);
                         _curStepSize = std::min(_dataManager->getNextOutputTime(_currentTime), _endTime) - _currentTime;
-
                     }
                     doSolverStepErrorHandled(std::min(_curStepSize, _endTime - _currentTime));
                     handleEvents();
@@ -343,7 +343,7 @@ namespace Solver
             _fmu.getEventIndicators(_prevEventIndicators);
         }
 
-        void setEndTime(const real_type & simTime)
+        void setEndTime(const real_type & simTime) override
         {
             _endTime = simTime;
         }
@@ -353,7 +353,7 @@ namespace Solver
             return *_dataManager;
         }
 
-        void setTolerance(const real_type & tolerance)
+        void setTolerance(const real_type & tolerance) override
         {
             _tolerance = tolerance;
             _fmu.setRelativeTolerance(tolerance);

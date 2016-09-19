@@ -145,10 +145,13 @@ namespace FMI
 
     template<>
     real_type FmuSdkFmu::getStartValue<real_type>(ScalarVariable * variable, ValueStatus & vs);
+
     template<>
     int_type FmuSdkFmu::getStartValue<int_type>(ScalarVariable * variable, ValueStatus & vs);
+
     template<>
     bool_type FmuSdkFmu::getStartValue<bool_type>(ScalarVariable * variable, ValueStatus & vs);
+
     template<>
     string_type FmuSdkFmu::getStartValue<string_type>(ScalarVariable * variable, ValueStatus & vs);
 

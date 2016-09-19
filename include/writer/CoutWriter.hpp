@@ -38,20 +38,21 @@ namespace Writer
 
         ~CoutWriter();
 
-        void appendTimeHeader();
+        void appendTimeHeader() override;
 
-        void appendTime(double time);
+        void appendTime(double time) override;
 
-        void appendHeader(const string_type &fmuName, const FMI::ValueInfo& variables);
+        void appendHeader(const string_type &fmuName, const FMI::ValueInfo& variables) override;
 
-        void appendResults(const string_type &fmuName, const FMI::ValueCollection &values);
+        void appendResults(const string_type &fmuName, const FMI::ValueCollection &values) override;
 
-        void flushResults();
+        void flushResults() override;
 
         /**
          * Open the stream for writing and set the initialized variable to true.
          */
         void initialize() override;
+
         /**
          * Close the stream and set the internal initialization variable to false.
          */
@@ -60,7 +61,6 @@ namespace Writer
      private:
         const char _lineEndingSign;
         const char _separator;
-
     };
 
 } /* namespace Synchronization */
