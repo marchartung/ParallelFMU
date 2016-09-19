@@ -233,7 +233,7 @@ namespace Solver
             vals.setIntValues(tmp.getValues<int_type>().data());
             vals.setBoolValues(tmp.getValues<bool_type>().data());
 
-            _lastRequestHandled = _simServer->sendOutputValues(fmuId, _currentTime);
+            _lastRequestHandled = _simServer->sendOutputValues(fmuId, _currentTime,vals);
             return 1;
         }
 
