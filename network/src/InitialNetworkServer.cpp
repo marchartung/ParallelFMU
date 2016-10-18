@@ -35,6 +35,8 @@ namespace Network
         if (!server.initializeConnection())
             throw std::runtime_error("Couldn't initialize network connection.");
 
+        // The loop end, if the START signal is received. In the meanwhile other stiff can be done (e.g., several
+        // simulations can be added and initialized).
         bool run = true;
         while (run)
         {
