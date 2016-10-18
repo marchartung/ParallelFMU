@@ -67,6 +67,7 @@ namespace Simulation
         void deinitialize();
 
      protected:
+
         /**
          * All solvers handled by the simulation.
          */
