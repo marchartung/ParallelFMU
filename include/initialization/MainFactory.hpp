@@ -206,7 +206,7 @@ namespace Initialization
                 return createSolversWithDataManager<HistoryClass, Writer::MatFileWriter>(in);
             }
             else
-                throw std::runtime_error("MainFactory: Unkown writer type " + in.dataManager.writer.kind);
+                throw std::runtime_error("MainFactory: Unknown writer type " + in.dataManager.writer.kind);
         }
 
         template<class SimulationClass>
