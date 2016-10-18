@@ -5,7 +5,7 @@
  *      Author: hartung
  */
 
-#include <synchronization/RingBufferSubHistory.hpp>
+#include "synchronization/RingBufferSubHistory.hpp"
 
 namespace Synchronization
 {
