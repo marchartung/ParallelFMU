@@ -362,7 +362,7 @@ namespace Initialization
             }
         }
         else
-        createMapping(solverPlans,schedPlan);  // spread the solver on cores
+            createMapping(solverPlans,schedPlan);  // spread the solver on cores
 
         appendConnectionInformation(solverPlans, connPlans, schedPlan);
 
