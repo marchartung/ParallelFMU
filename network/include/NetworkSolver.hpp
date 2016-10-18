@@ -86,8 +86,10 @@ namespace Solver
             _dataManager->addFmu(&_fmu);
 
             for(auto& con : _fmu.getConnections())
+            {
                 if(con->isOutgoing(_fmu.getFmuName()))
                     _outConns.push_back(con);
+            }
             _simServer->confirmStart();
         }
 
@@ -233,7 +235,8 @@ namespace Solver
             vals.setIntValues(tmp.getValues<int_type>().data());
             vals.setBoolValues(tmp.getValues<bool_type>().data());
 
-            _lastRequestHandled = _simServer->sendOutputValues(fmuId, _currentTime,vals);
+            // _lastRequestHandled = _simServer->sendOutputValues(fmuId, _currentTime, vals);
+            _lastRequestHandled = _simServer->sendOutputValues(fmuId, _currentTime);
             return 1;
         }
 
