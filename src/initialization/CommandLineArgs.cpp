@@ -73,9 +73,15 @@ namespace Initialization
 
         namespace po = boost::program_options;
         po::options_description desc("Options");
-        desc.add_options()("help", "Print help messages")("configFile,c", boost::program_options::value<std::string>()->required(), "Path to the configuration file containing detailed information about the FMUs")("log-settings,V", po::value<vector<std::string> >(), "log information: loader, event, solver, system, other")(
-        //"numThreads,n", po::value<size_type>(), "The number of threads respectively processes to use")(
-                "server,S", po::value<int>(), "Setting up an simulation server based on NetworkOffloader interface. Takes the port on which it should open")("client,C", "Starting a client program for remote connection based on the NetworkOffload interface");
+        desc.add_options()("help", "Print help messages")
+                          ("configFile,c", boost::program_options::value<std::string>()->required(),
+                           "Path to the configuration file containing detailed information about the FMUs")
+                          ("log-settings,V", po::value<vector<std::string> >(),
+                           "log information: loader, event, solver, system, other")
+                          //"numThreads,n", po::value<size_type>(), "The number of threads respectively processes to use")
+                          ("server,S", po::value<int>(),
+                           "Setting up an simulation server based on NetworkOffloader interface. Takes the port on which it should open")
+                          ("client,C", "Starting a client program for remote connection based on the NetworkOffload interface");
 
         po::variables_map vm;
         this->_argc = argc;
