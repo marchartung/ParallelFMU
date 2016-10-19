@@ -14,7 +14,7 @@
 
 namespace Network
 {
-    void appendNetworkInformation(Initialization::ProgramPlan & plan, NetworkPlan & netPlan);
+    void appendNetworkInformation(Initialization::ProgramPlan & plan, const NetworkPlan & netPlan);
 }
 
 

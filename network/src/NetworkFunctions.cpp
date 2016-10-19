@@ -11,7 +11,7 @@
 namespace Network
 {
 
-    void appendNetworkInformation(Initialization::ProgramPlan & plan, NetworkPlan & netPlan)
+    void appendNetworkInformation(Initialization::ProgramPlan & plan, const NetworkPlan & netPlan)
     {
         size_type numFmus = 0, numCons = 0, netSimId = 0, netCoreId = 0;  //TODO own thread?!?!?
         for (const auto & simVec : plan.simPlans)
