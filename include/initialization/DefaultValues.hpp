@@ -20,23 +20,23 @@ namespace Initialization
 
         DefaultValues() = delete;
 
-        static Initialization::FmuPlan fmuPlan();
+        static FmuPlan fmuPlan();
 
-        static Initialization::SolverPlan solverPlan();
+        static SolverPlan solverPlan();
 
-        static Initialization::HistoryPlan historyPlan();
+        static HistoryPlan historyPlan();
 
-        static Initialization::ConnectionPlan connectionPlan();
+        static ConnectionPlan connectionPlan();
 
-        static Initialization::DataManagerPlan dataManagerPlan();
+        static DataManagerPlan dataManagerPlan();
 
-        static Initialization::ProgramPlan programPlan();
+        static ProgramPlan programPlan();
 
-        static Initialization::SchedulePlan schedulePlan();
+        static SchedulePlan schedulePlan();
 
-        static Initialization::SimulationPlan simulationPlan();
+        static SimulationPlan simulationPlan();
 
-        static Initialization::WriterPlan writerPlan();
+        static WriterPlan writerPlan();
 
         /*static Initialization Plan()
          {
@@ -58,14 +58,19 @@ namespace Initialization
             return in == getUndefinedValue<T>();
         }
     };
+
     template<>
     real_type DefaultValues::getUndefinedValue<real_type>();
+
     template<>
     size_type DefaultValues::getUndefinedValue<size_type>();
+
     template<>
     int DefaultValues::getUndefinedValue<int>();
+
     template<>
     string_type DefaultValues::getUndefinedValue<string_type>();
+
     template<>
     bool_type DefaultValues::getUndefinedValue();
 
