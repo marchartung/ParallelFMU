@@ -13,6 +13,7 @@
 
 namespace FMI
 {
+
     /**
      * A container class to store additional information like name and description for all variables.
      */
@@ -37,14 +38,14 @@ namespace FMI
 
         std::vector<string_type> getAllValueNames() const;
 
-        list<std::pair<string_type ,size_type> > getAllReferences() const;
+        list<pair<string_type, size_type>> getAllReferences() const;
 
         size_type size() const;
 
         template<typename T>
         size_type getReference(const std::string & varName) const
         {
-            const map<size_type, vector<string_type> >& values = _valueReferenceToNamesMapping[dataIndex<T>()];
+            const map<size_type, vector<string_type>> & values = _valueReferenceToNamesMapping[dataIndex<T>()];
             for(const auto & p : values)
             {
                 for(const auto name : p.second)
@@ -58,14 +59,14 @@ namespace FMI
         void addNameReferencePair(const string_type & name, size_type valueReference)
         {
             if (name.length() == 0)
-                throw std::runtime_error("Cannot add empty name to reference mapping");
+                throw std::runtime_error("Cannot add empty name to reference mapping.");
 
-            map<size_type, vector<string_type> >& values = _valueReferenceToNamesMapping[dataIndex<T>()];
+            map<size_type, vector<string_type>> & values = _valueReferenceToNamesMapping[dataIndex<T>()];
 
             auto iter = values.find(valueReference);
             if (iter == values.end())
             {
-                values.insert(pair<size_type, vector<string_type> >(valueReference, vector<string_type >(1, name)));
+                values.insert(pair<size_type, vector<string_type>>(valueReference, vector<string_type>(1, name)));
             }
             else
                 iter->second.push_back(name);
@@ -77,41 +78,37 @@ namespace FMI
             if (name.length() == 0)
                 throw std::runtime_error("Cannot add empty name to reference mapping");
 
-            map<size_type, string_type >& values = _valueInputReferenceToNamesMapping[dataIndex<T>()];
+            map<size_type, string_type> & values = _valueInputReferenceToNamesMapping[dataIndex<T>()];
 
             auto iter = values.find(valueReference);
             if (iter == values.end())
             {
-                values.insert(pair<size_type, string_type >(valueReference, name));
+                values.insert(pair<size_type, string_type>(valueReference, name));
             }
         }
 
         template<typename T>
         list<size_type> getAllValueReferencesUnrolled() const
         {
-            const map<size_type, vector<string_type> >& values = _valueReferenceToNamesMapping[dataIndex<T>()];
+            const map<size_type, vector<string_type>> & values = _valueReferenceToNamesMapping[dataIndex<T>()];
             std::list<size_type> res;
             for (const auto & p : values)
-            {
                 res.push_back(p.first);
-            }
             return res;
         }
 
-        void getAllValueReferencesUnrolled(list<size_type>& realValueIndices, list<size_type>& bool_typeValueIndices, list<size_type>& intValueIndices,
-                                           list<size_type>& stringValueIndices) const;
+        void getAllValueReferencesUnrolled(list<size_type> & realValueIndices, list<size_type> & bool_typeValueIndices,
+                                           list<size_type> & intValueIndices, list<size_type> & stringValueIndices) const;
 
         template<typename T>
         std::vector<string_type> getValueNames() const
         {
-            const map<size_type, vector<string_type> >& values = _valueReferenceToNamesMapping[dataIndex<T>()];
+            const map<size_type, vector<string_type>> & values = _valueReferenceToNamesMapping[dataIndex<T>()];
             std::vector<string_type> res;
-            for (map<size_type, vector<string_type> >::const_iterator it = values.begin();it!=values.end();++it)
+            for (map<size_type, vector<string_type>>::const_iterator it = values.begin(); it!=values.end(); ++it)
             {
-                for (size_type i=0;i<it->second.size();++i)
-                {
+                for (size_type i = 0; i < it->second.size(); ++i)
                     res.push_back(it->second[i]);
-                }
             }
             return res;
         }
@@ -119,28 +116,27 @@ namespace FMI
         template<typename T>
         std::vector<string_type> getInputValueNames() const
         {
-            const map<size_type, string_type >& values = _valueInputReferenceToNamesMapping[dataIndex<T>()];
+            const map<size_type, string_type> & values = _valueInputReferenceToNamesMapping[dataIndex<T>()];
             std::vector<string_type> res;
-            for (map<size_type,string_type >::const_iterator it = values.begin();it!=values.end();++it)
-            {
+            for (map<size_type,string_type>::const_iterator it = values.begin(); it != values.end(); ++it)
                     res.push_back(it->second);
-            }
             return res;
         }
 
         template<typename T>
-        const vector<string_type> & getAllValueNamesByReference(size_type valueReference) const
+        const vector<string_type>& getAllValueNamesByReference(size_type valueReference) const
         {
-            const map<size_type, vector<string_type> >& values = _valueReferenceToNamesMapping[dataIndex<T>()];
+            const map<size_type, vector<string_type>>& values = _valueReferenceToNamesMapping[dataIndex<T>()];
 
             return values.find(valueReference)->second;
         }
 
      private:
-        vector<map<size_type, vector<string_type> > > _valueReferenceToNamesMapping;
-        vector<map<size_type, string_type> > _valueInputReferenceToNamesMapping;
-        vector<map<size_type, vector<string_type> > > _valueReferenceToDescriptionMapping;
+        vector<map<size_type, vector<string_type>>> _valueReferenceToNamesMapping;
+        vector<map<size_type, string_type>> _valueInputReferenceToNamesMapping;
+        vector<map<size_type, vector<string_type>>> _valueReferenceToDescriptionMapping;
     };
+
 } /* namespace FMI */
 
 #endif /* INCLUDE_FMI_FMUVALUEINFO_HPP_ */
