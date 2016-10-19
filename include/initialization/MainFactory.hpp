@@ -49,6 +49,7 @@
 
 namespace Initialization
 {
+
     /**
      * This factory class can create various objects that are required for an FMU based simulation. All created
      * objects are internally cached by their id or unique name. So if an object creation depends on another object,
@@ -61,9 +62,26 @@ namespace Initialization
     class MainFactory
     {
      public:
-        MainFactory();
+        MainFactory() = default;
 
         ~MainFactory() = default;
+
+        /**
+         * Creates a \ref Simulation::SerialSimulation object according to the given plan.
+         *
+         * \remark Since a pointer to the simulation object is returned, the caller has to handle the memory deallocation!
+         */
+        Simulation::AbstractSimulationSPtr createSimulation(SimulationPlan & in) const;
+
+        /**
+         * Creates a FMU object according to the given FmuPlan. The object can be of type \ref FMI::FmuSdkFmu,
+         * \ref FMI::FmiLibFmu(plan) or \ref FMI::EmptyFmu(plan).
+         *
+         * \remark Since a pointer to the FMU object is returned, the caller has to handle the memory deallocation!
+         */
+        FMI::AbstractFmu * createFmu(const FmuPlan & plan) const;
+
+     private:
 
         template<class DataManagerClass, class FmuClass>
         Solver::ISolver * createSolverWithKnownFmu(std::shared_ptr<DataManagerClass> & dm, const SolverPlan & in) const
@@ -75,26 +93,6 @@ namespace Initialization
                 res = new Solver::Ros2<DataManagerClass, FmuClass>(in, FmuClass(*in.fmu), dm);
             else
                 throw std::runtime_error("MainFactory: Unknown solver type " + in.kind);
-            return res;
-        }
-
-        FMI::AbstractFmu * createFmu(const FmuPlan & plan) const
-        {
-            FMI::AbstractFmu * res;
-            if (plan.loader == "fmuSdk")
-                res = new FMI::FmuSdkFmu(plan);
-#ifdef USE_FMILIB
-            else if (plan.loader == "fmiLib")
-                res = new FMI::FmiLibFmu(plan);
-#endif
-#ifdef USE_NETWORK_OFFLOADER
-            else if(plan.loader == "network")
-            {
-                res = new FMI::EmptyFmu(plan);
-            }
-#endif
-            else
-                throw std::runtime_error("MainFactory: Unknown FMU loader type " + plan.loader);
             return res;
         }
 
@@ -110,32 +108,14 @@ namespace Initialization
 #endif
 #ifdef USE_NETWORK_OFFLOADER
             else if(in.fmu->loader == "network")
-            {
                 res = new Solver::AbstractSolver<DataManagerClass, FMI::EmptyFmu>(in,FMI::EmptyFmu(*in.fmu),dm);
-            }
 #endif
             else
                 throw std::runtime_error("MainFactory: Unknown FMU loader type " + in.fmu->loader);
             return res;
         }
 
-        Synchronization::ConnectionSPtr createConnection(const ConnectionPlan & in, bool outgoing) const
-        {
-            Synchronization::ConnectionSPtr res;
-            if (in.kind == "serial")
-                res = Synchronization::ConnectionSPtr(new Synchronization::SerialConnection(in));
-#ifdef USE_OPENMP
-            else if (in.kind == "openmp")
-                res = Synchronization::ConnectionSPtr(new Synchronization::OpenMPConnection(in));
-#endif
-#ifdef USE_MPI
-            else if (in.kind == "mpi")
-                res = Synchronization::ConnectionSPtr(new Synchronization::MPIConnection(in));
-#endif
-            else
-                throw std::runtime_error("MainFactory: Unknown connection type " + in.kind);
-            return res;
-        }
+        Synchronization::ConnectionSPtr createConnection(const ConnectionPlan & in, bool outgoing) const;
 
         template<class HistoryClass>
         HistoryClass createHistory(const HistoryPlan & in) const
@@ -158,31 +138,19 @@ namespace Initialization
                                                                                 in.dataManager.commnicator));
         }
 
-        std::vector<Synchronization::ConnectionSPtr> createConnectionsOfSolver(const SolverPlan & in) const
-        {
-            std::vector<Synchronization::ConnectionSPtr> res;
-            for (auto con : in.outConnections)
-            {
-                res.push_back(createConnection(*con, true));
-            }
-            for (auto con : in.inConnections)
-            {
-                res.push_back(createConnection(*con, false));
-            }
-            return res;
-        }
+        std::vector<Synchronization::ConnectionSPtr> createConnectionsOfSolver(const SolverPlan & in) const;
 
         template<class HistoryClass, class WriterClass>
-        vector<std::shared_ptr<Solver::ISolver>> createSolversWithDataManager(SimulationPlan & in) const
+        vector<shared_ptr<Solver::ISolver>> createSolversWithDataManager(SimulationPlan & in) const
         {
-            std::shared_ptr<Synchronization::DataManager<HistoryClass, WriterClass> > dm = createDataManager<HistoryClass, WriterClass>(in);
+            shared_ptr<Synchronization::DataManager<HistoryClass, WriterClass>> dm = createDataManager<HistoryClass, WriterClass>(in);
             size_type numSolvers = in.dataManager.solvers.size();
 
-            vector<std::shared_ptr<Solver::ISolver>> res(numSolvers);
+            vector<shared_ptr<Solver::ISolver>> res(numSolvers);
             size_type i = 0;
             for (const auto & sp : in.dataManager.solvers)
             {
-                    res[i] = std::shared_ptr<Solver::ISolver>(createSolver<Synchronization::DataManager<HistoryClass, WriterClass>>(dm, *sp));
+                    res[i] = shared_ptr<Solver::ISolver>(createSolver<Synchronization::DataManager<HistoryClass, WriterClass>>(dm, *sp));
                     auto conns = createConnectionsOfSolver(*sp);
                     res[i].get()->getFmu()->setConnections(conns);
                     ++i;
@@ -191,20 +159,14 @@ namespace Initialization
         }
 
         template<class HistoryClass>
-        vector<std::shared_ptr<Solver::ISolver>> createSolvers(SimulationPlan & in) const
+        vector<shared_ptr<Solver::ISolver>> createSolvers(SimulationPlan & in) const
         {
             if (in.dataManager.writer.kind == "csvFileWriter")
-            {
                 return createSolversWithDataManager<HistoryClass, Writer::CSVFileWriter>(in);
-            }
             else if (in.dataManager.writer.kind == "coutWriter")
-            {
                 return createSolversWithDataManager<HistoryClass, Writer::CoutWriter>(in);
-            }
             else if (in.dataManager.writer.kind == "matFileWriter")
-            {
                 return createSolversWithDataManager<HistoryClass, Writer::MatFileWriter>(in);
-            }
             else
                 throw std::runtime_error("MainFactory: Unknown writer type " + in.dataManager.writer.kind);
         }
@@ -215,9 +177,7 @@ namespace Initialization
             Simulation::AbstractSimulationSPtr res;
 
             if (in.dataManager.history.kind == "serial")
-            {
                 res = Simulation::AbstractSimulationSPtr(new SimulationClass(in, createSolvers<Synchronization::SerialDataHistory>(in)));
-            }
             //else if (in.dataManager.history.kind == "openmp")
             //{
             //    res = Simulation::AbstractSimulationSPtr(new SimulationClass(in, createSolvers<Synchronization::OpenMPDataHistory>(in)));
@@ -228,7 +188,6 @@ namespace Initialization
 
         }
 
-        Simulation::AbstractSimulationSPtr createSimulation(SimulationPlan & in) const;
     };
 
 } /* namespace Initialization */
