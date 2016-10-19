@@ -13,6 +13,7 @@
 
 namespace FMI
 {
+
     /**
      * A class to store references (i.e., IDs from XML model description) of FMU values. It is often used
      * together with \ref Data::ValueCollection to keep a mapping between the concrete values and
@@ -29,11 +30,16 @@ namespace FMI
          * @param bool_typeVars References to the variables of type bool_type.
          * @param stringVars References to the variables of type string.
          */
-        ValueReferenceCollection(const vector<size_type> & realVars = vector<size_type>(), const vector<size_type> & intVars = vector<size_type>(), const vector<size_type> & boolVars = vector<size_type>(), const vector<size_type> & stringVars = vector<size_type>());
+        ValueReferenceCollection(const vector<size_type> & realVars = vector<size_type>(),
+                                 const vector<size_type> & intVars = vector<size_type>(),
+                                 const vector<size_type> & boolVars = vector<size_type>(),
+                                 const vector<size_type> & stringVars = vector<size_type>());
 
-        ValueReferenceCollection(const size_type & numReals, const size_type & numInts, const size_type & numBools, const size_type & numStrings);
+        ValueReferenceCollection(const size_type & numReals, const size_type & numInts, const size_type & numBools,
+                                 const size_type & numStrings);
 
         ValueReferenceCollection(const ValueReferenceCollection & in);
+
         /**
          * Destroy reference collection.
          */
@@ -44,7 +50,7 @@ namespace FMI
          * @param values
          */
         template<typename T>
-        void setValues(const vector<size_type>& values)
+        void setValues(const vector<size_type> & values)
         {
             _values[dataIndex<T>()] = values;
         }
@@ -54,7 +60,7 @@ namespace FMI
          * @return Reference to the internal storage vector.
          */
         template<typename T>
-        const vector<size_type>& getValues() const
+        const vector<size_type> & getValues() const
         {
             return _values[dataIndex<T>()];
         }
@@ -76,7 +82,7 @@ namespace FMI
 
      protected:
         /// Storage location for the reference values. This are integral type.
-        vector<vector<size_type> > _values;
+        vector<vector<size_type>> _values;
     };
 
 } /* namespace FMI */
