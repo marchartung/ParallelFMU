@@ -59,6 +59,7 @@ using std::get;
 using std::function;
 using std::make_tuple;
 using std::max;
+using std::string;
 
 #include "BasicTypedefs.hpp"
 #include "util/Logger.hpp"
