@@ -17,11 +17,11 @@ namespace Initialization
     {
      public:
 
-        CommandLineArgs(const std::string & configFile, const Util::LogLevel & logLvl);
+        CommandLineArgs(const string & configFile, const Util::LogLevel & logLvl);
 
         CommandLineArgs(int * argc, char ** argv[]);
 
-        const std::string & getConfigFilePath() const;
+        const string & getConfigFilePath() const;
 
         const Util::LogSettings & getLogSettings() const;
 
@@ -39,7 +39,7 @@ namespace Initialization
 
      private:
 
-        std::string _configFilePath = "";
+        string _configFilePath = "";
         Util::LogSettings _logSettings;
         int _simulationServerPort;
         bool _simulationClient;
@@ -49,9 +49,9 @@ namespace Initialization
 
         void initialize(int * argc, char ** argv[]);
 
-        static map<std::string, Util::LogCategory> getLogCatMap();
+        static map<string, Util::LogCategory> getLogCatMap();
 
-        static map<std::string, Util::LogLevel> getLogLvlMap();
+        static map<string, Util::LogLevel> getLogLvlMap();
     };
 
 } /* namespace Initialization */
