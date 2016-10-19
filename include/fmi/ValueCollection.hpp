@@ -9,11 +9,11 @@
 #define INCLUDE_FMI_VALUECOLLECTION_HPP_
 
 #include "Stdafx.hpp"
-#include "BasicTypedefs.hpp"
 
 
 namespace FMI
 {
+
     /**
      * A class to store concrete values of an FMU. It is often used together with \ref Data::ValueReferenceCollection
      * to keep a mapping between the concrete values and the corresponding references.
@@ -37,7 +37,8 @@ namespace FMI
         /**
          * Create a new ValueCollection filled with args for an FMU.
          */
-        ValueCollection(const vector<real_type> & real, const vector<int_type> & integer, const vector<bool_type> & bool_typeean, const vector<string_type> & str);
+        ValueCollection(const vector<real_type> & real, const vector<int_type> & integer,
+                        const vector<bool_type> & bool_typeean, const vector<string_type> & str);
 
         /**
          * Delete the value collection including all stored values.
@@ -49,13 +50,13 @@ namespace FMI
          * @return Reference to the internal storage vector.
          */
         template<typename T>
-        vector<T>& getValues()
+        vector<T> & getValues()
         {
-            throw runtime_error("ValueCollection: type was not collected.");
+            throw runtime_error("ValueCollection: Type was not collected.");
         }
 
         template<typename T>
-        void getValues(vector<T> & out, const vector<size_type>& references) const
+        void getValues(vector<T> & out, const vector<size_type> & references) const
         {
             for(size_type i = 0; i < out.size();++i)
                 out[i] = getValues<T>()[references[i]];
@@ -66,13 +67,13 @@ namespace FMI
          * @return Reference to the internal storage vector.
          */
         template<typename T>
-        const vector<T>& getValues() const
+        const vector<T> & getValues() const
         {
-            throw runtime_error("ValueCollection: type was not collected.");
+            throw runtime_error("ValueCollection: Type was not collected.");
         }
 
         template<typename T>
-        void setValues(const vector<T> & out, const vector<size_type>& references)
+        void setValues(const vector<T> & out, const vector<size_type> & references)
         {
             for(size_type i = 0; i < out.size();++i)
                 getValues<T>()[references[i]] = out[i];
