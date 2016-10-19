@@ -21,6 +21,7 @@
 
 namespace Initialization
 {
+
     Program::Program(const CommandLineArgs & cla)
             : _isInitialized(false),
               _usingMPI(false),
@@ -32,12 +33,7 @@ namespace Initialization
     }
 
     Program::Program(int* argc, char** argv[])
-            : _isInitialized(false),
-              _usingMPI(false),
-              _usingOMP(false),
-              _commandLineArgs(CommandLineArgs(argc, argv)),
-              _pp(),
-              _simulations()
+            : Program::Program(CommandLineArgs(argc, argv))
     {
     }
 
