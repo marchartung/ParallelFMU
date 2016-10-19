@@ -20,7 +20,7 @@ namespace Simulation
      public:
         //AbstractSimulation(vector<Solver::AbstractSolverSPtr> solver);
 
-        AbstractSimulation(const Initialization::SimulationPlan & in, const vector<std::shared_ptr<Solver::ISolver>> & solver);
+        AbstractSimulation(const Initialization::SimulationPlan & in, const vector<shared_ptr<Solver::ISolver>> & solver);
 
         /**
          * Destructor. Destroys AbstractSimulation object and frees allocates resources.
@@ -44,17 +44,17 @@ namespace Simulation
          * Get all solvers that are part of the simulation.
          * @return The list of solvers that are connected to the simulation.
          */
-        virtual const vector<std::shared_ptr<Solver::ISolver>>& getSolver() const;
+        virtual const vector<shared_ptr<Solver::ISolver>> & getSolver() const;
 
-        virtual vector<std::shared_ptr<Solver::ISolver>> & getSolver();
+        virtual vector<shared_ptr<Solver::ISolver>> & getSolver();
 
         real_type getSimulationEndTime() const;
 
         size_type getMaxIterations() const;
 
-        void setSimulationEndTime(real_type simEnd);
+        void setSimulationEndTime(const real_type simEnd);
 
-        void setMaxIterations(size_type num);
+        void setMaxIterations(const size_type num);
 
         /**
          * Returns if a simulation is a MPI, OpenMP or Serial simulation
@@ -71,7 +71,7 @@ namespace Simulation
         /**
          * All solvers handled by the simulation.
          */
-        vector<std::shared_ptr<Solver::ISolver>> _solver;
+        vector<shared_ptr<Solver::ISolver>> _solver;
 
      private:
 

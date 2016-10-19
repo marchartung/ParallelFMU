@@ -4,7 +4,7 @@
 namespace Simulation
 {
 
-    AbstractSimulation::AbstractSimulation(const Initialization::SimulationPlan & in, const vector<std::shared_ptr<Solver::ISolver>> & solver)
+    AbstractSimulation::AbstractSimulation(const Initialization::SimulationPlan & in, const vector<shared_ptr<Solver::ISolver>> & solver)
             : _solver(solver),
               _maxIterations(std::numeric_limits<size_type>::max() - 2)
     {
@@ -36,7 +36,7 @@ namespace Simulation
             solver->initialize();
     }
 
-    void AbstractSimulation::setSimulationEndTime(real_type simEnd)
+    void AbstractSimulation::setSimulationEndTime(const real_type simEnd)
     {
         _simulationEndTime = simEnd;
         for (size_type i = 0; i < _solver.size(); ++i)
@@ -48,7 +48,7 @@ namespace Simulation
         return _maxIterations;
     }
 
-    void AbstractSimulation::setMaxIterations(size_type num)
+    void AbstractSimulation::setMaxIterations(const size_type num)
     {
         _maxIterations = num;
     }
