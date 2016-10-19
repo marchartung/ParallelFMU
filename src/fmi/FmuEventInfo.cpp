@@ -3,7 +3,9 @@
 namespace FMI
 {
 
-    FmuEventInfo::FmuEventInfo(bool_type iterationConverged, bool_type stateValueReferencesChanged, bool_type stateValuesChanged, bool_type terminateSimulation, bool_type upcomingTimeEvent, double nextEventTime)
+    FmuEventInfo::FmuEventInfo(bool_type iterationConverged, bool_type stateValueReferencesChanged,
+                               bool_type stateValuesChanged, bool_type terminateSimulation, bool_type upcomingTimeEvent,
+                               double nextEventTime)
             : _iterationConverged(iterationConverged),
               _stateValueReferencesChanged(stateValueReferencesChanged),
               _stateValuesChanged(stateValuesChanged),
@@ -83,6 +85,7 @@ namespace FMI
         setUpcomingTimeEvent(eventInfoSource.upcomingTimeEvent);
 
     }
+
 #ifdef USE_FMILIB
     void FmuEventInfo::assign(const fmi1_event_info_t & eventInfoSource)
     {
@@ -95,4 +98,5 @@ namespace FMI
         setUpcomingTimeEvent(eventInfoSource.upcomingTimeEvent);
     }
 #endif
+
 } /* namespace FMI */

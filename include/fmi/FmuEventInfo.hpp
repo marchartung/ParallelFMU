@@ -115,6 +115,7 @@ namespace FMI
         void setUpcomingTimeEvent(bool_type upcomingTimeEvent);
 
         void assign(const fmiEventInfo & in);
+
 #ifdef USE_FMILIB
         void assign(const fmi1_event_info_t & in);
 #endif
