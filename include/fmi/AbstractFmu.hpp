@@ -298,8 +298,8 @@ namespace FMI
                     refs = &_continousValueReferences;
                     break;
             }
-            FMI::ValueCollection res(refs->getValues<real_type>().size(), refs->getValues<int_type>().size(),
-                                     refs->getValues<bool_type>().size(), refs->getValues<string_type>().size());
+            ValueCollection res(refs->getValues<real_type>().size(), refs->getValues<int_type>().size(),
+                                refs->getValues<bool_type>().size(), refs->getValues<string_type>().size());
             getAllValues(res);
             return res;
         }
@@ -314,7 +314,7 @@ namespace FMI
             getStateDerivativesInternal(stateDerivatives);
         }
 
-        std::vector<real_type> getStateDerivatives()
+        vector<real_type> getStateDerivatives()
         {
             std::vector<real_type> stateDerivatives(getNumStates());
             getStateDerivatives(stateDerivatives.data());
@@ -331,14 +331,14 @@ namespace FMI
             getEventIndicatorsInternal(eventIndicators);
         }
 
-        std::vector<real_type> getEventIndicators()
+        vector<real_type> getEventIndicators()
         {
-            std::vector<real_type> eventIndicators(getNumEventIndicators());
+            vector<real_type> eventIndicators(getNumEventIndicators());
             getStateDerivatives(eventIndicators.data());
             return eventIndicators;
         }
 
-        void setValues(const FMI::ValueCollection& values)
+        void setValues(const ValueCollection& values)
         {
             setValuesInternal(values.getValues<real_type>(), _eventValueReferences.getValues<real_type>());
             setValuesInternal(values.getValues<int_type>(), _eventValueReferences.getValues<int_type>());
