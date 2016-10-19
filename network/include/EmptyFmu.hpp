@@ -13,6 +13,9 @@
 namespace FMI
 {
 
+    /*!
+     * This class is used within objects of class \ref NetworkSolver.
+     */
     class EmptyFmu : public AbstractFmu
     {
      public:
@@ -22,12 +25,12 @@ namespace FMI
 
         virtual AbstractFmu * duplicate() override;
         virtual void stepCompleted() override;
-        virtual FMI::FmuEventInfo eventUpdate() override;
+        virtual FmuEventInfo eventUpdate() override;
         virtual double getDefaultStart() const override;
         virtual double getDefaultStop() const override;
         virtual void initialize() override;
 
-        const FMI::ValueCollection & getEmptyFmuValues() const;
+        const ValueCollection & getEmptyFmuValues() const;
         void setNumValues(const size_type & numReals, const size_type & numInts, const size_type & numBools, const size_type & numStrings);
 
      protected:
@@ -49,7 +52,7 @@ namespace FMI
 
      private:
 
-        FMI::ValueCollection _values;
+        ValueCollection _values;
 
     };
 
