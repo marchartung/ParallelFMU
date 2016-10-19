@@ -18,6 +18,7 @@
 
 namespace Initialization
 {
+
     struct FmuPlan
     {
         string name;
@@ -60,7 +61,6 @@ namespace Initialization
             return res;
         }
     };
-
 
     struct SolverPlan
     {
@@ -108,12 +108,9 @@ namespace Initialization
         list<shared_ptr<ConnectionPlan>> inConnections;
     };
 
-
-
     struct SchedulePlan
     {
         vector<vector<vector<size_type> > > nodeStructure; // node -> core -> solv
-
         vector<tuple<size_type, size_type>> solvIdToCore; // solv -> (node,core)
     };
 
@@ -128,7 +125,6 @@ namespace Initialization
         real_type defaultMaxError;
         real_type defaultTolerance;
 
-
         DataManagerPlan dataManager;
     };
 
@@ -137,8 +133,6 @@ namespace Initialization
         //vec2D represents node/thread mapping. simPlans[nodeNum][threadNum]
         vector<vector<SimulationPlan>> simPlans; //for mpi
     };
-
-
 
 } /* namespace Synchronization */
 
