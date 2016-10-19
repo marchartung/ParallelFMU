@@ -20,14 +20,14 @@ namespace Initialization
 {
     struct FmuPlan
     {
-        std::string name;
-        std::string path;
-        std::string workingPath;
-        std::string version;
+        string name;
+        string path;
+        string workingPath;
+        string version;
 
         size_type id;
 
-        std::string loader;
+        string loader;
         bool intermediateResults;
         bool tolControlled;
         real_type relTol;
@@ -39,14 +39,14 @@ namespace Initialization
 
     struct ConnectionPlan
     {
-        std::string kind;
+        string kind;
         size_type bufferSize;
 
         size_type sourceRank;
         size_type destRank;
 
-        std::string sourceFmu;
-        std::string destFmu;
+        string sourceFmu;
+        string destFmu;
 
         size_type startTag;
 
@@ -64,10 +64,10 @@ namespace Initialization
 
     struct SolverPlan
     {
-        std::string kind;
+        string kind;
         size_type id;
 
-        std::shared_ptr<FmuPlan> fmu;
+        shared_ptr<FmuPlan> fmu;
 
         real_type startTime;
         real_type endTime;
@@ -76,8 +76,8 @@ namespace Initialization
         real_type maxError;
         real_type eventInterval;
 
-        std::list<std::shared_ptr<ConnectionPlan>> outConnections;
-        std::list<std::shared_ptr<ConnectionPlan>> inConnections;
+        list<shared_ptr<ConnectionPlan>> outConnections;
+        list<shared_ptr<ConnectionPlan>> inConnections;
 
 #ifdef USE_NETWORK_OFFLOADER
         Network::NetworkPlan networkPlan;
@@ -86,40 +86,40 @@ namespace Initialization
 
     struct WriterPlan
     {
-        std::string kind;
+        string kind;
         real_type startTime;
         real_type endTime;
         size_type numSteps;
-        std::string filePath;
+        string filePath;
     };
 
     struct HistoryPlan
     {
-        std::string kind;
+        string kind;
     };
 
     struct DataManagerPlan
     {
         WriterPlan writer;
         HistoryPlan history;
-        std::shared_ptr<Synchronization::Communicator> commnicator;
-        std::vector<std::shared_ptr<SolverPlan> > solvers;
-        std::list<std::shared_ptr<ConnectionPlan>> outConnections;
-        std::list<std::shared_ptr<ConnectionPlan>> inConnections;
+        shared_ptr<Synchronization::Communicator> commnicator;
+        vector<shared_ptr<SolverPlan> > solvers;
+        list<shared_ptr<ConnectionPlan>> outConnections;
+        list<shared_ptr<ConnectionPlan>> inConnections;
     };
 
 
 
     struct SchedulePlan
     {
-        std::vector<std::vector<std::vector<size_type> > > nodeStructure; // node -> core -> solv
+        vector<vector<vector<size_type> > > nodeStructure; // node -> core -> solv
 
-        std::vector<std::tuple<size_type, size_type>> solvIdToCore; // solv -> (node,core)
+        vector<tuple<size_type, size_type>> solvIdToCore; // solv -> (node,core)
     };
 
     struct SimulationPlan
     {
-        std::string kind;
+        string kind;
         real_type startTime;
         real_type endTime;
 
