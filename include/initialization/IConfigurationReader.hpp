@@ -13,6 +13,12 @@
 
 namespace Initialization
 {
+
+    /**
+     * Interface to a configuration reader. Currently, the one and only implementation is \ref XMLConfigurationReader.
+     *
+     * Maybe, this is useful, if someone implements a JSONConfigurationReader to parse JSON files...
+     */
     class IConfigurationReader
     {
      public:
@@ -22,9 +28,10 @@ namespace Initialization
 
         virtual ProgramPlan getProgramPlan() = 0;
 
-        virtual vector<vector<SimulationPlan>> getSimulationPlans(const std::list<SolverPlan> & solverPlans, const SchedulePlan & schedPlan,
-                                                          const SimulationPlan simPlan) = 0;
+        virtual vector<vector<SimulationPlan>> getSimulationPlans(const list<SolverPlan> & solverPlans, const SchedulePlan & schedPlan,
+                                                                  const SimulationPlan simPlan) = 0;
     };
+
 } /* namespace Initialization */
 
 #endif /* INCLUDE_DATAACCESS_ICONFIGURATIONREADER_HPP_ */

@@ -13,6 +13,7 @@
 
 #include <typeinfo>
 
+#include "Stdafx.hpp"
 #include "fmi/InputMapping.hpp"
 #include "initialization/IConfigurationReader.hpp"
 #include "initialization/DefaultValues.hpp"
@@ -40,35 +41,41 @@ namespace Initialization
          */
         virtual ~XMLConfigurationReader() = default;
 
+        /**
+         * @return The program plan which holds the simulation plans.
+         */
         ProgramPlan getProgramPlan();
 
-        vector<vector<SimulationPlan>> getSimulationPlans(const std::list<SolverPlan> & solverPlans, const SchedulePlan & schedPlan, const SimulationPlan simPlan);
-
-     protected:
+     private:
+        vector<vector<SimulationPlan>> getSimulationPlans(const list<SolverPlan> & solverPlans, const SchedulePlan & schedPlan,
+                                                          const SimulationPlan simPlan);
 
         FmuPlan getFmuPlan(const ptree::value_type & fmuElem, const SimulationPlan & simPlan, const size_type id);
 
-        std::list<SolverPlan> getSolverPlanFromMultipleFmu(const ptree::value_type &firstElem, const size_type & startId, const SimulationPlan & simPlan);
+        list<SolverPlan> getSolverPlanFromMultipleFmu(const ptree::value_type & firstElem, const size_type & startId,
+                                                      const SimulationPlan & simPlan);
 
-        std::list<SolverPlan> getSolverPlanFromFmu(const ptree::value_type &firstElem, const size_type & id, const SimulationPlan & simPlan, const bool & single);
+        list<SolverPlan> getSolverPlanFromFmu(const ptree::value_type & firstElem, const size_type & id,
+                                              const SimulationPlan & simPlan, const bool & single);
 
-        std::list<SolverPlan> getSolverPlans(const SimulationPlan & simPlan);
+        list<SolverPlan> getSolverPlans(const SimulationPlan & simPlan);
 
-        SolverPlan getSolverPlan(const ptree::value_type &firstElem, const SimulationPlan & simPlan, size_type id = std::numeric_limits<size_type>::max());
+        SolverPlan getSolverPlan(const ptree::value_type & firstElem, const SimulationPlan & simPlan,
+                                 size_type id = std::numeric_limits<size_type>::max());
 
         ConnectionPlan getConnectionPlan(ptree::value_type & mapElem);
 
-        std::list<ConnectionPlan> getConnectionPlans();
+        list<ConnectionPlan> getConnectionPlans();
 
-        std::vector<std::vector<size_type>> getNodeSchedule(ptree::value_type & solverElem);
+        vector<vector<size_type>> getNodeSchedule(ptree::value_type & solverElem);
 
         SchedulePlan getSchedulePlan();
 
-        void createMapping(const std::list<SolverPlan> & solverPlans, SchedulePlan & schedPlan);
+        void createMapping(const list<SolverPlan> & solverPlans, SchedulePlan & schedPlan);
 
         SimulationPlan getDefaultSimulationPlan();
 
-        void appendConnectionInformation(std::list<SolverPlan> & solverPlans, std::list<ConnectionPlan> & connPlans, const SchedulePlan & schedPlan);
+        void appendConnectionInformation(list<SolverPlan> & solverPlans, list<ConnectionPlan> & connPlans, const SchedulePlan & schedPlan);
 
         WriterPlan getWriterPlan();
 
@@ -83,13 +90,12 @@ namespace Initialization
             checkForUndefinedValues<T>(first);
             checkForUndefinedValues<Remain...>(remainer ...);
         }
+
         template<typename T>
         void checkForUndefinedValues(const T & first)
         {
             if (DefaultValues::isUndefinedValue<T>(first))
-            {
-                throw std::runtime_error("Uninitialized value");
-            }
+                throw std::runtime_error("Uninitialized value.");
         }
     };
 
