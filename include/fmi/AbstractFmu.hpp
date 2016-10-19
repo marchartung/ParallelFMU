@@ -45,36 +45,12 @@ namespace FMI
          * @param loggingEnabled Set to true if logging output of the FMU should be displayed.
          * @param intermediateResults Set to true if the event update function should return after every internal event iteration.
          */
-        AbstractFmu(const Initialization::FmuPlan & in)
-                : _id(in.id),
-                  _localId(std::numeric_limits<size_type>::max()),
-                  _sharedId(std::numeric_limits<size_type>::max()),
-                  _name(in.name),
-                  _path(in.path),
-                  _workingPath(in.workingPath),
-                  _loaded(false),
-                  _relativeTolerance(in.relTol),
-                  _toleranceControlled(in.tolControlled),
-                  _loggingEnabled(in.logEnabled),
-                  _intermediateResults(in.intermediateResults),
-                  _eventInfo(),
-                  _outputValueReferences(),
-                  _inputValueReferences(),
-                  _time(0.0),
-                  _valueInfo(),
-                  _numberOfStates(-1),
-                  _numberOfEventIndicators(-1)
-        {
-        }
+        AbstractFmu(const Initialization::FmuPlan & in);
 
         /**
          * Destroy the FMU object and unload the resources if necessary.
          */
-        virtual ~AbstractFmu()
-        {
-            if (isLoaded())
-                unload();
-        }
+        virtual ~AbstractFmu();
 
         virtual AbstractFmu * duplicate() = 0;
         virtual void stepCompleted() = 0;
@@ -105,246 +81,119 @@ namespace FMI
         /**
          * Load the shared library of the FMU and instantiate and initialize an instance of the FMU.
          */
-        virtual void load(const bool & alsoInit = true)
-        {
-            _loaded = true;
-        }
+        virtual void load(const bool & alsoInit = true);
 
         /**
          * Unload the shared library of the FMU (if not needed by other instances).
          */
-        virtual void unload()
-        {
-            _loaded = false;
-        }
+        virtual void unload();
 
         /**
          * Get the storage location of the FMU.
          * @return The path to the FMU-file.
          */
-        const string & getPath() const
-        {
-            return _path;
-        }
+        const string & getPath() const;
 
-        const string & getWorkingDirectory() const
-        {
-            return _workingPath;
-        }
+        const string & getWorkingDirectory() const;
 
         /**
          * Check if the FMU is already loaded.
          * @return True if the FMU is loaded.
          */
-        bool isLoaded() const
-        {
-            return _loaded;
-        }
+        bool isLoaded() const;
 
         /**
          * Get the unique name of the FMU.
          * @return The stored name.
          */
-        const string& getFmuName() const
-        {
-            return _name;
-        }
+        const string& getFmuName() const;
 
-        size_type getId() const
-        {
-            return _id;
-        }
+        size_type getId() const;
 
-        size_type getLocalId() const
-        {
-            return _localId;
-        }
+        size_type getLocalId() const;
 
-        void setLocalId(size_type localId)
-        {
-            _localId = localId;
-        }
+        void setLocalId(size_type localId);
 
         /**
          * Get the number of event indicators that are described in the model description.
          * @return The number of event indicators.
          */
-        size_type getNumEventIndicators() const
-        {
-            return _numberOfEventIndicators;
-        }
+        size_type getNumEventIndicators() const;
 
         /**
          * Set the number of event indicators that are describe the model.
          * @param numberOfEventIndicators
          */
-        void setNumEventIndicators(size_type numberOfEventIndicators)
-        {
-            this->_numberOfEventIndicators = numberOfEventIndicators;
-        }
+        void setNumEventIndicators(size_type numberOfEventIndicators);
 
         /**
          * Get the number of state, respectively state derivative, variables of the FMU-model.
          * @return The number of state variables.
          */
-        size_type getNumStates() const
-        {
-            return _numberOfStates;
-        }
+        size_type getNumStates() const;
 
         /**
          * Set the number of state, respectively state derivative, variables of the FMU-model.
          * @param numberOfStates The new number of state variables.
          */
-        void setNumStates(size_type numberOfStates)
-        {
-            this->_numberOfStates = numberOfStates;
-        }
+        void setNumStates(size_type numberOfStates);
 
         /**
          * Get the number of variables that are declared as 'input' in the model description.
          * @return The number of input variables.
          */
-        size_type getNumInputs() const
-        {
-            return _inputValueReferences.size();
-        }
+        size_type getNumInputs() const;
 
-        size_type getNumOutputs() const
-        {
-            return _outputValueReferences.size();
-        }
+        size_type getNumOutputs() const;
 
-        real_type getTime() const
-        {
-            return _time;
-        }
+        real_type getTime() const;
 
-        virtual void setTime(const real_type & in)
-        {
-            _time = in;
-        }
+        virtual void setTime(const real_type & in);
 
         /**
          * Get all value references that are part of the model description.
          * @return All value references.
          */
-        const ValueReferenceCollection& getAllValueReferences() const
-        {
-            return _allValueReferences;
-        }
+        const ValueReferenceCollection & getAllValueReferences() const;
 
         /**
          * Set all value references that should be used by the FMU.
          * @param valueReferences The new value references.
          * @todo Make the setAllValueReferences protected and use the library loader as friend.
          */
-        void setAllValueReferences(const ValueReferenceCollection& valueReferences)
-        {
-            _allValueReferences = valueReferences;
-        }
+        void setAllValueReferences(const ValueReferenceCollection & valueReferences);
 
         /**
          * Get all value references that are related to output variables of the model description.
          * @return All references to output variables.
          */
-        const ValueReferenceCollection& getOutputValueReferences() const
-        {
-            return _outputValueReferences;
-        }
+        const ValueReferenceCollection & getOutputValueReferences() const;
 
-        void setStates(const real_type * states)
-        {
-            return setStatesInternal(states);
-        }
+        void setStates(const real_type * states);
 
-        void setStates(const vector<real_type> & states)
-        {
-            return setStates(states.data());
-        }
+        void setStates(const vector<real_type> & states);
 
-        void getStates(real_type * states) const
-        {
-            getStatesInternal(states);
-        }
+        void getStates(real_type * states) const;
 
-        void getStates(vector<real_type> & in) const
-        {
-            getStates(in.data());
-        }
+        void getStates(vector<real_type> & in) const;
 
-        vector<real_type> getStates() const
-        {
-            vector<real_type> res(getNumStates());
-            getStates(res);
-            return res;
-        }
+        vector<real_type> getStates() const;
 
-        ValueCollection getValues(ReferenceContainerType refType = ReferenceContainerType::EVENT) const
-        {
-            const ValueReferenceCollection * refs = nullptr;
-            switch(refType)
-            {
-                case ReferenceContainerType::ALL:
-                    refs = &_allValueReferences;
-                    break;
-                case ReferenceContainerType::START:
-                    refs = &_startValueReferences;
-                    break;
-                case ReferenceContainerType::EVENT:
-                    refs = &_eventValueReferences;
-                    break;
-                case ReferenceContainerType::CONTINIOUS:
-                    refs = &_continousValueReferences;
-                    break;
-            }
-            ValueCollection res(refs->getValues<real_type>().size(), refs->getValues<int_type>().size(),
-                                refs->getValues<bool_type>().size(), refs->getValues<string_type>().size());
-            getAllValues(res);
-            return res;
-        }
+        ValueCollection getValues(ReferenceContainerType refType = ReferenceContainerType::EVENT) const;
 
-        void getStateDerivatives(vector<real_type> & stateDerivatives)
-        {
-            getStateDerivatives(stateDerivatives.data());
-        }
+        void getStateDerivatives(vector<real_type> & stateDerivatives);
 
-        void getStateDerivatives(real_type * stateDerivatives)
-        {
-            getStateDerivativesInternal(stateDerivatives);
-        }
+        void getStateDerivatives(real_type * stateDerivatives);
 
-        vector<real_type> getStateDerivatives()
-        {
-            std::vector<real_type> stateDerivatives(getNumStates());
-            getStateDerivatives(stateDerivatives.data());
-            return stateDerivatives;
-        }
+        vector<real_type> getStateDerivatives();
 
-        virtual void getEventIndicators(vector<real_type> & eventIndicators)
-        {
-            getEventIndicators(eventIndicators.data());
-        }
+        virtual void getEventIndicators(vector<real_type> & eventIndicators);
 
-        virtual void getEventIndicators(real_type * eventIndicators)
-        {
-            getEventIndicatorsInternal(eventIndicators);
-        }
+        virtual void getEventIndicators(real_type * eventIndicators);
 
-        vector<real_type> getEventIndicators()
-        {
-            vector<real_type> eventIndicators(getNumEventIndicators());
-            getStateDerivatives(eventIndicators.data());
-            return eventIndicators;
-        }
+        vector<real_type> getEventIndicators();
 
-        void setValues(const ValueCollection& values)
-        {
-            setValuesInternal(values.getValues<real_type>(), _eventValueReferences.getValues<real_type>());
-            setValuesInternal(values.getValues<int_type>(), _eventValueReferences.getValues<int_type>());
-            setValuesInternal(values.getValues<bool_type>(), _eventValueReferences.getValues<bool_type>());
-            setValuesInternal(values.getValues<string_type>(), _eventValueReferences.getValues<string_type>());
-        }
+        void setValues(const ValueCollection & values);
 
         /**
          * Set all value references that are related to output variables.
@@ -352,144 +201,81 @@ namespace FMI
          * @attention This function should only be called from the FMU loader during the loading/initialization process.
          * @todo Make the setOutputValueReferences protected and use the library loader as friend.
          */
-        void setOutputValueReferences(const ValueReferenceCollection& outputValues)
-        {
-            this->_outputValueReferences = outputValues;
-        }
+        void setOutputValueReferences(const ValueReferenceCollection & outputValues);
 
         /**
          * Get the relative tolerance that is used for internal numeric calculations.
          * @return The relative tolerance.
          */
-        double getRelativeTolerance() const
-        {
-            return _relativeTolerance;
-        }
+        double getRelativeTolerance() const;
 
         /**
          * Check if the numerical algorithms of the FMU work with the given relative tolerance.
          * @return True if the relative tolerance is used.
          */
-        bool isToleranceControlled() const
-        {
-            return _toleranceControlled;
-        }
+        bool isToleranceControlled() const;
 
         /**
          * Get the references to all values that are marked as input values.
          * @return The references to all input variables.
          */
-        const ValueReferenceCollection& getInputValueReferences() const
-        {
-            return _inputValueReferences;
-        }
+        const ValueReferenceCollection & getInputValueReferences() const;
 
         /**
          * Set the references to all input values of the FMU.
          * @param inputValues The new input values
          * @todo Make the setInputValueReferences protected and use the library loader as friend.
          */
-        void setInputValueReferences(const ValueReferenceCollection& inputValues)
-        {
-            this->_inputValueReferences = inputValues;
-        }
+        void setInputValueReferences(const ValueReferenceCollection & inputValues);
 
         /**
          * Check if debug logging is enabled.
          * @return True if debug logging is enabled.
          */
-        bool isLoggingEnabled() const
-        {
-            return _loggingEnabled;
-        }
+        bool isLoggingEnabled() const;
 
         /**
          * Disable or enable the debug logging.
          * @param loggingEnabled True if the debug logging should be enabled.
          */
-        void setLoggingEnabled(bool loggingEnabled)
-        {
-            _loggingEnabled = true;
-        }
+        void setLoggingEnabled(bool loggingEnabled);
 
         /**
          * Get the value info of the FMU, describing all values.
          * @return The stored value info.
          */
-        const ValueInfo& getValueInfo() const
-        {
-            return _valueInfo;
-        }
+        const ValueInfo& getValueInfo() const;
 
         /**
          * Set the value info for the FMU, describing all values.
          * @param valueInfo The new value info.
          */
-        void setValueInfo(const ValueInfo& valueInfo)
-        {
-            _valueInfo = valueInfo;
-        }
+        void setValueInfo(const ValueInfo & valueInfo);
 
         /**
          * Check if the event update function should return after every internal event iteration.
          * @return True if intermediate results are returned.
          */
-        bool hasIntermediateResults() const
-        {
-            return _intermediateResults;
-        }
+        bool hasIntermediateResults() const;
 
         /// Set the relative tolerance to the given value.
-        void setRelativeTolerance(real_type relativeTolerance)
-        {
-            _relativeTolerance = relativeTolerance;
-        }
+        void setRelativeTolerance(real_type relativeTolerance);
 
-        void getValues(ValueCollection& values) const
-        {
-            getValuesInternal(values.getValues<real_type>(), _eventValueReferences.getValues<real_type>());
-            getValuesInternal(values.getValues<int_type>(), _eventValueReferences.getValues<int_type>());
-            getValuesInternal(values.getValues<bool_type>(), _eventValueReferences.getValues<bool_type>());
-            getValuesInternal(values.getValues<string_type>(), _eventValueReferences.getValues<string_type>());
-        }
+        void getValues(ValueCollection & values) const;
 
-        void getAllValues(ValueCollection& values) const
-        {
-            getValuesInternal(values.getValues<real_type>(), _allValueReferences.getValues<real_type>());
-            getValuesInternal(values.getValues<int_type>(), _allValueReferences.getValues<int_type>());
-            getValuesInternal(values.getValues<bool_type>(), _allValueReferences.getValues<bool_type>());
-            //getValuesInternal(values.getValues<string_type>(), _allValueReferences.getValues<string_type>());
-        }
+        void getAllValues(ValueCollection & values) const;
 
-        const FmuEventInfo& getEventInfo() const
-        {
-            return _eventInfo;
-        }
+        const FmuEventInfo& getEventInfo() const;
 
-        vector<Synchronization::ConnectionSPtr> & getConnections()
-        {
-            return _fmuCons;
-        }
+        vector<Synchronization::ConnectionSPtr> & getConnections();
 
-        const vector<Synchronization::ConnectionSPtr> & getConnections() const
-        {
-            return _fmuCons;
-        }
+        const vector<Synchronization::ConnectionSPtr> & getConnections() const;
 
-        void setConnections(const vector<Synchronization::ConnectionSPtr> & in)
-        {
-            _fmuCons = in;
-        }
+        void setConnections(const vector<Synchronization::ConnectionSPtr> & in);
 
-        size_type getSharedId() const
-        {
-            return _sharedId;
-        }
+        size_type getSharedId() const;
 
-        void setSharedId(size_type sharedId)
-        {
-            _sharedId = sharedId;
-        }
+        void setSharedId(size_type sharedId);
 
      protected:
         /**
@@ -497,14 +283,7 @@ namespace FMI
          * @param values The values that should be set.
          * @param references The references to the values.
          */
-        void setValues(ValueCollection& values, ValueReferenceCollection& references)
-        {
-            throw std::runtime_error("AbstractFmu: setValues(ValueCollection&,ValueReferenceCollection&) is deprecated.");
-            assert(values.getValues<double>().size() == references.getValues<double>().size());
-            assert(values.getValues<int_type>().size() == references.getValues<int_type>().size());
-            assert(values.getValues<bool_type>().size() == references.getValues<bool_type>().size());
-            assert(values.getValues<string_type>().size() == references.getValues<string_type>().size());
-        }
+        void setValues(ValueCollection & values, ValueReferenceCollection & references);
 
         /**
          * Set the values stored as type T.
@@ -512,7 +291,7 @@ namespace FMI
          * @param references The references that are associated with the given values.
          */
         template<typename T>
-        void setValues(ValueCollection& values, ValueReferenceCollection& references)
+        void setValues(ValueCollection & values, ValueReferenceCollection & references)
         {
             throw std::runtime_error("AbstractFmu: setValues(ValueCollection&,ValueReferenceCollection&) is deprecated.");
             vector<T>& vals = values.getValues<T>();
@@ -554,6 +333,7 @@ namespace FMI
 
         vector<Synchronization::ConnectionSPtr> _fmuCons;
     };
+
 } /* namespace FMI */
 
 #endif /* INCLUDE_FMI_ABSTRACTFMU_HPP_ */
