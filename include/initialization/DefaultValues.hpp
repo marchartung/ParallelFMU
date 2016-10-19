@@ -51,7 +51,6 @@ namespace Initialization
             throw std::runtime_error("DefaultValues: Unknown type for undefined value creation.");
         }
 
-
         template<typename T>
         static bool isUndefinedValue(const T & in)
         {
