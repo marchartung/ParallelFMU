@@ -35,8 +35,10 @@ namespace Solver
     template<class DataManagerClass, class FmuClass>
     class AbstractSolver : public ISolver
     {
-        static_assert(std::is_base_of<Synchronization::IDataManager,DataManagerClass>::value, "AbstractSolver: Template argument FmuClass must be a specialization of IDataManager");
-        static_assert(std::is_base_of<FMI::AbstractFmu,FmuClass>::value, "AbstractSolver: Template argument 2 must be a specialization of AbstractFMU");
+        static_assert(std::is_base_of<Synchronization::IDataManager,DataManagerClass>::value,
+                      "AbstractSolver: Template argument FmuClass must be a specialization of IDataManager");
+        static_assert(std::is_base_of<FMI::AbstractFmu,FmuClass>::value,
+                      "AbstractSolver: Template argument 2 must be a specialization of AbstractFMU");
 
      protected:
         virtual void doSolverStep(const real_type & h) = 0;
@@ -57,7 +59,7 @@ namespace Solver
          * @param dataManager
          */
         //AbstractSolver(size_type id, FMI::FmuSPtr fmu, Synchronization::DataManagerSPtr dataManager);
-        AbstractSolver(const Initialization::SolverPlan & in, const FmuClass & fmu, std::shared_ptr<DataManagerClass> & dataManager)
+        AbstractSolver(const Initialization::SolverPlan & in, const FmuClass & fmu, shared_ptr<DataManagerClass> & dataManager)
                 : _numStates(0),
                   _numEvents(0),
                   _currentTime(in.startTime),
@@ -128,9 +130,7 @@ namespace Solver
             _fmu.getEventIndicators(_prevEventIndicators);
 
             if (_tolerance <= 0.0 || _maxError <= 0.0 || _initStepSize <= 0.0)
-            {
-                throw std::runtime_error("FMU values not set correctly. " + to_string(_tolerance) + "|" + to_string(_maxError) + "|" + to_string(_initStepSize));
-            }
+                throw runtime_error("FMU values not set correctly. " + to_string(_tolerance) + "|" + to_string(_maxError) + "|" + to_string(_initStepSize));
 
         }
 
@@ -249,7 +249,7 @@ namespace Solver
                             return std::numeric_limits<size_type>::max();
                             break;
                         default:
-                            throw std::runtime_error("AbstractSolver: Unknown dependency");
+                            throw runtime_error("AbstractSolver: Unknown dependency");
                     }
                 }
                 else
@@ -280,9 +280,11 @@ namespace Solver
         {
             double step = h;
             if (_prevTime > _currentTime)
-                throw std::runtime_error("Prevtime is gt than current.");
+                throw runtime_error("Prevtime is gt than current.");
+
             if (0 > _curStepSize)
-                throw std::runtime_error("Step size is negative.");
+                throw runtime_error("Step size is negative.");
+
             _prevTime = _currentTime;
             _prevStates.swap(_states);  // save current states in previous states
 
@@ -295,7 +297,7 @@ namespace Solver
             _currentTime += step;
             _curStepSize = std::min(_initStepSize, getErrorInfo().getStepSize());
             if (0 > _curStepSize)
-                throw std::runtime_error("Step size is negative.");
+                throw runtime_error("Step size is negative.");
 
             _fmu.setTime(_currentTime);
             _fmu.setStates(_states);
@@ -424,7 +426,7 @@ namespace Solver
         /// Pointer to the FMU which is handled/solved by this solver.
         FmuClass _fmu;
 
-        std::list<DependencySolverInfo> _depHist;
+        list<DependencySolverInfo> _depHist;
 
         SolverEventInfo findZeroCrossing(const size_type & eventIndex)
         {
@@ -531,7 +533,7 @@ namespace Solver
         size_type _id;
 
         /// DataManager which cares about data exchange between FMUs and output saving.
-        std::shared_ptr<DataManagerClass> _dataManager;
+        shared_ptr<DataManagerClass> _dataManager;
     };
 
 }
