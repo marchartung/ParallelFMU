@@ -48,6 +48,7 @@ namespace FMI
         AbstractFmu(const Initialization::FmuPlan & in)
                 : _id(in.id),
                   _localId(std::numeric_limits<size_type>::max()),
+                  _sharedId(std::numeric_limits<size_type>::max()),
                   _name(in.name),
                   _path(in.path),
                   _workingPath(in.workingPath),
