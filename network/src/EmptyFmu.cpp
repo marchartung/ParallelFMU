@@ -21,7 +21,7 @@ namespace FMI
 
     }
 
-    FMI::AbstractFmu* EmptyFmu::duplicate()
+    AbstractFmu* EmptyFmu::duplicate()
     {
         throw std::runtime_error("Network FMUs can't be duplicated.");
     }
@@ -30,9 +30,9 @@ namespace FMI
     {
     }
 
-    FMI::FmuEventInfo EmptyFmu::eventUpdate()
+    FmuEventInfo EmptyFmu::eventUpdate()
     {
-        return FMI::FmuEventInfo();
+        return FmuEventInfo();
     }
 
     double EmptyFmu::getDefaultStart() const
@@ -103,8 +103,8 @@ namespace FMI
 
     void EmptyFmu::setNumValues(const size_type& numReals, const size_type& numInts, const size_type& numBools, const size_type& numStrings)
     {
-        _values = FMI::ValueCollection(numReals,numInts,numBools,numStrings);
-        FMI::ValueReferenceCollection collection(numReals,numInts,numBools,numStrings);
+        _values = ValueCollection(numReals,numInts,numBools,numStrings);
+        ValueReferenceCollection collection(numReals,numInts,numBools,numStrings);
         for(size_type i=0;i<collection.getValues<real_type>().size();++i)
             collection.getValues<real_type>()[i] = i;
         for(size_type i=0;i<collection.getValues<int_type>().size();++i)
@@ -117,7 +117,7 @@ namespace FMI
         this->_eventValueReferences = collection;
     }
 
-    const FMI::ValueCollection & EmptyFmu::getEmptyFmuValues() const
+    const ValueCollection & EmptyFmu::getEmptyFmuValues() const
     {
         return _values;
     }
