@@ -15,7 +15,7 @@ namespace Simulation
 
     void SerialSimulation::simulate()
     {
-        bool_type running;  //MF only set, not used
+        bool running;
         size_type iterationCount = 0;
         const vector<shared_ptr<Solver::ISolver>>& solver = getSolver();
         std::vector<size_type> numSteps(solver.size(),15);
