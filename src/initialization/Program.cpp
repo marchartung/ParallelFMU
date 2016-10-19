@@ -27,7 +27,7 @@ namespace Initialization
               _usingMPI(false),
               _usingOMP(false),
               _commandLineArgs(cla),
-              _pp(),
+              _progPlan(),
               _simulations()
     {
     }
@@ -45,50 +45,60 @@ namespace Initialization
 
     void Program::initialize()
     {
+        // Already initialized?
         if (_isInitialized)
             return;
+
         Util::Logger::initialize(_commandLineArgs.getLogSettings());
-        //create simulation plan, i.e. multiple simulation plans if mpi should be used (for each mpi process one plan)
-        // read config file:
+
+        // Create simulation plan(s). If MPI should be used we have several simulation plans (One plan for each MPI process).
+        // Read config file:
         XMLConfigurationReader reader(_commandLineArgs.getConfigFilePath());
-        _pp = reader.getProgramPlan();
+        _progPlan = reader.getProgramPlan();
 
-        // test for MPI initialization:
+        // Test for MPI initialization
         int rank = 0, numRanks = 1;
-        if (_pp.simPlans.size() > 1)
+        if (_progPlan.simPlans.size() > 1)
             if (!initMPI(rank, numRanks))
-                throw std::runtime_error("Couldn't initialize simulation. MPI couldn't be initialized.");
+                throw runtime_error("Couldn't initialize simulation. MPI couldn't be initialized.");
 
+        // Some output for the user
         if(rank == 0)
-            printProgramInfo(_pp);
+            printProgramInfo(_progPlan);
+
         // initialize server if needed
         if (_commandLineArgs.isSimulationServer())
         {
             if (!initNetworkConnection(rank))
-                throw std::runtime_error("Simulation server couldn't be initialized");
+                throw runtime_error("Simulation server couldn't be initialized");
         }
 
-        // initialize and create simulation:
+        // Let the factory create and initialize the simulation.
         MainFactory mf;
 
-        // not in parallel because FmuSdkFMU::load and FmiLibFmu::load is not save to call in parallel
-        for(size_type i=0;i<_pp.simPlans[rank].size();++i)
-            _simulations.push_back( mf.createSimulation(_pp.simPlans[rank][i]));
+        // Not in parallel because FmuSdkFMU::load and FmiLibFmu::load is not save to call in parallel!
+        for(size_type i = 0; i < _progPlan.simPlans[rank].size(); ++i)
+        {
+            const auto sim = mf.createSimulation(_progPlan.simPlans[rank][i]);
+            _simulations.push_back(sim);
+        }
 
         _isInitialized = true;
     }
 
     void Program::simulate()
     {
-        size_type threadNum = 0;
-        // not in parallel, Communicator::addFmu is not safe to call
+        // Initialize the simulations.
+        // Not in parallel since Communicator::addFmu is not safe to call.
         for (auto & sim : _simulations)
             sim->initialize();
+
+        size_type threadNum = 0;
         #pragma omp parallel num_threads(_simulations.size())
         {
-            #ifdef USE_OPENMP
+#ifdef USE_OPENMP
             threadNum = omp_get_thread_num();
-            #endif
+#endif
     
             _simulations[threadNum]->simulate();
         }
@@ -154,12 +164,12 @@ namespace Initialization
                 && MPI_SUCCESS == MPI_Init(std::get<0>(_commandLineArgs.getProgramArgs()), std::get<1>(_commandLineArgs.getProgramArgs())))
         {
             MPI_Comm_size(MPI_COMM_WORLD, &numRanks);
-            if (numRanks < (long long int) _pp.simPlans.size())
+            if (numRanks < (long long int) _progPlan.simPlans.size())
             {
                 deinitialize();
                 throw std::runtime_error("Program: Not enough mpi processes for given schedule.");
             }
-            else if (numRanks > (long long int) _pp.simPlans.size())
+            else if (numRanks > (long long int) _progPlan.simPlans.size())
                 LOGGER_WRITE("Program: More mpi process given than the simulation will use.", Util::LC_LOADER, Util::LL_WARNING);
             MPI_Comm_rank(MPI_COMM_WORLD, &rank);
             _usingMPI = true;
@@ -174,13 +184,16 @@ namespace Initialization
 
     bool Program::initNetworkConnection(const int & rank)
     {
-        // Need to tread special cases. In a network server case the socket can only be hold by one process. The additional information need to be send via MPI.
+        // Need to tread special cases: In a network server case the socket can only be hold by one process. The additional
+        // information need to be send via MPI.
 #ifdef USE_NETWORK_OFFLOADER
         Network::NetworkPlan np;
+
+        // Master
         if (rank == 0)
         {
             // initial network phase. Gather which information need to be collected and send to the client:
-            Network::InitialNetworkServer initServer(_commandLineArgs.getSimulationServerPort(), _pp);
+            Network::InitialNetworkServer initServer(_commandLineArgs.getSimulationServerPort(), _progPlan);
             initServer.start();
             np = initServer.getNetworkPlan();
 #ifdef USE_MPI
@@ -238,7 +251,7 @@ namespace Initialization
         {
 #ifdef USE_MPI
             if (!_usingMPI)
-                throw std::runtime_error("Cannot start mpi simulation.");
+                throw std::runtime_error("Cannot start MPI simulation.");
             // quick and dirty bcast for the remote simulation data aka. for the NetworkPlan
             int num = 0;
             MPI_Recv(&num, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
@@ -299,7 +312,7 @@ namespace Initialization
 #endif
         }
         // adding network fmu and connections to program plan
-        Network::appendNetworkInformation(_pp, np);
+        Network::appendNetworkInformation(_progPlan, np);
 #endif
         return true;
     }

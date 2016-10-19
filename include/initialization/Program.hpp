@@ -15,6 +15,12 @@
 namespace Initialization
 {
 
+    /**
+     * Docu
+     *
+     * If ParallelFMU serves as network server, a NetworkPlan is added to the simulation plans of the ProgramPlan.
+     *
+     */
     class Program
     {
      public:
@@ -25,12 +31,26 @@ namespace Initialization
 
         virtual ~Program();
 
+        /** \brief Initializes the program.
+         * The ProgramPlan is created from the configuration file.
+         * MPI is initialized, if used.
+         * Network connection is established, if ParallelFMU is used as server.
+         * The simulations are created (but not initialized!).
+         */
         void initialize();
 
         void deinitialize();
 
+        /** \brief Runs the simulations.
+         *
+         * The simulations are initialized and than run/executed.
+         */
         void simulate();
 
+        /**
+         * Returns a shared pointer to the simulations.
+         * If OpenMP is used, a shared pointer to the simulation i-th simulation is returned, where i is the OpenMP thread number.
+         */
         Simulation::AbstractSimulationSPtr getSimulation();
 
         void printProgramInfo(const ProgramPlan & in) const;
@@ -42,9 +62,9 @@ namespace Initialization
         bool _usingOMP;
 
         CommandLineArgs _commandLineArgs;
-        ProgramPlan _pp;
+        ProgramPlan _progPlan;
 
-        std::vector<Simulation::AbstractSimulationSPtr> _simulations;
+        vector<Simulation::AbstractSimulationSPtr> _simulations;
 
         bool initMPI(int & rank, int & numRanks);
         bool initNetworkConnection(const int & rank);
