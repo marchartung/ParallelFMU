@@ -14,6 +14,7 @@
 
 namespace FMI
 {
+
     /**
      * Class to connect the output variables of an FMU with the input variables of another FMU. The mappings are
      * separated by their type and defined as tuple '(index of output variable, index of input variable)'.
@@ -39,8 +40,10 @@ namespace FMI
          * @param bool_typeVarsMapping Mapping tuples for bool_typeean variables '(index of output bool_typeean variable, index of input bool_typeean variable)'.
          * @param stringVarsMapping Mapping tuples for string_type variables '(index of output string_type variable, index of input string_type variable)'.
          */
-        InputMapping(vector<tuple<size_type, size_type> > realVarsMapping = vector<tuple<size_type, size_type> >(), vector<tuple<size_type, size_type> > intVarsMapping = vector<tuple<size_type, size_type> >(), vector<tuple<size_type, size_type> > bool_typeVarsMapping = vector<tuple<size_type, size_type> >(), vector<tuple<size_type, size_type> > stringVarsMapping =
-                             vector<tuple<size_type, size_type> >());
+        InputMapping(vector<tuple<size_type, size_type>> realVarsMapping = vector<tuple<size_type, size_type>>(),
+                     vector<tuple<size_type, size_type>> intVarsMapping = vector<tuple<size_type, size_type>>(),
+                     vector<tuple<size_type, size_type>> boolVarsMapping = vector<tuple<size_type, size_type>>(),
+                     vector<tuple<size_type, size_type>> stringVarsMapping = vector<tuple<size_type, size_type>>());
 
 
         /**
@@ -60,7 +63,7 @@ namespace FMI
          * @param values The new mapping values.
          */
         template<typename T>
-        void setValues(const vector<tuple<size_type, size_type> >& values)
+        void setValues(const vector<tuple<size_type, size_type>> & values)
         {
         	T v;
             _connectedVars[dataIndex<T>()] = values;
@@ -71,7 +74,7 @@ namespace FMI
          * @return A reference to the internal mapping.
          */
         template<typename T>
-        const vector<tuple<size_type, size_type> >& getValues() const
+        const vector<tuple<size_type, size_type>> & getValues() const
         {
             return _connectedVars[dataIndex<T>()];
         }
@@ -90,16 +93,9 @@ namespace FMI
 
         void unpack(ValueCollection & out, const ValueCollection & in) const;
 
-        size_type size() const
-        {
-            return _connectedVars.size();
-        }
+        size_type size() const;
 
-        ValueCollection getPackedValueCollection() const
-        {
-            return ValueCollection(getValues<real_type>().size(),getValues<int_type>().size(),getValues<bool_type>().size(),getValues<string_type>().size());
-        }
-
+        ValueCollection getPackedValueCollection() const;
 
         friend std::ostream & operator<<(std::ostream & in, const InputMapping & im);
 
@@ -117,7 +113,7 @@ namespace FMI
 
      private:
         /// Output variables mapped to input variables
-        vector<vector<tuple<size_type, size_type> > > _connectedVars;
+        vector<vector<tuple<size_type, size_type>>> _connectedVars;
 
         template<typename T>
         vector<T> pack(const ValueCollection & in) const

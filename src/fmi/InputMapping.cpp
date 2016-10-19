@@ -25,6 +25,17 @@ namespace FMI
         unpack<string_type>(out, in);
     }
 
+    size_type InputMapping::size() const
+    {
+        return _connectedVars.size();
+    }
+
+    ValueCollection InputMapping::getPackedValueCollection() const
+    {
+        return ValueCollection(getValues<real_type>().size(), getValues<int_type>().size(),
+                               getValues<bool_type>().size(), getValues<string_type>().size());
+    }
+
     std::ostream & operator<<(std::ostream & in, const FMI::InputMapping & im)
     {
         for (unsigned i = 0; i < 4; ++i)
