@@ -14,7 +14,6 @@
 #include <typeinfo>
 
 #include "Stdafx.hpp"
-#include "fmi/InputMapping.hpp"
 #include "initialization/IConfigurationReader.hpp"
 #include "initialization/DefaultValues.hpp"
 
@@ -95,7 +94,7 @@ namespace Initialization
         void checkForUndefinedValues(const T & first)
         {
             if (DefaultValues::isUndefinedValue<T>(first))
-                throw std::runtime_error("Uninitialized value.");
+                throw runtime_error("Uninitialized value.");
         }
     };
 
