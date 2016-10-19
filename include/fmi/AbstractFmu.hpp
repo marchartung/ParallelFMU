@@ -122,12 +122,12 @@ namespace FMI
          * Get the storage location of the FMU.
          * @return The path to the FMU-file.
          */
-        const std::string & getPath() const
+        const string & getPath() const
         {
             return _path;
         }
 
-        const std::string & getWorkingDirectory() const
+        const string & getWorkingDirectory() const
         {
             return _workingPath;
         }
@@ -145,7 +145,7 @@ namespace FMI
          * Get the unique name of the FMU.
          * @return The stored name.
          */
-        const std::string& getFmuName() const
+        const string& getFmuName() const
         {
             return _name;
         }
@@ -268,14 +268,14 @@ namespace FMI
             getStatesInternal(states);
         }
 
-        void getStates(std::vector<real_type> & in) const
+        void getStates(vector<real_type> & in) const
         {
             getStates(in.data());
         }
 
-        std::vector<real_type> getStates() const
+        vector<real_type> getStates() const
         {
-            std::vector<real_type> res(getNumStates());
+            vector<real_type> res(getNumStates());
             getStates(res);
             return res;
         }
@@ -445,7 +445,7 @@ namespace FMI
             _relativeTolerance = relativeTolerance;
         }
 
-        void getValues(FMI::ValueCollection& values) const
+        void getValues(ValueCollection& values) const
         {
             getValuesInternal(values.getValues<real_type>(), _eventValueReferences.getValues<real_type>());
             getValuesInternal(values.getValues<int_type>(), _eventValueReferences.getValues<int_type>());
@@ -453,7 +453,7 @@ namespace FMI
             getValuesInternal(values.getValues<string_type>(), _eventValueReferences.getValues<string_type>());
         }
 
-        void getAllValues(FMI::ValueCollection& values) const
+        void getAllValues(ValueCollection& values) const
         {
             getValuesInternal(values.getValues<real_type>(), _allValueReferences.getValues<real_type>());
             getValuesInternal(values.getValues<int_type>(), _allValueReferences.getValues<int_type>());
@@ -466,17 +466,17 @@ namespace FMI
             return _eventInfo;
         }
 
-        std::vector<Synchronization::ConnectionSPtr> & getConnections()
+        vector<Synchronization::ConnectionSPtr> & getConnections()
         {
             return _fmuCons;
         }
 
-        const std::vector<Synchronization::ConnectionSPtr> & getConnections() const
+        const vector<Synchronization::ConnectionSPtr> & getConnections() const
         {
             return _fmuCons;
         }
 
-        void setConnections(const std::vector<Synchronization::ConnectionSPtr> & in)
+        void setConnections(const vector<Synchronization::ConnectionSPtr> & in)
         {
             _fmuCons = in;
         }
@@ -526,10 +526,10 @@ namespace FMI
         size_type _localId;
         size_type _sharedId;
         /// Name of the FMU.
-        std::string _name;
+        string _name;
         /// (Absolute) Path to the FMU.
-        std::string _path;
-        std::string _workingPath;
+        string _path;
+        string _workingPath;
         bool _loaded;
         real_type _relativeTolerance;
         bool _toleranceControlled;
@@ -552,7 +552,7 @@ namespace FMI
         size_type _numberOfStates;
         size_type _numberOfEventIndicators;
 
-        std::vector<Synchronization::ConnectionSPtr> _fmuCons;
+        vector<Synchronization::ConnectionSPtr> _fmuCons;
     };
 } /* namespace FMI */
 
