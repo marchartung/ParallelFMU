@@ -21,7 +21,7 @@ namespace Util
 
         vector()
                 : _num(0),
-                  _array(NULL),
+                  _array(nullptr),
                   _ref(true)
         {
         }
