@@ -30,7 +30,9 @@ namespace Synchronization
          * @param bufferScheme Pattern for recv and send data
          */
         AbstractConnection(const Initialization::ConnectionPlan & in)
-                : _buffer(vector<HistoryEntryBuffer>(in.bufferSize, HistoryEntryBuffer(HistoryEntry(in.inputMapping.getPackedValueCollection()),true))),
+                : _buffer(vector<HistoryEntryBuffer>(
+                          in.bufferSize,
+                          HistoryEntryBuffer(HistoryEntry(in.inputMapping.getPackedValueCollection()), true))),
                   _currentReceiveIndex(0),
                   _currentSendIndex(0),
                   _localId(0),
@@ -65,7 +67,8 @@ namespace Synchronization
         virtual int_type hasFreeBuffer() = 0;
 
         virtual void initialize(const std::string & fmuName)
-        {}
+        {
+        }
 
         bool isOutgoing(const std::string & fmuName) const
         {
@@ -106,7 +109,7 @@ namespace Synchronization
 
         size_t nextSendIndex() const
         {
-            if (_currentSendIndex == _buffer.size()-1)
+            if (_currentSendIndex == _buffer.size() - 1)
                 return (_currentSendIndex + 1) % _buffer.size();
             else
                 return (_currentSendIndex + 1) % _buffer.size();
