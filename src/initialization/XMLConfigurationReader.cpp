@@ -13,7 +13,8 @@ namespace Initialization
         read_xml(configurationFilePath, _propertyTree);
     }
 
-    FmuPlan XMLConfigurationReader::getFmuPlan(const ptree::value_type & fmuElem, const SimulationPlan & simPlan, const size_type id)
+    FmuPlan XMLConfigurationReader::getFmuPlan(const ptree::value_type & fmuElem, const SimulationPlan & simPlan,
+                                               const size_type id)
     {
         FmuPlan res = DefaultValues::fmuPlan();
         res.path = fmuElem.second.get<string_type>("<xmlattr>.path", res.path);
@@ -36,7 +37,8 @@ namespace Initialization
         return res;
     }
 
-    SolverPlan XMLConfigurationReader::getSolverPlan(const ptree::value_type &firstElem, const SimulationPlan & simPlan, size_type id)
+    SolverPlan XMLConfigurationReader::getSolverPlan(const ptree::value_type &firstElem, const SimulationPlan & simPlan,
+                                                     size_type id)
     {
         SolverPlan res = DefaultValues::solverPlan();
         res.id = id;
@@ -46,11 +48,13 @@ namespace Initialization
         res.endTime = firstElem.second.get<real_type>("<xmlattr>.endTime", simPlan.endTime);
         res.stepSize = firstElem.second.get<real_type>("<xmlattr>.defaultStepSize", simPlan.defaultStepSize);
         res.eventInterval = firstElem.second.get<real_type>("<xmlattr>.eventInterval", simPlan.defaultEventInterval);
-        checkForUndefinedValues(res.kind, res.id, res.maxError, res.startTime, res.endTime, res.stepSize, res.eventInterval);
+        checkForUndefinedValues(res.kind, res.id, res.maxError, res.startTime, res.endTime, res.stepSize,
+                                res.eventInterval);
         return res;
     }
 
-    list<SolverPlan> XMLConfigurationReader::getSolverPlanFromMultipleFmu(const ptree::value_type &firstElem, const size_type & startId,
+    list<SolverPlan> XMLConfigurationReader::getSolverPlanFromMultipleFmu(const ptree::value_type &firstElem,
+                                                                          const size_type & startId,
                                                                           const SimulationPlan & simPlan)
     {
         list<SolverPlan> res;
@@ -66,11 +70,12 @@ namespace Initialization
         return res;
     }
 
-    list<SolverPlan> XMLConfigurationReader::getSolverPlanFromFmu(const ptree::value_type &firstElem, const size_type & id, const SimulationPlan & simPlan,
+    list<SolverPlan> XMLConfigurationReader::getSolverPlanFromFmu(const ptree::value_type &firstElem,
+                                                                  const size_type & id, const SimulationPlan & simPlan,
                                                                   const bool & single)
     {
         SolverPlan solv = getSolverPlan(firstElem, simPlan, id);
-        solv.fmu = shared_ptr<FmuPlan>(new FmuPlan(getFmuPlan(firstElem, simPlan, (single) ? std::numeric_limits<size_type>::max() : id)));
+        solv.fmu = make_shared<FmuPlan>(getFmuPlan(firstElem, simPlan, (single) ? std::numeric_limits<size_type>::max() : id));
         solv.fmu->id = firstElem.second.get<size_type>("<xmlattr>.id", DefaultValues::getUndefinedValue<size_type>());
         if (DefaultValues::isUndefinedValue(solv.fmu->id))
             solv.fmu->id = id;
@@ -108,7 +113,7 @@ namespace Initialization
 
         if (mapElem.first != "connection")
         {
-            LOGGER_WRITE(string("XMLConfigurationReader: Unknown connection type \"") + mapElem.first +string("\".") ,
+            LOGGER_WRITE(string("XMLConfigurationReader: Unknown connection type \"") + mapElem.first + string("\"."),
                          Util::LC_LOADER, Util::LL_WARNING);
             return res;
         }
@@ -163,7 +168,8 @@ namespace Initialization
         res.defaultTolerance = simElem.get<real_type>("<xmlattr>.defaultTolerance", res.defaultTolerance);
         res.endTime = simElem.get<real_type>("<xmlattr>.endTime");
         res.startTime = simElem.get<real_type>("<xmlattr>.startTime ", res.startTime);
-        checkForUndefinedValues(res.defaultEventInterval, res.defaultMaxError, res.defaultTolerance, res.endTime, res.startTime);
+        checkForUndefinedValues(res.defaultEventInterval, res.defaultMaxError, res.defaultTolerance, res.endTime,
+                                res.startTime);
         return res;
     }
 
@@ -217,7 +223,8 @@ namespace Initialization
         return res;
     }
 
-    void XMLConfigurationReader::appendConnectionInformation(list<SolverPlan> & solverPlans, list<ConnectionPlan> & connPlans,
+    void XMLConfigurationReader::appendConnectionInformation(list<SolverPlan> & solverPlans,
+                                                             list<ConnectionPlan> & connPlans,
                                                              const SchedulePlan & schedPlan)
     {
         map<string_type, SolverPlan*> fmuNameToSolver;
@@ -228,7 +235,7 @@ namespace Initialization
 
         for (ConnectionPlan & cp : connPlans)
         {
-            tmp = shared_ptr<ConnectionPlan>(new ConnectionPlan(cp));
+            tmp = make_shared<ConnectionPlan>(cp);
             tuple<size_type, size_type> destId, sourceId;
             destId = schedPlan.solvIdToCore[fmuNameToSolver[cp.destFmu]->id];
             sourceId = schedPlan.solvIdToCore[fmuNameToSolver[cp.sourceFmu]->id];
@@ -293,10 +300,10 @@ namespace Initialization
                                                                               const SchedulePlan & schedPlan,
                                                                               const SimulationPlan simPlan)
     {
-        vector<vector<SimulationPlan>> res(schedPlan.nodeStructure.size(),vector<SimulationPlan>(0));
-        for(size_type i=0;i<res.size();++i)
+        vector<vector<SimulationPlan>> res(schedPlan.nodeStructure.size(), vector<SimulationPlan>(0));
+        for (size_type i = 0; i < res.size(); ++i)
         {
-                res[i].resize(schedPlan.nodeStructure[i].size(),simPlan);
+            res[i].resize(schedPlan.nodeStructure[i].size(), simPlan);
         }
         vector<size_type> numSolver(res.size(), 0);
         WriterPlan wp = getWriterPlan();
@@ -318,13 +325,14 @@ namespace Initialization
         // Setting history and Sim kind:
         for (size_type i = 0; i < res.size(); ++i)
         {
-            shared_ptr<Synchronization::Communicator> tmpCom(new Synchronization::Communicator());
+            auto tmpCom = make_shared<Synchronization::Communicator>();
             for (size_type j = 0; j < res[i].size(); ++j)
             {
                 res[i][j].dataManager.writer.startTime = simPlan.startTime;  // Maybe different to the others
                 res[i][j].dataManager.writer.endTime = simPlan.endTime;
-                res[i][j].dataManager.writer.filePath = string("p") + to_string(i) + string("_") + res[i][j].dataManager.writer.filePath;
-                res[i][j].dataManager.history.kind =  "serial";  // is only for extension (work in progress) to support different kinds of data histories
+                res[i][j].dataManager.writer.filePath = string("p") + to_string(i) + string("_")
+                        + res[i][j].dataManager.writer.filePath;
+                res[i][j].dataManager.history.kind = "serial";  // is only for extension (work in progress) to support different kinds of data histories
                 res[i][j].dataManager.commnicator = tmpCom;
 
                 res[i][j].kind = "serial";
@@ -354,7 +362,7 @@ namespace Initialization
             }
         }
         else
-            createMapping(solverPlans, schedPlan);  // spread the solver on cores
+        createMapping(solverPlans, schedPlan);  // spread the solver on cores
 
         appendConnectionInformation(solverPlans, connPlans, schedPlan);
 

@@ -46,8 +46,8 @@ namespace Initialization
         ProgramPlan getProgramPlan();
 
      private:
-        vector<vector<SimulationPlan>> getSimulationPlans(const list<SolverPlan> & solverPlans, const SchedulePlan & schedPlan,
-                                                          const SimulationPlan simPlan);
+        vector<vector<SimulationPlan>> getSimulationPlans(const list<SolverPlan> & solverPlans,
+                                                          const SchedulePlan & schedPlan, const SimulationPlan simPlan);
 
         FmuPlan getFmuPlan(const ptree::value_type & fmuElem, const SimulationPlan & simPlan, const size_type id);
 
@@ -59,8 +59,8 @@ namespace Initialization
 
         list<SolverPlan> getSolverPlans(const SimulationPlan & simPlan);
 
-        SolverPlan getSolverPlan(const ptree::value_type & firstElem, const SimulationPlan & simPlan,
-                                 size_type id = std::numeric_limits<size_type>::max());
+        SolverPlan getSolverPlan(const ptree::value_type & firstElem, const SimulationPlan & simPlan, size_type id =
+                                         std::numeric_limits<size_type>::max());
 
         ConnectionPlan getConnectionPlan(ptree::value_type & mapElem);
 
@@ -74,7 +74,8 @@ namespace Initialization
 
         SimulationPlan getDefaultSimulationPlan();
 
-        void appendConnectionInformation(list<SolverPlan> & solverPlans, list<ConnectionPlan> & connPlans, const SchedulePlan & schedPlan);
+        void appendConnectionInformation(list<SolverPlan> & solverPlans, list<ConnectionPlan> & connPlans,
+                                         const SchedulePlan & schedPlan);
 
         WriterPlan getWriterPlan();
 
