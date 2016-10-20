@@ -8,19 +8,19 @@
 #ifndef INCLUDE_SYNCHRONIZATION_DATAMANAGER_HPP_
 #define INCLUDE_SYNCHRONIZATION_DATAMANAGER_HPP_
 
-#include "fmi/AbstractFmu.hpp"
 #include "Stdafx.hpp"
+#include "fmi/AbstractFmu.hpp"
+#include "fmi/InputMapping.hpp"
 #include "BasicTypedefs.hpp"
 #include "solver/SolverStepInfo.hpp"
-#include "fmi/InputMapping.hpp"
 #include "synchronization/IDataManager.hpp"
 #include "synchronization/AbstractDataHistory.hpp"
 #include "synchronization/Communicator.hpp"
-#include "util/Vector.hpp"
 #include "initialization/Plans.hpp"
 
 namespace Synchronization
 {
+
     /**
      * Receives data from communicator and interpolates if necessary. One DataManager serves all FMUs on a (compute) node.
      */
