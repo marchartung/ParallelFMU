@@ -119,6 +119,7 @@ namespace FMI
             }
             else
                 throw std::runtime_error("Variable contains illegal or missing vars");
+
             switch (varCausality)
             {
                 case VarCausality::varCausalityInput:
@@ -133,13 +134,12 @@ namespace FMI
                 default:
                     ;
             }
-
         }
 
         template<typename T>
         T getStartValue(ScalarVariable * variable, ValueStatus & vs)
         {
-            throw std::runtime_error("FmuSdk: Unkown type for start value.");
+            throw runtime_error("FmuSdk: Unkown type for start value.");
         }
     };
 
