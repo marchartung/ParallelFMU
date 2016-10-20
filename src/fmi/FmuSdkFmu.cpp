@@ -5,6 +5,7 @@
 
 namespace FMI
 {
+
     map<string_type, tuple<FMU *, size_type>> FmuSdkFmu::_knownFmus;
 
     FmuSdkFmu::FmuSdkFmu(const Initialization::FmuPlan & in)
@@ -31,7 +32,8 @@ namespace FMI
         _workingPath = boost::filesystem::absolute(_workingPath).string();
         ModelDescription *modelDescription = _fmu->modelDescription;
         string_type guid = string_type(getString(modelDescription, att_guid));
-        LOGGER_WRITE(string_type("Try to load FMU from ") + _path + string_type(" and work on ") + _workingPath, Util::LC_LOADER, Util::LL_DEBUG);
+        LOGGER_WRITE(string_type("Try to load FMU from ") + _path + string_type(" and work on ") + _workingPath,
+                     Util::LC_LOADER, Util::LL_DEBUG);
 
         _component = _fmu->instantiateModel(getModelIdentifier(modelDescription), guid.c_str(), _callbacks, _loggingEnabled);
 
@@ -60,7 +62,7 @@ namespace FMI
                     addVariable<int_type>(modelDescription->modelVariables[i]);  // enums are treated as integers
                     break;
                 default:
-                    throw std::runtime_error("FmuSdk: VarType unkown.");
+                    throw runtime_error("FmuSdkFmu: VarType unknown.");
             }
         }
 
@@ -93,10 +95,10 @@ namespace FMI
         if (_fmu != nullptr)
         {
             _fmu->freeModelInstance(_component);
-            --std::get<1>(_knownFmus.at(std::string(_fmu->path)));
-            if (std::get<1>(_knownFmus.at(std::string(_fmu->path))) == 0)
+            --get<1>(_knownFmus.at(string(_fmu->path)));
+            if (get<1>(_knownFmus.at(string(_fmu->path))) == 0)
             {
-                _knownFmus.erase(std::string(_fmu->path));
+                _knownFmus.erase(string(_fmu->path));
                 unloadFMU(_fmu);
             }
         }
@@ -108,7 +110,7 @@ namespace FMI
         fmiStatus fmiFlag;
         fmiFlag = _fmu->initialize(_component, isToleranceControlled(), getRelativeTolerance(), &_componentEventInfo);
         if (fmiFlag > fmiWarning)
-            throw runtime_error("Could not initialize model");
+            throw runtime_error("FmuSdkFmu: Could not initialize model.");
     }
 
     void FmuSdkFmu::stepCompleted()
@@ -116,30 +118,30 @@ namespace FMI
         char stepEvent;
         fmiStatus fmiFlag = _fmu->completedIntegratorStep(_component, &stepEvent);
         if (fmiFlag > fmiWarning)
-            runtime_error("Could not complete integrator step of the given FMU.");
+            runtime_error("FmuSdkFmu: Could not complete integrator step of the given FMU.");
     }
 
     FmuEventInfo FmuSdkFmu::eventUpdate()
     {
         fmiStatus fmiFlag = _fmu->eventUpdate(_component, _intermediateResults, &_componentEventInfo);
         if (fmiFlag > fmiWarning)
-            runtime_error("Could not perform event update.");
+            runtime_error("FmuSdkFmu: Could not perform event update.");
         _eventInfo.assign(_componentEventInfo);
         return _eventInfo;
     }
 
     double FmuSdkFmu::getDefaultStart() const
     {
-        if (_fmu->modelDescription == NULL)
-            runtime_error("No model description defined in FMU-structure.");
+        if (_fmu->modelDescription == nullptr)
+            runtime_error("FmuSdkFmu: No model description defined in FMU-structure.");
 
         return getDefaultStartTime(_fmu->modelDescription);
     }
 
     double FmuSdkFmu::getDefaultStop() const
     {
-        if (_fmu->modelDescription == NULL)
-            runtime_error("No model description defined in FMU-structure.");
+        if (_fmu->modelDescription == nullptr)
+            runtime_error("FmuSdkFmu: No model description defined in FMU-structure.");
 
         return getDefaultStopTime(_fmu->modelDescription);
     }
@@ -185,7 +187,7 @@ namespace FMI
         auto iter = _knownFmus.find(fmuName);
         if (iter != _knownFmus.end())
         {
-            ++std::get<1>(iter->second);
+            ++get<1>(iter->second);
             return get<0>(iter->second);
         }
 
@@ -194,7 +196,7 @@ namespace FMI
         return fmu;
     }
 
-    void FmuSdkFmu::fillNameVector(vector<string_type>& valueNames, const map<int, string_type>& valueNamesIdx)
+    void FmuSdkFmu::fillNameVector(vector<string_type> & valueNames, const map<int, string_type> & valueNamesIdx)
     {
         for (auto iter : valueNamesIdx)
         {
@@ -278,7 +280,7 @@ namespace FMI
 
     inline AbstractFmu* FmuSdkFmu::duplicate()
     {
-        throw std::runtime_error("FmuSdkFmu: duplication not available.");
+        throw runtime_error("FmuSdkFmu: Duplication not available.");
     }
 
 } /* namespace FMI */
