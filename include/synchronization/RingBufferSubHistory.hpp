@@ -13,7 +13,6 @@
 #include "synchronization/HistoryEntry.hpp"
 #include "synchronization/Interpolation.hpp"
 
-
 namespace Synchronization
 {
 
@@ -33,7 +32,7 @@ namespace Synchronization
 
         friend class AbstractDataHistory;
 
-    private:
+     private:
         size_type _curIndex;
         size_type _lastInsertedElem;
         std::vector<HistoryEntry> _entries;
@@ -43,14 +42,18 @@ namespace Synchronization
 
         RingBufferSubHistory() = delete;
 
-        RingBufferSubHistory(const Interpolation & interpolation,
-                const FMI::ValueCollection & bufferScheme, size_type size = 300);
+        RingBufferSubHistory(const Interpolation & interpolation, const FMI::ValueCollection & bufferScheme,
+                             size_type size = 300);
 
         bool_type insert(const HistoryEntry & in);
 
         size_type deleteOlderThan(const HistoryEntry & in);
 
-        tuple<size_type,size_type> checkValidEntries() const;
+        /**
+         * Check, if _numAddedElems is greater than 1 and returns ...
+         * Otherwise, an exception is thrown.
+         */
+        tuple<size_type, size_type> checkValidEntries() const;
     };
 
 } /* namespace Synchronization */
