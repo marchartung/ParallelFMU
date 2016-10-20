@@ -35,7 +35,8 @@ namespace FMI
         LOGGER_WRITE(string_type("Try to load FMU from ") + _path + string_type(" and work on ") + _workingPath,
                      Util::LC_LOADER, Util::LL_DEBUG);
 
-        _component = _fmu->instantiateModel(getModelIdentifier(modelDescription), guid.c_str(), _callbacks, _loggingEnabled);
+        _component = _fmu->instantiateModel(getModelIdentifier(modelDescription), guid.c_str(), _callbacks,
+                                            _loggingEnabled);
 
         if (_component == nullptr)
             throw runtime_error("Could not instantiate FMU");
@@ -74,15 +75,18 @@ namespace FMI
 
         AbstractFmu::load(alsoInit);
         if (!_startValueReferences.getValues<real_type>().empty())
-            _fmu->setReal(_component, _startValueReferences.getValues<real_type>().data(), _startValueReferences.getValues<real_type>().size(),
+            _fmu->setReal(_component, _startValueReferences.getValues<real_type>().data(),
+                          _startValueReferences.getValues<real_type>().size(),
                           _startValues.getValues<real_type>().data());
 
         if (!_startValueReferences.getValues<bool_type>().empty())
-            _fmu->setBoolean(_component, _startValueReferences.getValues<real_type>().data(), _startValueReferences.getValues<real_type>().size(),
+            _fmu->setBoolean(_component, _startValueReferences.getValues<real_type>().data(),
+                             _startValueReferences.getValues<real_type>().size(),
                              _startValues.getValues<bool_type>().data());
 
         if (!_startValueReferences.getValues<int_type>().empty())
-            _fmu->setInteger(_component, _startValueReferences.getValues<real_type>().data(), _startValueReferences.getValues<real_type>().size(),
+            _fmu->setInteger(_component, _startValueReferences.getValues<real_type>().data(),
+                             _startValueReferences.getValues<real_type>().size(),
                              _startValues.getValues<int_type>().data());
 
         if (alsoInit)
