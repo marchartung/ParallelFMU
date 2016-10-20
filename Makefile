@@ -24,7 +24,9 @@ eclipse-omp: parallelFmu
 
 eclipse: parallelFmu
 	mkdir -p ../parallel_fmu_eclipse
-	cd ../parallel_fmu_eclipse && CC=$(CC) CXX=$(CXX) cmake -DFMILIB_HOME=$(FMILIB_HOME) -DMATIO_HOME=$(MATIO_HOME) -G"Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug $(ROOT_DIR) -DCMAKE_INSTALL_PREFIX:PATH="$(ROOT_DIR)/build"
+	cd ../parallel_fmu_eclipse && CC=$(CC) CXX=$(CXX) CXXFLAGS=$(CXXFLAGS) CFLAGS=$(CFLAGS) cmake \
+-DFMILIB_HOME=$(FMILIB_HOME) -DMATIO_HOME=$(MATIO_HOME) -G"Eclipse CDT4 - Unix Makefiles" \
+-DCMAKE_BUILD_TYPE=Debug $(ROOT_DIR) -DCMAKE_INSTALL_PREFIX:PATH="$(ROOT_DIR)/build"
 
 doc: build
 	make -C build_tmp doc
