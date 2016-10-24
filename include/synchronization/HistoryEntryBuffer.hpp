@@ -22,13 +22,13 @@ namespace Synchronization
      public:
         HistoryEntryBuffer(const HistoryEntry & in, bool init = false);
 
-        virtual ~HistoryEntryBuffer();
+        virtual ~HistoryEntryBuffer() = default;
 
         operator HistoryEntry() const;
 
         HistoryEntryBuffer & operator=(const HistoryEntry & in);
 
-        void* data();
+        void * data();
 
         size_type dataSize() const;
 
@@ -70,15 +70,15 @@ namespace Synchronization
 
         void initialize(const HistoryEntry & in);
 
-        real_type* getStartOfValueCollection();
+        real_type * getStartOfValueCollection();
 
-        int* getStartOfAdditionalIntValues();
+        int * getStartOfAdditionalIntValues();
 
-        bool_type* getStartOfAdditionalBoolValues();
+        bool_type * getStartOfAdditionalBoolValues();
 
-        const int* getStartOfAdditionalIntValues() const;
+        const int * getStartOfAdditionalIntValues() const;
 
-        const bool_type* getStartOfAdditionalBoolValues() const;
+        const bool_type * getStartOfAdditionalBoolValues() const;
 
     };
 
