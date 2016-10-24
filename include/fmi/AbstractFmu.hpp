@@ -8,12 +8,11 @@
 #ifndef INCLUDE_FMI_ABSTRACTFMU_HPP_
 #define INCLUDE_FMI_ABSTRACTFMU_HPP_
 
-#include "BasicTypedefs.hpp"
+#include "Stdafx.hpp"
 #include "fmi/FmuEventInfo.hpp"
 #include "fmi/ValueCollection.hpp"
 #include "fmi/ValueInfo.hpp"
 #include "fmi/ValueReferenceCollection.hpp"
-#include "Stdafx.hpp"
 #include "util/EventHandler.hpp"
 #include "initialization/Plans.hpp"
 
