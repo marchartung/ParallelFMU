@@ -42,7 +42,7 @@ namespace Initialization
             res = Synchronization::ConnectionSPtr(new Synchronization::MPIConnection(in));
 #endif
         else
-            throw std::runtime_error("MainFactory: Unknown connection type " + in.kind);
+            throw runtime_error("MainFactory: Unknown connection type " + in.kind);
         return res;
     }
 
@@ -53,7 +53,7 @@ namespace Initialization
         //else if(in.kind == "openmp")
         //    return createSimulationWithKnownType<Simulation::OpenMPSimulation>(in);
         else
-            throw std::runtime_error("MainFactoy: There's no simulation type " + in.kind);
+            throw runtime_error("MainFactoy: There's no simulation type " + in.kind);
     }
 
     vector<Synchronization::ConnectionSPtr> MainFactory::createConnectionsOfSolver(const SolverPlan & in) const
