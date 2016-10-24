@@ -10,7 +10,6 @@
 
 #include "Stdafx.hpp"
 
-
 namespace FMI
 {
 
@@ -58,7 +57,7 @@ namespace FMI
         template<typename T>
         void getValues(vector<T> & out, const vector<size_type> & references) const
         {
-            for(size_type i = 0; i < out.size();++i)
+            for (size_type i = 0; i < out.size(); ++i)
                 out[i] = getValues<T>()[references[i]];
         }
 
@@ -75,7 +74,7 @@ namespace FMI
         template<typename T>
         void setValues(const vector<T> & out, const vector<size_type> & references)
         {
-            for(size_type i = 0; i < out.size();++i)
+            for (size_type i = 0; i < out.size(); ++i)
                 getValues<T>()[references[i]] = out[i];
         }
 
@@ -86,7 +85,8 @@ namespace FMI
          */
         bool_type operator==(const ValueCollection & in) const
         {
-            return false;
+            return (_realValues == in._realValues && _intValues == in._intValues && _boolValues == in._boolValues
+                    && _stringValues == in._stringValues);
         }
 
         /**
@@ -120,13 +120,13 @@ namespace FMI
 
         bool_type empty() const;
 
-        template <typename T>
+        template<typename T>
         T * data()
         {
             return getValues<T>().data();
         }
 
-        template <typename T>
+        template<typename T>
         const T * data() const
         {
             return getValues<T>().data();
@@ -143,7 +143,7 @@ namespace FMI
         vector<bool_type> _boolValues;
 
         /// Storage of values of type string.
-        vector<string_type > _stringValues;
+        vector<string_type> _stringValues;
 
         template<typename T>
         void resizeInternal(const ValueCollection & in)
@@ -171,7 +171,7 @@ namespace FMI
     template<> const vector<string_type>& ValueCollection::getValues() const;
 
 } /* namespace FMI */
-string_type  to_string(const FMI::ValueCollection & in);
+string_type to_string(const FMI::ValueCollection & in);
 
 #endif /* INCLUDE_FMI_VALUECOLLECTION_HPP_ */
 /**
