@@ -48,7 +48,7 @@ namespace Synchronization
                                                const FMI::ValueCollection & bufferScheme, size_type size)
             : _curIndex(0),
               _lastInsertedElem(size - 1),
-              _entries(std::vector<HistoryEntry>(size, HistoryEntry(bufferScheme))),
+              _entries(vector<HistoryEntry>(size, HistoryEntry(bufferScheme))),
               _interpolation(interpolation),
               _numAddedElems(0)
     {
@@ -64,6 +64,7 @@ namespace Synchronization
                 _lastInsertedElem = 0;
             _entries[_lastInsertedElem] = in;
             ++_numAddedElems;
+            std::cout << "RingBufferSubHistory:: Added elements. NumAddedElems= " << _numAddedElems << '\n';
         }
         else
         {
