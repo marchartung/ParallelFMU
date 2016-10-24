@@ -37,8 +37,9 @@ namespace Synchronization
 
         real_type getTolerance() const;
 
-        FMI::ValueCollection interpolateHistory(const vector<HistoryEntry> & entries, const tuple<size_type, size_type> & range,
-                                                const size_type & curI, const size_type & time);
+        FMI::ValueCollection interpolateHistory(const vector<HistoryEntry> & entries,
+                                                const tuple<size_type, size_type> & range, const size_type & curI,
+                                                const size_type & time);
 
      private:
         template<typename T>
@@ -47,11 +48,12 @@ namespace Synchronization
             throw runtime_error("Interpolation: order not supported");
         }
 
-        list<const HistoryEntry*> internalCollect(const real_type & curTime, const set<HistoryEntry> & dh, size_type n) const;
+        list<const HistoryEntry*> internalCollect(const real_type & curTime, const set<HistoryEntry> & dh,
+                                                  size_type n) const;
 
         template<typename T>
-        vector<T> interpolateValues(const vector<HistoryEntry> & entries, const size_type & startI, const size_type & endI,
-                                         const size_type & time)
+        vector<T> interpolateValues(const vector<HistoryEntry> & entries, const size_type & startI,
+                                    const size_type & endI, const size_type & time)
         {
             throw runtime_error("Interpolation: type not supported");
         }
@@ -61,19 +63,19 @@ namespace Synchronization
     }; // End class Interpolation
 
     template<>
-    vector<real_type> Interpolation::interpolateValues(const std::vector<HistoryEntry> & entries, const size_type & startI,
+    vector<real_type> Interpolation::interpolateValues(const vector<HistoryEntry> & entries, const size_type & startI,
                                                        const size_type & endI, const size_type & time);
 
     template<>
-    vector<int_type> Interpolation::interpolateValues(const std::vector<HistoryEntry> & entries, const size_type & startI,
+    vector<int_type> Interpolation::interpolateValues(const vector<HistoryEntry> & entries, const size_type & startI,
                                                       const size_type & endI, const size_type & time);
 
     template<>
-    vector<bool_type> Interpolation::interpolateValues(const std::vector<HistoryEntry> & entries, const size_type & startI,
+    vector<bool_type> Interpolation::interpolateValues(const vector<HistoryEntry> & entries, const size_type & startI,
                                                        const size_type & endI, const size_type & time);
 
     template<>
-    vector<string_type> Interpolation::interpolateValues(const std::vector<HistoryEntry> & entries, const size_type & startI,
+    vector<string_type> Interpolation::interpolateValues(const vector<HistoryEntry> & entries, const size_type & startI,
                                                          const size_type & endI, const size_type & time);
 
 } /* End namespace Synchronization */
