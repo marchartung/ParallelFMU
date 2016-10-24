@@ -29,8 +29,6 @@ namespace Initialization
 
         tuple<int *, char ***> getProgramArgs();
 
-        tuple<const int *, const char ***> getProgramArgs() const;
-
         bool isSimulationServer() const;
 
         bool isSimulationClient() const;

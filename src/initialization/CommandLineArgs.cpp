@@ -59,12 +59,6 @@ namespace Initialization
         return make_tuple(_argc, _argv);
     }
 
-    tuple<const int *, const char ***> CommandLineArgs::getProgramArgs() const
-    {
-        // Infinite recursion
-        //return getProgramArgs();
-    }
-
     void CommandLineArgs::initialize(int * argc, char ** argv[])
     {
         map<std::string, Util::LogCategory> logCatMap = getLogCatMap();
