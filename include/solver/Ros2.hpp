@@ -18,7 +18,8 @@ namespace Solver
      * \remark: For references, see http://oai.cwi.nl/oai/asset/1252/1252A.pdf
      */
 
-    extern "C" int_type dgetrs_(char *trans, int_type *n, int_type *nrhs, double *a, int_type *lda, int_type *ipiv, double *b, int_type * ldb, int_type *info);
+    extern "C" int_type dgetrs_(char *trans, int_type *n, int_type *nrhs, double *a, int_type *lda, int_type *ipiv,
+                                double *b, int_type * ldb, int_type *info);
     extern "C" int_type dgetrf_(int_type *m, int_type *n, double *a, int_type * lda, int_type *ipiv, int_type *info);
 
     template<class DataManagerClass, class FmuClass>
@@ -33,8 +34,9 @@ namespace Solver
          * @param id Unique ID to identify the solver object.
          * @param fmu Pointer to the FMU that should be handled.
          * @param dataManager Pointer to the DataManager which handles the synchronization with other FMUs.
+         *
+         * \todo: Initialize ALL members!
          */
-        //Ros2(size_type id, FMI::FmuSPtr fmu, Synchronization::DataManagerSPtr dataManager);
         Ros2(const Initialization::SolverPlan & in, const FmuClass & fmu, std::shared_ptr<DataManagerClass> & dm)
                 : AbstractSolver<DataManagerClass, FmuClass>(in, fmu, dm),
                   _lapackTrans('N'),
@@ -44,6 +46,7 @@ namespace Solver
                   _gamma(0.5)
         {
         }
+
         /**
          * Destructor. Frees allocates resources.
          */
@@ -64,7 +67,8 @@ namespace Solver
             for (size_type i = 0; i < _stateDerivatives.size(); ++i)
                 _stateDerivatives[i] += _dfdt[i];
 
-            dgetrs_(&_lapackTrans, &_numStates, &_dimRHS, (real_type*) _jacobi[0], &_numStates, _pivot.data(), _stateDerivatives.data(), &_numStates, &_info);  //3
+            dgetrs_(&_lapackTrans, &_numStates, &_dimRHS, (real_type*) _jacobi[0], &_numStates, _pivot.data(),
+                    _stateDerivatives.data(), &_numStates, &_info);  //3
             for (size_type i = 0; i < _stateDerivatives.size(); ++i)
                 _states[i] += h * _stateDerivatives[i];
 
@@ -75,7 +79,8 @@ namespace Solver
             for (size_type i = 0; i < _stateDerivatives.size(); ++i)
                 _stateDerivatives2[i] += _dfdt[i] - 2.0 * _stateDerivatives[i];
 
-            dgetrs_(&_lapackTrans, &_numStates, &_dimRHS, (real_type *) _jacobi[0], &_numStates, _pivot.data(), _stateDerivatives2.data(), &_numStates, &_info);
+            dgetrs_(&_lapackTrans, &_numStates, &_dimRHS, (real_type *) _jacobi[0], &_numStates, _pivot.data(),
+                    _stateDerivatives2.data(), &_numStates, &_info);
 
             _fmu.setStates(_prevStates);
             double error = 0, tmpError;
@@ -83,7 +88,9 @@ namespace Solver
             {
                 _states[i] += h * std::abs(0.5 * _stateDerivatives[i] + 0.5 * _stateDerivatives2[i]);
                 tmpError = (_stateDerivatives[i] + _stateDerivatives2[i]);
-                tmpError /= (_prevStates[i] - std::max(0.0, h * (1.5 * _stateDerivatives[i] + 0.5 * _stateDerivatives2[i])) + 1.0) * _maxError;
+                tmpError /= (_prevStates[i]
+                        - std::max(0.0, h * (1.5 * _stateDerivatives[i] + 0.5 * _stateDerivatives2[i])) + 1.0)
+                        * _maxError;
                 if (tmpError > error)
                     error = tmpError;
             }
@@ -134,7 +141,8 @@ namespace Solver
         {
             AbstractSolver<DataManagerClass, FmuClass>::initialize();
             _jacobi = vector<double *>(_numStates, nullptr);
-            _jacobiSpace = std::shared_ptr<real_type>(new real_type[_numStates * _numStates]);
+            _jacobiSpace = std::shared_ptr<real_type>(new real_type[_numStates * _numStates],
+                                                      std::default_delete<real_type>());
             for (size_type i = 0; i < _jacobi.size(); ++i)
                 _jacobi[i] = &_jacobiSpace.get()[i * _jacobi.size()];
             _dfdt = vector1D(_numStates, 0.0);
