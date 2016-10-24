@@ -54,7 +54,7 @@ namespace Writer
             if (uiLength < 6)
                 return;
 
-            while (strncmp(pcStr, "der(", 4) == 0 && (pcDot = strrchr(pcStr, '.')) != NULL)
+            while (strncmp(pcStr, "der(", 4) == 0 && (pcDot = strrchr(pcStr, '.')) != nullptr)
             {
                 size_type uiPos = (size_type) (pcDot - pcStr) + 1;
 
