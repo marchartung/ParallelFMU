@@ -4,7 +4,7 @@
 namespace Simulation
 {
 
-    SerialSimulation::SerialSimulation(const Initialization::SimulationPlan & in, const vector<shared_ptr<Solver::ISolver>> & solvers)
+    SerialSimulation::SerialSimulation(const Initialization::SimulationPlan & in, const vector<std::shared_ptr<Solver::ISolver>> & solvers)
             : AbstractSimulation(in,solvers)
     {
     }
@@ -15,15 +15,20 @@ namespace Simulation
 
     void SerialSimulation::simulate()
     {
-        bool running;
+        //! We can/should use a bool! bool_type running;
+        bool running = true;
         size_type iterationCount = 0;
-        const vector<shared_ptr<Solver::ISolver>>& solver = getSolver();
-        vector<size_type> numSteps(solver.size(),15);
+        //const vector<shared_ptr<Solver::ISolver>>& solver = getSolver();
+
+        const auto& solver = getSolver();
+
+        std::vector<size_type> numSteps(solver.size(),15);
         size_type tmpStepCount;
         double s (0.0) , e (0.0);
         //s = omp_get_wtime();
         while (running && getMaxIterations() > ++iterationCount)
         {
+            LOGGER_WRITE("Running at iteration " + to_string(iterationCount) , Util::LC_SOLVER, Util::LL_DEBUG);
             running = false;
             for (size_type i = 0; i < solver.size(); ++i)
             {
@@ -36,8 +41,7 @@ namespace Simulation
                     --numSteps[i];
                 else
                     ++numSteps[i];
-
-                //LOGGER_WRITE("(" + to_string(i) + ") numSteps: " + to_string(numSteps[i]),Util::LC_SOLVER, Util::LL_ERROR);
+                LOGGER_WRITE("(" + to_string(i) + ") numSteps: " + to_string(numSteps[i]),Util::LC_SOLVER, Util::LL_ERROR);
                 if (solver[i]->getCurrentTime() < getSimulationEndTime())
                     running = true;
                 else
