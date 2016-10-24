@@ -37,7 +37,7 @@ namespace Solver
          *
          * \todo: Initialize ALL members!
          */
-        Ros2(const Initialization::SolverPlan & in, const FmuClass & fmu, std::shared_ptr<DataManagerClass> & dm)
+        Ros2(const Initialization::SolverPlan & in, const FmuClass & fmu, shared_ptr<DataManagerClass> & dm)
                 : AbstractSolver<DataManagerClass, FmuClass>(in, fmu, dm),
                   _lapackTrans('N'),
                   _info(1),
@@ -141,8 +141,8 @@ namespace Solver
         {
             AbstractSolver<DataManagerClass, FmuClass>::initialize();
             _jacobi = vector<double *>(_numStates, nullptr);
-            _jacobiSpace = std::shared_ptr<real_type>(new real_type[_numStates * _numStates],
-                                                      std::default_delete<real_type>());
+            _jacobiSpace = shared_ptr<real_type>(new real_type[_numStates * _numStates],
+                                                 std::default_delete<real_type>());
             for (size_type i = 0; i < _jacobi.size(); ++i)
                 _jacobi[i] = &_jacobiSpace.get()[i * _jacobi.size()];
             _dfdt = vector1D(_numStates, 0.0);
@@ -159,7 +159,7 @@ namespace Solver
         void calcJacobi(const real_type & h)
         {
             real_type delta;
-            throw std::runtime_error("Ros2 isn't implemented.");
+            throw runtime_error("Ros2 isn't implemented.");
             _fmu.getStates(_states);
             _tmpStates = _states;
             _fmu.getStateDerivatives(_stateDerivatives);
@@ -207,7 +207,7 @@ namespace Solver
 
         /// Jacobian matrix for a particular step size.
         matrix _jacobi;
-        std::shared_ptr<real_type> _jacobiSpace;
+        shared_ptr<real_type> _jacobiSpace;
         vector1D _dfdt;
 
         vector1D _stateDerivatives2;
