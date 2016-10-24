@@ -50,9 +50,10 @@ namespace Util
          * Create a new object for logger settings. All categories are set to the warning level by default.
          */
         LogSettings()
+                : modes(vector<LogLevel>(5, LL_DEBUG))
         {
-            modes = vector<LogLevel>(5, LL_DEBUG);
         }
+
         /**
          * Set all categories at once to the given level.
          * @param level The new level for all categories.
@@ -115,7 +116,7 @@ namespace Util
          * @param category The category of the message.
          * @param level The significance of the given message.
          */
-        static inline void write(string_type  message, LogCategory category, LogLevel level)
+        static inline void write(string_type message, LogCategory category, LogLevel level)
         {
             Logger& instance = getInstance();
             if (instance.isEnabled())
@@ -128,7 +129,7 @@ namespace Util
          * @param message The message that should be written.
          * @param mode The category and significance indicator encapsulated as one pair.
          */
-        static inline void write(string_type  message, std::pair<LogCategory, LogLevel> mode)
+        static inline void write(string_type message, std::pair<LogCategory, LogLevel> mode)
         {
             write(message, mode.first, mode.second);
         }
@@ -186,7 +187,7 @@ namespace Util
          * @param category The category of the message.
          * @param level The significance of the given message.
          */
-        virtual void writeInternal(string_type  message, LogCategory category, LogLevel level);
+        virtual void writeInternal(string_type message, LogCategory category, LogLevel level);
         /**
          * Enable or disable the logger.
          * @param enabled True if the logger should be enabled.
@@ -205,26 +206,26 @@ namespace Util
          * @param level The level of the message.
          * @return The prefix that contains color information.
          */
-        string_type  getPrefix(LogCategory category, LogLevel level) const;
+        string_type getPrefix(LogCategory category, LogLevel level) const;
         /**
          * Get a suffix text decoration for a message of the given category and level.
          * @param category The category of the message.
          * @param level The level of the message.
          * @return The suffix that contains color and category information.
          */
-        string_type  getSuffix(LogCategory category, LogLevel level) const;
+        string_type getSuffix(LogCategory category, LogLevel level) const;
         /**
          * Convert the given log category to string.
          * @param category The category that should be converted.
          * @return The result string.
          */
-        string_type  logCategoryToString(LogCategory category) const;
+        string_type logCategoryToString(LogCategory category) const;
         /**
          * Convert the given log level to string.
          * @param level The level that should be converted.
          * @return The result string.
          */
-        string_type  logLevelToString(LogLevel level) const;
+        string_type logLevelToString(LogLevel level) const;
         /**
          * The static logger singleton instance. This should be set by the initialize method of the concrete logger
          * implementation.
@@ -233,7 +234,7 @@ namespace Util
 
      private:
         LogSettings _settings;
-        vector<std::tuple<string_type , string_type > > _textDecorator;
+        vector<std::tuple<string_type, string_type> > _textDecorator;
         bool_type _isEnabled;
     };
 
