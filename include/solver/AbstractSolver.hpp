@@ -36,9 +36,9 @@ namespace Solver
     class AbstractSolver : public ISolver
     {
         static_assert(std::is_base_of<Synchronization::IDataManager,DataManagerClass>::value,
-                      "AbstractSolver: Template argument FmuClass must be a specialization of IDataManager");
+                "AbstractSolver: Template argument FmuClass must be a specialization of IDataManager");
         static_assert(std::is_base_of<FMI::AbstractFmu,FmuClass>::value,
-                      "AbstractSolver: Template argument 2 must be a specialization of AbstractFMU");
+                "AbstractSolver: Template argument 2 must be a specialization of AbstractFMU");
 
      protected:
         virtual void doSolverStep(const real_type & h) = 0;
@@ -58,8 +58,8 @@ namespace Solver
          * @param fmu
          * @param dataManager
          */
-        //AbstractSolver(size_type id, FMI::FmuSPtr fmu, Synchronization::DataManagerSPtr dataManager);
-        AbstractSolver(const Initialization::SolverPlan & in, const FmuClass & fmu, shared_ptr<DataManagerClass> & dataManager)
+        AbstractSolver(const Initialization::SolverPlan & in, const FmuClass & fmu,
+                       shared_ptr<DataManagerClass> & dataManager)
                 : _numStates(0),
                   _numEvents(0),
                   _currentTime(in.startTime),
@@ -77,6 +77,7 @@ namespace Solver
                   _eventIndicators(),
                   _prevEventIndicators(),
                   _tmpEventIndicators(),
+                  _dependencyInfo(DependencyStatus::BLOCKED),
                   _freshStep(false),
                   _savedStep(false),
                   _sEventInfo(),
@@ -88,7 +89,7 @@ namespace Solver
                   _dataManager(dataManager)
         {
             //assert(dataManager != nullptr);
-        }
+        }        /// All state values from last time step.
 
         /**
          * Destroy solver.
@@ -130,7 +131,9 @@ namespace Solver
             _fmu.getEventIndicators(_prevEventIndicators);
 
             if (_tolerance <= 0.0 || _maxError <= 0.0 || _initStepSize <= 0.0)
-                throw runtime_error("FMU values not set correctly. " + to_string(_tolerance) + "|" + to_string(_maxError) + "|" + to_string(_initStepSize));
+                throw runtime_error(
+                        "FMU values not set correctly. " + to_string(_tolerance) + "|" + to_string(_maxError) + "|"
+                                + to_string(_initStepSize));
 
         }
 
@@ -238,7 +241,8 @@ namespace Solver
                         case DependencyStatus::EVENT:
                             _depHist.push_back(_dependencyInfo);
                             _sEventInfo.eventOccured = true;
-                            _sEventInfo.eventTimeStart = std::min(_sEventInfo.eventTimeStart, _dependencyInfo.eventTimeStart);  // which event happend earlier?
+                            _sEventInfo.eventTimeStart = std::min(_sEventInfo.eventTimeStart,
+                                                                  _dependencyInfo.eventTimeStart);  // which event happend earlier?
                             _sEventInfo.eventTimeEnd = std::min(_sEventInfo.eventTimeEnd, _dependencyInfo.eventTimeEnd);  // which event happend earlier?
                             break;
 
@@ -309,7 +313,10 @@ namespace Solver
             //keep the new state values, because they are the after event start values
             //it's too late at this location to write the pre-event-values
             //_fmu.getStates(eventStateValues.data());
-            LOGGER_WRITE("Event stepping: t0=" + to_string(_sEventInfo.eventTimeStart) + " , t1=" + to_string(_sEventInfo.eventTimeEnd), Util::LC_SOLVER, Util::LL_DEBUG);
+            LOGGER_WRITE(
+                    "Event stepping: t0=" + to_string(_sEventInfo.eventTimeStart) + " , t1="
+                            + to_string(_sEventInfo.eventTimeEnd),
+                    Util::LC_SOLVER, Util::LL_DEBUG);
             _currentTime = _sEventInfo.eventTimeStart;
             doSolverStep(_currentTime - _prevTime);
             _fmu.setTime(_currentTime);
@@ -350,7 +357,7 @@ namespace Solver
             _endTime = simTime;
         }
 
-        const Synchronization::IDataManager* getDataManager() const
+        const Synchronization::IDataManager * getDataManager() const
         {
             return *_dataManager;
         }
@@ -361,7 +368,7 @@ namespace Solver
             _fmu.setRelativeTolerance(tolerance);
         }
 
-        Synchronization::IDataManager* getDataManager() override
+        Synchronization::IDataManager * getDataManager() override
         {
             return _dataManager.get();
         }
@@ -451,7 +458,8 @@ namespace Solver
                 else
                     tMin = t;
             }
-            LOGGER_WRITE(string_type("Interpolated event time point_type to ") + to_string(t), Util::LC_EVT, Util::LL_DEBUG);
+            LOGGER_WRITE(string_type("Interpolated event time point_type to ") + to_string(t), Util::LC_EVT,
+                         Util::LL_DEBUG);
             if (tMin <= _prevTime)
                 tMin = std::nextafter(_prevTime, DBL_MAX);
             if (tMax >= _currentTime)
@@ -479,7 +487,8 @@ namespace Solver
 
         bool_type hasZeroCrossing(const size_type & eventIndex) const
         {
-            return signbit(_eventIndicators[eventIndex]) != signbit(_prevEventIndicators[eventIndex]) && _prevEventIndicators[eventIndex] != 0.0;
+            return signbit(_eventIndicators[eventIndex]) != signbit(_prevEventIndicators[eventIndex])
+                    && _prevEventIndicators[eventIndex] != 0.0;
         }
 
         size_type findEarliestEvent()
@@ -492,7 +501,10 @@ namespace Solver
             {
                 if (hasZeroCrossing(k))
                 {
-                    LOGGER_WRITE(string_type("(" + to_string(_fmu.getLocalId()) + ") Found event at index '") + to_string(k) + string_type("'"), Util::LC_EVT, Util::LL_DEBUG);
+                    LOGGER_WRITE(
+                            string_type("(" + to_string(_fmu.getLocalId()) + ") Found event at index '") + to_string(k)
+                                    + string_type("'"),
+                            Util::LC_EVT, Util::LL_DEBUG);
                     hTmp = interpolateZeroCrossing(k);
                     //LOGGER_WRITE(string_type("Interpolated event time point_type to ") + to_string(hTmp), Util::LC_EVT, Util::LL_DEBUG);
                     if (h > hTmp)
@@ -523,7 +535,8 @@ namespace Solver
             if (eventHappend)
                 _sEventInfo = event;
             else
-                _sEventInfo = {false, std::numeric_limits<real_type>::infinity(), std::numeric_limits<real_type>::infinity()};
+                _sEventInfo =
+                {   false, std::numeric_limits<real_type>::infinity(), std::numeric_limits<real_type>::infinity()};
 
             return _sEventInfo;
         }
