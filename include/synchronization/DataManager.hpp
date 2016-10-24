@@ -248,7 +248,6 @@ namespace Synchronization
                     HistoryEntry dhe = _communicator.recv(conId);
                     if (dhe.isValid())
                     {
-
                         if (dhe.hasEvent())
                         {
                             if (!_lastEventReadState[conId])
@@ -260,7 +259,7 @@ namespace Synchronization
                                 if (std::abs(res.eventTimeStart - res.eventTimeEnd) > 1.0e-3)
                                 {
                                     HistoryEntry dhe2 = _communicator.recv(conId);
-                                    throw std::runtime_error("Somthings wrong");
+                                    throw runtime_error("Somthings wrong");
                                 }
                             }
                             else
