@@ -8,23 +8,26 @@
 #ifndef NETWORK_INCLUDE_NETWORKSOLVER_HPP_
 #define NETWORK_INCLUDE_NETWORKSOLVER_HPP_
 
-#include "../../include/solver/AbstractSolver.hpp"
+#include "solver/AbstractSolver.hpp"
 #include "SimulationServer.hpp"
 
 namespace Solver
 {
+
+    /*! \brief
+     *
+     * This is a specialization of template class AbstractSolver with FMUClass=FMI::EmptyFMU.
+     */
     template<class DataManagerClass>
-    class AbstractSolver<DataManagerClass, FMI::EmptyFmu> : public ISolver
+    class NetworkSolver : public ISolver
     {
      public:
-        AbstractSolver() = delete;
+        NetworkSolver() = delete;
 
-        ~AbstractSolver()
-        {
+        ~NetworkSolver() = default;
 
-        }
-
-        AbstractSolver(const Initialization::SolverPlan & in, const FMI::EmptyFmu & fmu, std::shared_ptr<DataManagerClass> & dataManager)
+        NetworkSolver(const Initialization::SolverPlan & in, const FMI::EmptyFmu & fmu,
+                      shared_ptr<DataManagerClass> & dataManager)
                 : _id(in.id),
                   _dataManager(dataManager),
                   _currentTime(in.startTime),
@@ -37,11 +40,12 @@ namespace Solver
                   _outputsSent(false)
         {
             if (!_simServer->isActive())
-                throw std::runtime_error("SimulationServer isn't active. Abort.");
+                throw runtime_error("SimulationServer isn't active. Abort.");
         }
 
         size_type solve(const size_type & numSteps) override
         {
+            std::cout << "Networksolver::Solve\n";
             unsigned count = 0, testVar = 1;
             while (count++ < numSteps && testVar == 1)
             {
@@ -85,9 +89,9 @@ namespace Solver
 
             _dataManager->addFmu(&_fmu);
 
-            for(auto& con : _fmu.getConnections())
+            for (auto& con : _fmu.getConnections())
             {
-                if(con->isOutgoing(_fmu.getFmuName()))
+                if (con->isOutgoing(_fmu.getFmuName()))
                     _outConns.push_back(con);
             }
             _simServer->confirmStart();
@@ -185,12 +189,12 @@ namespace Solver
 
      private:
         size_type _id;
-        std::shared_ptr<DataManagerClass> _dataManager;
+        shared_ptr<DataManagerClass> _dataManager;
         real_type _currentTime;
         real_type _endTime;
 
-        std::shared_ptr<NetOff::SimulationServer> _simServer;
-        std::vector<Synchronization::ConnectionSPtr> _outConns;  // refs simNum to connection
+        shared_ptr<NetOff::SimulationServer> _simServer;
+        vector<Synchronization::ConnectionSPtr> _outConns;  // refs simNum to connection
         NetOff::ClientMessageSpecifyer _spec;
 
         const Initialization::SolverPlan _solvPlan;
@@ -235,8 +239,8 @@ namespace Solver
             vals.setIntValues(tmp.getValues<int_type>().data());
             vals.setBoolValues(tmp.getValues<bool_type>().data());
 
-            _lastRequestHandled = _simServer->sendOutputValues(fmuId, _currentTime, vals);
-            //_lastRequestHandled = _simServer->sendOutputValues(fmuId, _currentTime);
+            // _lastRequestHandled = _simServer->sendOutputValues(fmuId, _currentTime, vals);
+            _lastRequestHandled = _simServer->sendOutputValues(fmuId, _currentTime);
             return 1;
         }
 
