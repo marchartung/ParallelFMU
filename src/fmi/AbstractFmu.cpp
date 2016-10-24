@@ -5,8 +5,6 @@
  *      Author: mf
  */
 
-
-
 #include "fmi/AbstractFmu.hpp"
 
 namespace FMI
@@ -39,7 +37,6 @@ namespace FMI
         if (isLoaded())
             unload();
     }
-
 
     void AbstractFmu::load(const bool & alsoInit)
     {
