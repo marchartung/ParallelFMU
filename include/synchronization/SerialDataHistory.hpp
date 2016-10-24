@@ -10,7 +10,7 @@
 
 #include "Stdafx.hpp"
 #include "BasicTypedefs.hpp"
-#include "synchronization/SubHistory.hpp"
+//#include "synchronization/SubHistory.hpp"
 #include "synchronization/AbstractDataHistory.hpp"
 #include "synchronization/HistoryEntry.hpp"
 
