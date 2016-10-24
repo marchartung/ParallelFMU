@@ -15,6 +15,7 @@
 
 namespace Writer
 {
+
     /**
      * This class is a concrete writer that is able to write Matlab-result-files.
      * \remark The implementation was taken from the OpenModelica project.
@@ -35,9 +36,9 @@ namespace Writer
 
         void appendTime(double time) override;
 
-        void appendHeader(const string_type &fmuName, const FMI::ValueInfo& variables) override;
+        void appendHeader(const string_type & fmuName, const FMI::ValueInfo & variables) override;
 
-        void appendResults(const string_type &fmuName, const FMI::ValueCollection &values) override;
+        void appendResults(const string_type & fmuName, const FMI::ValueCollection & values) override;
 
         void flushResults() override;
 
@@ -46,7 +47,7 @@ namespace Writer
          * @param pcStr pointer to changing string.
          * @param uiLength length of changing string.
          */
-        static inline void vFixVarName(char *pcStr, size_type uiLength)
+        static inline void vFixVarName(char * pcStr, size_type uiLength)
         {
             char* pcDot;
 
@@ -64,9 +65,9 @@ namespace Writer
             }
         }
 
-        void writeMatVer4MatrixHeader(const char *name, int_type rows, int_type cols,  size_type size);
+        void writeMatVer4MatrixHeader(const char * name, int_type rows, int_type cols, size_type size);
 
-        void writeMatVer4Matrix(const char *name, int_type rows, int_type cols, const void *matrixData, size_type size);
+        void writeMatVer4Matrix(const char * name, int_type rows, int_type cols, const void * matrixData, size_type size);
 
         void initialize() override;
 
@@ -78,14 +79,11 @@ namespace Writer
         std::ofstream::pos_type _dataEofPos;
         size_type _curser_position;
         size_type _uiValueCount;
-        string_type  _output_path;
-        string_type  _file_name;
-        double *_doubleMatrixData1;
-        double *_doubleMatrixData2;
-        char *_stringMatrix;
-        char *_pacString;
-        int_type *_intMatrix;
-        vector<string_type> _var_outputs;
+        double * _doubleMatrixData1;
+        double * _doubleMatrixData2;
+        char * _stringMatrix;
+        char * _pacString;
+        int_type * _intMatrix;
         bool_type _headerWritten;
         bool_type _lineFinished;
         double _currentTime;

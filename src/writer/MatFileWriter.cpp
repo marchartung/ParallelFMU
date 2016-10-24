@@ -6,6 +6,7 @@ namespace Writer
 
     MatFileWriter::MatFileWriter(const Initialization::WriterPlan & in)
             : IWriter(in),
+              _output_stream(),
               _dataHdrPos(),
               _dataEofPos(),
               _curser_position(0),
@@ -18,6 +19,7 @@ namespace Writer
               _headerWritten(false),
               _lineFinished(false),
               _currentTime(0.0),
+              _translated(),
               _data2Inited(false),
               _linesWrote(0),
               _numValues(0)
@@ -25,26 +27,27 @@ namespace Writer
         LOGGER_WRITE("Using MatFileWriter", Util::LC_LOADER, Util::LL_INFO);
     }
 
-
-    MatFileWriter::MatFileWriter(const MatFileWriter& in)
-        : IWriter(&in),
-          _dataHdrPos(),
-          _dataEofPos(),
-          _curser_position(0),
-          _uiValueCount(0),
-          _doubleMatrixData1(nullptr),
-          _doubleMatrixData2(nullptr),
-          _stringMatrix(nullptr),
-          _pacString(nullptr),
-          _intMatrix(nullptr),
-          _headerWritten(false),
-          _lineFinished(false),
-          _currentTime(0.0),
-          _data2Inited(false),
-          _linesWrote(0),
-          _numValues(0)
+    MatFileWriter::MatFileWriter(const MatFileWriter & in)
+            : IWriter(&in),
+              _output_stream(),
+              _dataHdrPos(),
+              _dataEofPos(),
+              _curser_position(0),
+              _uiValueCount(0),
+              _doubleMatrixData1(nullptr),
+              _doubleMatrixData2(nullptr),
+              _stringMatrix(nullptr),
+              _pacString(nullptr),
+              _intMatrix(nullptr),
+              _headerWritten(false),
+              _lineFinished(false),
+              _currentTime(0.0),
+              _translated(),
+              _data2Inited(false),
+              _linesWrote(0),
+              _numValues(0)
     {
-        if(in.isInitialized())
+        if (in.isInitialized())
             this->isInitialized();
     }
 
@@ -106,13 +109,13 @@ namespace Writer
     void MatFileWriter::deinitialize()
     {
 
-        writeMatVer4MatrixHeader("data_2",_numValues,_linesWrote,sizeof(double));
+        writeMatVer4MatrixHeader("data_2", _numValues, _linesWrote, sizeof(double));
         IWriter::deinitialize();
         if (_output_stream.is_open())
             _output_stream.close();
     }
 
-    void MatFileWriter::writeMatVer4MatrixHeader(const char *name, int_type rows, int_type cols, size_type size)
+    void MatFileWriter::writeMatVer4MatrixHeader(const char * name, int_type rows, int_type cols, size_type size)
     {
         // matrix header struct
         typedef struct MHeader
@@ -178,46 +181,48 @@ namespace Writer
         vector<string_type> valueNames = vector<string_type>(valueNamesList.begin(), valueNamesList.end());
         size_type uiVarCount = valueNames.size() + 1;  // all variables, all parameters + time
 
-
         // get longest string_type of the variable/parameter names
-        for (const string_type & str: valueNames)
+        for (const string_type & str : valueNames)
         {
             if (str.size() > uilongestName)
                 uilongestName = str.size() + 1;  // +1 because of string_type end
         }
 
-
         // get longest string. is needed for temp buffer
         uilongest = max(uilongestName, uilongestDesc);
 
-        vector<char> cVec(uiVarCount * uilongest,' ');
-        cVec[0] = 't'; cVec[1] = 'i'; cVec[2] = 'm'; cVec[3] = 'e';
+        vector<char> cVec(uiVarCount * uilongest, ' ');
+        cVec[0] = 't';
+        cVec[1] = 'i';
+        cVec[2] = 'm';
+        cVec[3] = 'e';
         size_type i = 1;
-        for(const string_type & str : valueNames)
+        for (const string_type & str : valueNames)
         {
             std::cout << i << ". " << str << "\n";
-            for(size_type j = 0;j<str.size();++j)
+            for (size_type j = 0; j < str.size(); ++j)
             {
-                cVec[i*uilongest+j] = str[j];
+                cVec[i * uilongest + j] = str[j];
                 //std::cout << "(" << i << "," << j << ")\n";
             }
             ++i;
         }
         writeMatVer4Matrix("name", (int) uilongest, (int) uiVarCount, cVec.data(), sizeof(char));
 
-        vector<double> dataInfo(4*(valueNames.size()+1));
-        dataInfo[0] = 2; dataInfo[1] = 1; dataInfo[2] = 0; dataInfo[3] = -1; // for time
-        for(size_type i=1;i<valueNames.size();++i)
+        vector<double> dataInfo(4 * (valueNames.size() + 1));
+        dataInfo[0] = 2;
+        dataInfo[1] = 1;
+        dataInfo[2] = 0;
+        dataInfo[3] = -1;  // for time
+        for (size_type i = 1; i < valueNames.size(); ++i)
         {
-            dataInfo[4*i] = 2;
-            dataInfo[4*i+1] = i+1;
-            dataInfo[4*i+2] = 0;
-            dataInfo[4*i+3] = -1;
+            dataInfo[4 * i] = 2;
+            dataInfo[4 * i + 1] = i + 1;
+            dataInfo[4 * i + 2] = 0;
+            dataInfo[4 * i + 3] = -1;
         }
 
-        writeMatVer4Matrix("dataInfo",4, (int)valueNames.size(),dataInfo.data(),sizeof(double));
-
-
+        writeMatVer4Matrix("dataInfo", 4, (int) valueNames.size(), dataInfo.data(), sizeof(double));
 
         _headerWritten = true;
         _lineFinished = true;
@@ -226,17 +231,17 @@ namespace Writer
     void MatFileWriter::appendResults(const string_type& fmuName, const FMI::ValueCollection& values)
     {
         ++_linesWrote;
-        if(!_data2Inited)
+        if (!_data2Inited)
         {
             _data2Inited = true;
-            _numValues = values.size()+1; // for time
+            _numValues = values.size() + 1;  // for time
             _dataHdrPos = _output_stream.tellp();
-            writeMatVer4MatrixHeader("data_2",_numValues,_linesWrote,sizeof(double));
-            _output_stream.seekp(0,std::ofstream::ios_base::end);
+            writeMatVer4MatrixHeader("data_2", _numValues, _linesWrote, sizeof(double));
+            _output_stream.seekp(0, std::ofstream::ios_base::end);
         }
         translateValueCollection(values);
 
-        _output_stream.write((char *)_translated.data(),_translated.size()*sizeof(double));
+        _output_stream.write((char *) _translated.data(), _translated.size() * sizeof(double));
     }
 
     void MatFileWriter::flushResults()
@@ -244,7 +249,8 @@ namespace Writer
         _output_stream.flush();
     }
 
-    void MatFileWriter::writeMatVer4Matrix(const char *name, int_type rows, int_type cols, const void *matrixData, size_type size)
+    void MatFileWriter::writeMatVer4Matrix(const char *name, int_type rows, int_type cols, const void *matrixData,
+                                           size_type size)
     {
         // first matrix header has to be written
         writeMatVer4MatrixHeader(name, rows, cols, size);
@@ -264,22 +270,22 @@ namespace Writer
     void MatFileWriter::translateValueCollection(const FMI::ValueCollection & in)
     {
         size_type curPos = in.getValues<real_type>().size();
-        if(_translated.size() != _numValues)
+        if (_translated.size() != _numValues)
             _translated.resize(_numValues);
         _translated[0] = _currentTime;
-        std::copy(in.getValues<real_type>().begin(),in.getValues<real_type>().end(),_translated.begin()+1);
+        std::copy(in.getValues<real_type>().begin(), in.getValues<real_type>().end(), _translated.begin() + 1);
 
-        for(const auto& elem : in.getValues<int_type>())
+        for (const auto& elem : in.getValues<int_type>())
         {
             _translated[curPos++] = static_cast<double>(elem);
         }
-        for(const auto& elem : in.getValues<bool_type>())
+        for (const auto& elem : in.getValues<bool_type>())
         {
             _translated[curPos++] = (elem) ? 1.0 : 0.0;
         }
-        for(const auto& elem : in.getValues<string_type >())
+        for (const auto& elem : in.getValues<string_type>())
         {
-            _translated[curPos++] = (elem.empty()) ? 0.0 : 1.0; // not supported
+            _translated[curPos++] = (elem.empty()) ? 0.0 : 1.0;  // not supported
         }
     }
 
