@@ -95,6 +95,7 @@ namespace FMI
                 if (getAlias(variable) == Enu::enu_noAlias)
                 {
                     Enu variability = getVariability(variable);
+                    // There are intentionally no breaks!
                     switch (variability)
                     {
                         case Enu::enu_BAD_DEFINED:
