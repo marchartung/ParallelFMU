@@ -2,15 +2,18 @@
 
 namespace Synchronization
 {
+
     Interpolation::Interpolation(const real_type & tolerance)
             : _tolerance(tolerance)
     {
     }
 
     template<>
-    vector<real_type> Interpolation::internalInterpolate(const real_type & curTime, const list<const HistoryEntry*> & in) const
+    vector<real_type> Interpolation::internalInterpolate(const real_type & curTime,
+                                                         const list<const HistoryEntry*> & in) const
     {
-        const vector<real_type> & v1 = in.front()->getValueCollection().getValues<real_type>(), &v2 = in.back()->getValueCollection().getValues<real_type>();
+        const vector<real_type> & v1 = in.front()->getValueCollection().getValues<real_type>(), &v2 = in.back()
+                ->getValueCollection().getValues<real_type>();
         real_type t1 = in.front()->getTime(), t2 = in.back()->getTime();
         vector<real_type> res(v1.size());
         real_type h = (curTime - t1) / (t2 - t1);
@@ -22,60 +25,64 @@ namespace Synchronization
     }
 
     template<>
-    vector<int_type> Interpolation::internalInterpolate(const real_type & curTime, const list<const HistoryEntry*> & in) const
+    vector<int_type> Interpolation::internalInterpolate(const real_type & curTime,
+                                                        const list<const HistoryEntry*> & in) const
     {
-        const vector<int_type> & v1 = in.front()->getValueCollection().getValues<int_type>(), &v2 = in.back()->getValueCollection().getValues<int_type>();
+        const vector<int_type> & v1 = in.front()->getValueCollection().getValues<int_type>(), &v2 = in.back()
+                ->getValueCollection().getValues<int_type>();
         int_type t1 = in.front()->getTime(), t2 = in.back()->getTime();
         vector<int_type> res(v1.size());
         real_type h = (curTime - t1) / (t2 - t1);
         for (size_type i = 0; i < v1.size(); ++i)
-        {
             res[i] = (h > 0.5) ? v2[i] : v1[i];  //TODO maybe continuous interpolation??
-        }
+
         return res;
     }
 
     template<>
-    vector<bool_type> Interpolation::internalInterpolate(const real_type & curTime, const list<const HistoryEntry*> & in) const
+    vector<bool_type> Interpolation::internalInterpolate(const real_type & curTime,
+                                                         const list<const HistoryEntry*> & in) const
     {
-        const vector<bool_type> & v1 = in.front()->getValueCollection().getValues<bool_type>(), &v2 = in.back()->getValueCollection().getValues<bool_type>();
+        const vector<bool_type> & v1 = in.front()->getValueCollection().getValues<bool_type>(), &v2 = in.back()
+                ->getValueCollection().getValues<bool_type>();
         real_type t1 = in.front()->getTime(), t2 = in.back()->getTime();
         vector<bool_type> res(v1.size());
         real_type h = (curTime - t1) / (t2 - t1);
         for (size_type i = 0; i < v1.size(); ++i)
-        {
             res[i] = (h > 0.5) ? v2[i] : v1[i];
-        }
+
         return res;
     }
 
     template<>
-    vector<string_type> Interpolation::internalInterpolate(const real_type & curTime, const list<const HistoryEntry*> & in) const
+    vector<string_type> Interpolation::internalInterpolate(const real_type & curTime,
+                                                           const list<const HistoryEntry*> & in) const
     {
-        const vector<string_type> & v1 = in.front()->getValueCollection().getValues<string_type>(), &v2 =
-                in.back()->getValueCollection().getValues<string_type>();
+        const vector<string_type> & v1 = in.front()->getValueCollection().getValues<string_type>(), &v2 = in.back()
+                ->getValueCollection().getValues<string_type>();
         real_type t1 = in.front()->getTime(), t2 = in.back()->getTime();
         vector<string_type> res(v1.size());
         real_type h = (curTime - t1) / (t2 - t1);
         for (size_type i = 0; i < v1.size(); ++i)
-        {
             res[i] = (h > 0.5) ? v2[i] : v1[i];
-        }
+
         return res;
     }
 
-    FMI::ValueCollection Interpolation::interpolate(const real_type & curTime, set<HistoryEntry> const & dh, int_type order) const
+    FMI::ValueCollection Interpolation::interpolate(const real_type & curTime, set<HistoryEntry> const & dh,
+                                                    int_type order) const
     {
         if (order != 1)
-        {
-            throw std::runtime_error("Interpolation: order " + to_string(order) + " is not supported\n");
-        }
+            throw runtime_error("Interpolation: order " + to_string(order) + " is not supported\n");
+
         auto it = dh.find(HistoryEntry(curTime));
         if (it != dh.end())
             return it->getValueCollection();
+
         list<const HistoryEntry*> collected = internalCollect(curTime, dh, order + 1);
         if (collected.size() == 1)
             return FMI::ValueCollection(collected.front()->getValueCollection());
+
         vector<real_type> valVec = internalInterpolate<real_type>(curTime, collected);
         vector<int_type> intVec = internalInterpolate<int_type>(curTime, collected);
         vector<bool_type> bool_typeVec = internalInterpolate<bool_type>(curTime, collected);
@@ -89,7 +96,8 @@ namespace Synchronization
         return interpolate(curTime, dh, 1);
     }
 
-    list<const HistoryEntry*> Interpolation::internalCollect(const real_type & curTime, const set<HistoryEntry> & dh, size_type n) const
+    list<const HistoryEntry*> Interpolation::internalCollect(const real_type & curTime, const set<HistoryEntry> & dh,
+                                                             size_type n) const
     {
         set<HistoryEntry>::const_iterator it = dh.upper_bound(HistoryEntry(curTime));
         list<const HistoryEntry*> res;
@@ -103,10 +111,12 @@ namespace Synchronization
                 return res;
             }
             else
-                throw std::runtime_error("Interpolation1: SubHistory contains no time after " + to_string(curTime) + ".");
+                throw runtime_error("Interpolation1: SubHistory contains no time after " + to_string(curTime) + ".");
         }
         if (dh.size() < n)
-            throw std::runtime_error("Interpolation: SubHistory contains only " + to_string(dh.size()) + " (size " + to_string(n) + " needed)");
+            throw runtime_error(
+                    "Interpolation: SubHistory contains only " + to_string(dh.size()) + " (size " + to_string(n)
+                            + " needed)");
         set<HistoryEntry>::const_reverse_iterator rit(++it);  // c++ increments once the rev iterator during cast and since it != end a incrementation of it undos this
         for (size_type i = 0; i < n; ++i)
         {
@@ -121,32 +131,36 @@ namespace Synchronization
         return _tolerance;
     }
 
-    FMI::ValueCollection Interpolation::interpolateHistory(const std::vector<HistoryEntry> & entries, const tuple<size_type, size_type> & range,
+    FMI::ValueCollection Interpolation::interpolateHistory(const vector<HistoryEntry> & entries,
+                                                           const tuple<size_type, size_type> & range,
                                                            const size_type & curI, const size_type & time)
     {
-        size_type iStart = std::get<0>(range), iEnd = std::get<1>(range);
-        return FMI::ValueCollection(interpolateValues<real_type>(entries, iStart, iEnd, time), interpolateValues<int_type>(entries, iStart, iEnd, time),
-                                    interpolateValues<bool_type>(entries, iStart, iEnd, time), interpolateValues<string_type>(entries, iStart, iEnd, time));
+        size_type iStart = get<0>(range), iEnd = get<1>(range);
+        return FMI::ValueCollection(interpolateValues<real_type>(entries, iStart, iEnd, time),
+                                    interpolateValues<int_type>(entries, iStart, iEnd, time),
+                                    interpolateValues<bool_type>(entries, iStart, iEnd, time),
+                                    interpolateValues<string_type>(entries, iStart, iEnd, time));
     }
 
     template<>
-    inline vector<real_type> Interpolation::interpolateValues(const std::vector<HistoryEntry>& entries, const size_type& startI, const size_type& endI,
+    inline vector<real_type> Interpolation::interpolateValues(const vector<HistoryEntry>& entries,
+                                                              const size_type& startI, const size_type& endI,
                                                               const size_type& time)
     {
-        const std::vector<real_type> & v1 = entries[startI].getValueCollection().getValues<real_type>(), v2 = entries[endI].getValueCollection()
-                .getValues<real_type>();
+        const vector<real_type> & v1 = entries[startI].getValueCollection().getValues<real_type>(), v2 = entries[endI]
+                .getValueCollection().getValues<real_type>();
         real_type t1 = entries[startI].getTime(), t2 = entries[endI].getTime();
         vector<real_type> res(v1.size());
         real_type h = (time - t1) / (t2 - t1);
         for (size_type i = 0; i < v1.size(); ++i)
-        {
             res[i] = v1[i] + h * (v2[i] - v1[i]);
-        }
+
         return res;
     }
 
     template<>
-    inline vector<int_type> Interpolation::interpolateValues(const std::vector<HistoryEntry>& entries, const size_type& startI, const size_type& endI,
+    inline vector<int_type> Interpolation::interpolateValues(const vector<HistoryEntry>& entries,
+                                                             const size_type& startI, const size_type& endI,
                                                              const size_type& time)
     {
         size_type bestI = startI;
@@ -161,7 +175,8 @@ namespace Synchronization
     }
 
     template<>
-    inline vector<bool_type> Interpolation::interpolateValues(const std::vector<HistoryEntry>& entries, const size_type& startI, const size_type& endI,
+    inline vector<bool_type> Interpolation::interpolateValues(const vector<HistoryEntry>& entries,
+                                                              const size_type& startI, const size_type& endI,
                                                               const size_type& time)
     {
         size_type bestI = startI;
@@ -176,7 +191,8 @@ namespace Synchronization
     }
 
     template<>
-    inline vector<string_type> Interpolation::interpolateValues(const std::vector<HistoryEntry>& entries, const size_type& startI, const size_type& endI,
+    inline vector<string_type> Interpolation::interpolateValues(const vector<HistoryEntry>& entries,
+                                                                const size_type& startI, const size_type& endI,
                                                                 const size_type& time)
     {
         size_type bestI = startI;
