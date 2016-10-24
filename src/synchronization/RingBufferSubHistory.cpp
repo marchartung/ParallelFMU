@@ -20,17 +20,18 @@ namespace Synchronization
         return _entries[_lastInsertedElem].getTime();
     }
 
-    FMI::ValueCollection RingBufferSubHistory::interpolate(const real_type& time)
+    FMI::ValueCollection RingBufferSubHistory::interpolate(const real_type & time)
     {
-        while(_entries[_curIndex].getTime() < time)
+        while (_entries[_curIndex].getTime() < time)
         {
-            if(++_curIndex == _entries.size())
+            if (++_curIndex == _entries.size())
                 _curIndex = 0;
         }
-        if(std::abs(_entries[_curIndex].getTime()-time) < _interpolation.getTolerance())
+        if (std::abs(_entries[_curIndex].getTime() - time) < _interpolation.getTolerance())
             return _entries[_curIndex].getValueCollection();
-        tuple<size_type,size_type> range = checkValidEntries();
-        return _interpolation.interpolateHistory(_entries,range,_curIndex,time);
+
+        tuple<size_type, size_type> range = checkValidEntries();
+        return _interpolation.interpolateHistory(_entries, range, _curIndex, time);
     }
 
     FMI::ValueCollection RingBufferSubHistory::operator [](const real_type& time)
@@ -38,12 +39,13 @@ namespace Synchronization
         return interpolate(time);
     }
 
-    const Interpolation& RingBufferSubHistory::getInterpolation() const
+    const Interpolation & RingBufferSubHistory::getInterpolation() const
     {
         return _interpolation;
     }
 
-    RingBufferSubHistory::RingBufferSubHistory(const Interpolation& interpolation, const FMI::ValueCollection& bufferScheme, size_type size)
+    RingBufferSubHistory::RingBufferSubHistory(const Interpolation & interpolation,
+                                               const FMI::ValueCollection & bufferScheme, size_type size)
             : _curIndex(0),
               _lastInsertedElem(size - 1),
               _entries(std::vector<HistoryEntry>(size, HistoryEntry(bufferScheme))),
@@ -52,7 +54,7 @@ namespace Synchronization
     {
     }
 
-    bool_type RingBufferSubHistory::insert(const HistoryEntry& in)
+    bool_type RingBufferSubHistory::insert(const HistoryEntry & in)
     {
         bool res = true;
         //LOGGER_WRITE("Insert " + to_string(in.getTime()) + " into history.",Util::LC_SOLVER, Util::LL_DEBUG);
@@ -65,13 +67,13 @@ namespace Synchronization
         }
         else
         {
-            throw std::runtime_error("RingBufferSubHistory: Can't insert values older than the newest in the history");
+            throw runtime_error("RingBufferSubHistory: Can't insert values older than the newest in the history");
             res = false;
         }
         return res;
     }
 
-    size_type RingBufferSubHistory::deleteOlderThan(const HistoryEntry& in)
+    size_type RingBufferSubHistory::deleteOlderThan(const HistoryEntry & in)
     {
         // ring buffer, it deletes it naturally
         return 1u;
@@ -79,12 +81,16 @@ namespace Synchronization
 
     tuple<size_type, size_type> RingBufferSubHistory::checkValidEntries() const
     {
-        if(_numAddedElems > 1)
+        if (_numAddedElems > 1)
         {
-            return std::make_tuple(((_curIndex == 0) ? _entries.size()-1 : _curIndex-1),_curIndex);
+            std::cout << "_numAddedElems = " << _numAddedElems << std::endl;
+            return std::make_tuple(((_curIndex == 0) ? _entries.size() - 1 : _curIndex - 1), _curIndex);
         }
         else
-            throw std::runtime_error("RingBufferSubHistory: Not enough data for interpolation.");
+        {
+            std::cout << "---------------------------------------------------------\n";
+            throw runtime_error("RingBufferSubHistory: Not enough data for interpolation.");
+        }
     }
 
 } /* namespace Synchronization */
