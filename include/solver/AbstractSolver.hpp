@@ -77,7 +77,7 @@ namespace Solver
                   _eventIndicators(),
                   _prevEventIndicators(),
                   _tmpEventIndicators(),
-                  _dependencyInfo(DependencyStatus::BLOCKED),
+                  _dependencyInfo(),
                   _freshStep(false),
                   _savedStep(false),
                   _sEventInfo(),
@@ -218,6 +218,7 @@ namespace Solver
          */
         virtual size_type solve(const size_type & numSteps = 1) override
         {
+            std::cout << "AbstractSolver::solve()\n";
             size_type count = 0, rCount = 0;
 
             while (!isFinished() && count++ < numSteps)
