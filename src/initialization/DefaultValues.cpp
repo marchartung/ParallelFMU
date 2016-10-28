@@ -9,6 +9,7 @@
 
 namespace Initialization
 {
+
     template<>
     real_type DefaultValues::getUndefinedValue<real_type>()
     {
@@ -36,9 +37,10 @@ namespace Initialization
     template<>
     bool_type DefaultValues::getUndefinedValue()
     {
-        static_assert(std::is_same<bool_type,char>(), "DefaultValues: Boolean values in FMUs are commonly chars. Please change code here.");
-        return (bool_type) 255;
+        static_assert(std::is_same<bool_type, char>(), "DefaultValues: Boolean values in FMUs are commonly chars. Please change code here.");
+        return static_cast<bool_type>(255);
     }
+
     template<>
     FMI::InputMapping DefaultValues::getUndefinedValue()
     {
@@ -54,7 +56,7 @@ namespace Initialization
     Initialization::FmuPlan DefaultValues::fmuPlan()
     {
         Initialization::FmuPlan res;
-        res.id = getUndefinedValue<size_type>(); //decltype(res.id)
+        res.id = getUndefinedValue<size_type>();  //decltype(res.id)
         res.intermediateResults = true;
         res.loader = "fmuSdk";
         res.logEnabled = false;
@@ -159,4 +161,5 @@ namespace Initialization
         //static_assert(sizeof(res.filePath) + sizeof(res.kind) + sizeof(res.numSteps) == sizeof(res),"DefaultValues: Byte count mismatch. Maybe you haven't added a default value for WriterPlan in class DefaultValues.");
         return res;
     }
-}
+
+} // Namespace Initialization
