@@ -12,6 +12,7 @@
 
 namespace Initialization
 {
+
     /**
      * An exception that is used by factory classes.
      */
@@ -22,21 +23,25 @@ namespace Initialization
          * Create a new exception instance, described by the given message.
          * @param message The message that describes the occured exception.
          */
-        FactoryException(string_type  message);
+        FactoryException(string_type message);
+
         /**
          * Delete the exception object.
          */
-        virtual ~FactoryException();
+        virtual ~FactoryException() = default;
+
         /**
          * Get the error message as c-string.
          * @return The error message.
          */
         virtual const char* what() const throw ();
+
         /**
          * Get the error message as c++-string.
          * @return The error message.
          */
         const string_type & getMessage() const;
+
         /**
          * Set the error message.
          * @param message The new message.
@@ -44,7 +49,7 @@ namespace Initialization
         void setMessage(const string_type & message);
 
      private:
-        string_type  _message;
+        string_type _message;
     };
 
 } /* namespace Initialization */

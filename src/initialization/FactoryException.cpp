@@ -4,11 +4,7 @@ namespace Initialization
 {
 
     FactoryException::FactoryException(string_type message)
-            : _message(message)
-    {
-    }
-
-    FactoryException::~FactoryException()
+            : _message(std::move(message))
     {
     }
 
