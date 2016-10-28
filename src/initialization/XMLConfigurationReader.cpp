@@ -149,7 +149,7 @@ namespace Initialization
     {
         list<ConnectionPlan> res;
 
-        if (_propertyTree.get_child_optional("configuration.connections"))
+        if (nullptr != _propertyTree.get_child_optional("configuration.connections"))
         {
             auto connElems = _propertyTree.get_child("configuration.connections");
             for (ptree::value_type & mapElem : connElems)
@@ -191,7 +191,7 @@ namespace Initialization
     SchedulePlan XMLConfigurationReader::getSchedulePlan()
     {
         SchedulePlan res = DefaultValues::schedulePlan();
-        if (_propertyTree.get_child_optional("configuration.scheduling"))
+        if (nullptr != _propertyTree.get_child_optional("configuration.scheduling"))
         {
             auto schedElem = _propertyTree.get_child("configuration.scheduling");
             if (!schedElem.empty())
@@ -358,7 +358,7 @@ namespace Initialization
             for(size_type i = 0; i < solverPlans.size(); ++i)
             {
                 schedPlan.nodeStructure[0][0].push_back(i);  // asssign all solvers to one core
-                schedPlan.solvIdToCore[i] = make_tuple((size_type)0, (size_type)0);
+                schedPlan.solvIdToCore[i] = make_tuple(static_cast<size_type>(0), static_cast<size_type>(0));
             }
         }
         else
