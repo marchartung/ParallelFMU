@@ -15,15 +15,17 @@ namespace Network
     {
         size_type numFmus = 0, numCons = 0, netSimId = 0, netCoreId = 0;  //TODO own thread?!?!?
         for (const auto & simVec : plan.simPlans)
+        {
             for (const auto & sim : simVec)
             {
                 numFmus += sim.dataManager.solvers.size();
                 numCons += sim.dataManager.inConnections.size();
             }
+        }
 
-        std::shared_ptr<Initialization::SolverPlan> sPlan = std::shared_ptr<Initialization::SolverPlan>(
-                new Initialization::SolverPlan(*plan.simPlans[0][0].dataManager.solvers[0]));
-        sPlan->fmu = std::shared_ptr<Initialization::FmuPlan>(new Initialization::FmuPlan(*sPlan->fmu));
+        shared_ptr<Initialization::SolverPlan> sPlan = make_shared<Initialization::SolverPlan>(
+                *plan.simPlans[0][0].dataManager.solvers[0]);
+        sPlan->fmu = make_shared<Initialization::FmuPlan>(*sPlan->fmu);
         sPlan->fmu->loader = "network";
         sPlan->fmu->id = numFmus;
         sPlan->fmu->name = "ParallelFmu_NetworkFmu0815";
@@ -34,14 +36,16 @@ namespace Network
         {
             std::shared_ptr<Initialization::ConnectionPlan> newInputCon;  // networkFmu -> dependent Fmu
             std::shared_ptr<Initialization::ConnectionPlan> newOutputCon;  // output/dependent fmu -> networkFmu
-            newInputCon = std::shared_ptr<Initialization::ConnectionPlan>(new Initialization::ConnectionPlan());
+            newInputCon = make_shared<Initialization::ConnectionPlan>();
+
             newInputCon->bufferSize = Initialization::DefaultValues::connectionPlan().bufferSize;
-            newInputCon->destFmu = plan.simPlans[extender.simPos][extender.corePos].dataManager.solvers[extender.solverPos]->fmu->name;
+            newInputCon->destFmu = plan.simPlans[extender.simPos][extender.corePos].dataManager.solvers[extender
+                    .solverPos]->fmu->name;
             newInputCon->sourceFmu = sPlan->fmu->name;
             newInputCon->destRank = extender.simPos;
             newInputCon->sourceRank = netSimId;
 
-            newOutputCon = std::shared_ptr<Initialization::ConnectionPlan>(new Initialization::ConnectionPlan(*newInputCon));
+            newOutputCon = make_shared<Initialization::ConnectionPlan>(*newInputCon);
 
             newInputCon->startTag = numCons;
             newInputCon->inputMapping = extender.inputMap;
@@ -88,11 +92,15 @@ namespace Network
                 plan.simPlans[netSimId][netCoreId].dataManager.inConnections.push_back(newOutputCon);
                 plan.simPlans[netSimId][netCoreId].dataManager.solvers.back()->inConnections.push_back(newOutputCon);
             }
-            //Add additional connection so dependend fmu's simulation plan
+            //Add additional connection so dependent fmu's simulation plan
             if (extender.inputMap.size() > 0)
-                plan.simPlans[extender.simPos][extender.corePos].dataManager.solvers[extender.solverPos]->inConnections.push_back(newInputCon);
-            plan.simPlans[extender.simPos][extender.corePos].dataManager.solvers[extender.solverPos]->outConnections.push_back(newOutputCon);
+                plan.simPlans[extender.simPos][extender.corePos].dataManager.solvers[extender.solverPos]->inConnections
+                        .push_back(newInputCon);
+
+            plan.simPlans[extender.simPos][extender.corePos].dataManager.solvers[extender.solverPos]->outConnections
+                    .push_back(newOutputCon);
         }
     }
-}
+
+} // Namespace network
 
