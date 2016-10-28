@@ -23,6 +23,7 @@ using boost::property_tree::ptree;
 
 namespace Initialization
 {
+
     /**
      * Class that parses the XML configuration file.
      */
@@ -66,7 +67,7 @@ namespace Initialization
 
         list<ConnectionPlan> getConnectionPlans();
 
-        vector<vector<size_type>> getNodeSchedule(ptree::value_type & solverElem);
+        vector<vector<size_type>> getNodeSchedule(ptree::value_type & nodeElem);
 
         SchedulePlan getSchedulePlan();
 
