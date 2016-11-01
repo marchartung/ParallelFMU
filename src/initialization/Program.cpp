@@ -153,8 +153,8 @@ namespace Initialization
         {
             LOGGER_WRITE("Node      " + to_string(i) + ":", Util::LC_LOADER, Util::LL_INFO);
             size_type numFmus = 0;
-            for (size_type j = 0; j < in.simPlans[i].size(); ++j)
-                numFmus += in.simPlans[i][j].dataManager.solvers.size();
+            for (auto& simPlan : in.simPlans[i])
+                numFmus += simPlan.dataManager.solvers.size();
             LOGGER_WRITE("NumFmus:      " + to_string(numFmus), Util::LC_LOADER, Util::LL_INFO);
             LOGGER_WRITE("NumCores:     " + to_string(in.simPlans[i].size()), Util::LC_LOADER, Util::LL_INFO);
             LOGGER_WRITE("\n", Util::LC_LOADER, Util::LL_INFO);
@@ -172,12 +172,12 @@ namespace Initialization
                                     std::get<1>(_commandLineArgs.getProgramArgs())))
         {
             MPI_Comm_size(MPI_COMM_WORLD, &numRanks);
-            if (numRanks < (long long int) _progPlan.simPlans.size())
+            if (numRanks < static_cast<int>(_progPlan.simPlans.size()))
             {
                 deinitialize();
                 throw std::runtime_error("Program: Not enough mpi processes for given schedule.");
             }
-            else if (numRanks > (long long int) _progPlan.simPlans.size())
+            else if (numRanks > static_cast<int>(_progPlan.simPlans.size()))
                 LOGGER_WRITE("Program: More mpi process given than the simulation will use.", Util::LC_LOADER,
                              Util::LL_WARNING);
             MPI_Comm_rank(MPI_COMM_WORLD, &rank);
