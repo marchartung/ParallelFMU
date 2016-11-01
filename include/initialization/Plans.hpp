@@ -134,6 +134,6 @@ namespace Initialization
         vector<vector<SimulationPlan>> simPlans; //for mpi
     };
 
-} /* namespace Synchronization */
+} // namespace Initialization
 
 #endif /* INCLUDE_INITIALIZATION_PLANS_HPP_ */
