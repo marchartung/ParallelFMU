@@ -18,7 +18,15 @@ namespace Network
     class InitialNetworkServer : private FMI::ValueSwitch
     {
      public:
-        InitialNetworkServer(const int & port, Initialization::ProgramPlan & plan);
+        /*! \brief Creates a InitialNetworkServer object.
+         *
+         * A new \ref NetOff::SimulationServer is created using the given port. This SimulationServer is managed by the
+         * member variable _networkPlan.server.
+         *
+         * @param port          Port to use for the SimulationServer.
+         * @param programPlan   ProgramPlan that holds the nod-to-thread mapping.
+         */
+        InitialNetworkServer(const int & port, Initialization::ProgramPlan & programPlan);
 
         ~InitialNetworkServer() = default;
 
@@ -27,8 +35,13 @@ namespace Network
         void start();
 
      private:
-        Initialization::ProgramPlan & _plan;
+        Initialization::ProgramPlan & _programPlan;
         NetworkPlan _networkPlan;
+
+        /*!
+         *
+         * There will be four offsets according to the variable types double, int, bool and string.
+         */
         vector<size_type> _offsets;
 
         vector<shared_ptr<FMI::AbstractFmu>> _tmpFmus;
@@ -41,8 +54,13 @@ namespace Network
 
         void startSim();
 
-        shared_ptr<Initialization::FmuPlan> findFmuInProgramPlan(const string fmuPath,
-                                                                 Network::NetworkFmuInformation & netInfo);
+        /*! \brief Searches for a particular FMU in program plan.
+         *
+         * @param fmuPath
+         * @param netInfo
+         * @return Shared pointer to the FmuPlan if FMU was found, nullptr otherwise.
+         */
+        shared_ptr<Initialization::FmuPlan> findFmuInProgramPlan(const string fmuPath, NetworkFmuInformation & netInfo);
 
         FMI::InputMapping getMappingFromNameList(const FMI::ValueReferenceCollection & refs,
                                                  const NetOff::VariableList & vars, const FMI::ValueInfo & vi,
