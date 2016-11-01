@@ -15,8 +15,8 @@
 namespace Initialization
 {
 
-    CommandLineArgs::CommandLineArgs(const std::string & configFile, const Util::LogLevel & logLvl)
-            : _configFilePath(configFile),
+    CommandLineArgs::CommandLineArgs(string configFile, const Util::LogLevel & logLvl)
+            : _configFilePath(std::move(configFile)),
               _logSettings(Util::LogSettings()),
               _simulationServerPort(-1),
               _simulationClient(false),
@@ -37,7 +37,7 @@ namespace Initialization
         initialize(argc, argv);
     }
 
-    const std::string& CommandLineArgs::getConfigFilePath() const
+    const string& CommandLineArgs::getConfigFilePath() const
     {
         return _configFilePath;
     }
@@ -61,21 +61,20 @@ namespace Initialization
 
     void CommandLineArgs::initialize(int * argc, char ** argv[])
     {
-        map<std::string, Util::LogCategory> logCatMap = getLogCatMap();
-
-        map<std::string, Util::LogLevel> logLvlMap = getLogLvlMap();
+        map<string, Util::LogCategory> logCatMap = getLogCatMap();
+        map<string, Util::LogLevel> logLvlMap = getLogLvlMap();
 
         namespace po = boost::program_options;
         po::options_description desc("Options");
-        desc.add_options()("help", "Print help messages")
-                          ("configFile,c", boost::program_options::value<std::string>()->required(),
-                           "Path to the configuration file containing detailed information about the FMUs")
-                          ("log-settings,V", po::value<vector<std::string> >(),
-                           "log information: loader, event, solver, system, other")
-                          //"numThreads,n", po::value<size_type>(), "The number of threads respectively processes to use")
-                          ("server,S", po::value<int>(),
-                           "Setting up an simulation server based on NetworkOffloader interface. Takes the port on which it should open")
-                          ("client,C", "Starting a client program for remote connection based on the NetworkOffload interface");
+        desc.add_options()("help", "Print help messages")(
+                "configFile,c", boost::program_options::value<std::string>()->required(),
+                "Path to the configuration file containing detailed information about the FMUs")(
+                "log-settings,V", po::value<vector<std::string> >(),
+                "log information: loader, event, solver, system, other")
+        //"numThreads,n", po::value<size_type>(), "The number of threads respectively processes to use")
+        ("server,S", po::value<int>(),
+         "Setting up an simulation server based on NetworkOffloader interface. Takes the port on which it should open")(
+                "client,C", "Starting a client program for remote connection based on the NetworkOffload interface");
 
         po::variables_map vm;
         this->_argc = argc;
@@ -84,12 +83,12 @@ namespace Initialization
         {
             po::store(po::parse_command_line(*argc, *argv, desc), vm);
 
-            if (vm.count("help"))
+            if (vm.count("help") != 0u)
             {
                 cout << "Basic Command Line Parameter App" << endl << desc << endl;
                 return;
             }
-            if (vm.count("server"))
+            if (vm.count("server") != 0u)
             {
 #ifdef USE_NETWORK_OFFLOADER
                 cout << "Creating FMU calculation server." << endl;
@@ -99,7 +98,7 @@ namespace Initialization
 #endif
             }
 
-            if (vm.count("client"))
+            if (vm.count("client") != 0u)
             {
 #ifdef USE_NETWORK_OFFLOADER
                 cout << "Creating FMU client." << endl;
@@ -110,21 +109,26 @@ namespace Initialization
 #endif
             }
 
-            if (vm.count("configFile"))
+            if (vm.count("configFile") != 0u)
+            {
                 this->_configFilePath = vm["configFile"].as<std::string>();
+            }
             else
+            {
                 throw runtime_error("Path to configuration file required, but missing.");
+            }
 
             Util::LogSettings logSet;
-            if (vm.count("log-settings"))
+            if (vm.count("log-settings") != 0u)
             {
                 vector<std::string> log_vec = vm["log-settings"].as<vector<std::string> >(), tmpvec;
-                for (unsigned i = 0; i < log_vec.size(); ++i)
+                for (auto & i : log_vec)
                 {
                     tmpvec.clear();
-                    boost::split(tmpvec, log_vec[i], boost::is_any_of("="));
+                    boost::split(tmpvec, i, boost::is_any_of("="));
 
-                    if (tmpvec.size() > 1 && logLvlMap.find(tmpvec[1]) != logLvlMap.end() && (tmpvec[0] == "all" || logCatMap.find(tmpvec[0]) != logCatMap.end()))
+                    if (tmpvec.size() > 1 && logLvlMap.find(tmpvec[1]) != logLvlMap.end()
+                            && (tmpvec[0] == "all" || logCatMap.find(tmpvec[0]) != logCatMap.end()))
                     {
                         if (tmpvec[0] == "all")
                         {
@@ -132,10 +136,14 @@ namespace Initialization
                             break;
                         }
                         else
+                        {
                             logSet.modes[logCatMap[tmpvec[0]]] = logLvlMap[tmpvec[1]];
+                        }
                     }
                     else
-                        throw runtime_error("log-settings flags not supported: " + log_vec[i] + "\n");
+                    {
+                        throw runtime_error("log-settings flags not supported: " + i + "\n");
+                    }
                 }
                 this->_logSettings = logSet;
             }
