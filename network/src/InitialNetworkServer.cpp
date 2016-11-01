@@ -11,13 +11,13 @@
 
 namespace Network
 {
-    InitialNetworkServer::InitialNetworkServer(const int & port, Initialization::ProgramPlan & plan)
-            : _plan(plan),
+
+    InitialNetworkServer::InitialNetworkServer(const int & port, Initialization::ProgramPlan & programPlan)
+            : _programPlan(programPlan),
               _networkPlan(),
               _offsets(4, 0),
               _tmpFmus()
     {
-//make shared        _networkPlan.server = shared_ptr<NetOff::SimulationServer>(new NetOff::SimulationServer(port));
         _networkPlan.server = make_shared<NetOff::SimulationServer>(port);
     }
 
@@ -34,7 +34,7 @@ namespace Network
             throw runtime_error("Couldn't initialize network connection.");
         }
 
-        // The loop end, if the START signal is received. In the meanwhile other stiff can be done (e.g., several
+        // The loop end, if the START signal is received. In the meanwhile other stuff can be done (e.g., several
         // simulations can be added and initialized).
         bool run = true;
         while (run)
@@ -43,10 +43,8 @@ namespace Network
             switch (spec)
             {
                 case NetOff::InitialClientMessageSpecifyer::ADD_SIM:
-                {
                     addSim();
                     break;
-                }
                 case NetOff::InitialClientMessageSpecifyer::GET_FILE:
                     getFile();
                     break;
@@ -115,12 +113,11 @@ namespace Network
         server.confirmSimulationInit(newId, initialValues);
     }
 
-    shared_ptr<Initialization::FmuPlan> InitialNetworkServer::findFmuInProgramPlan(
-            const string fmuPath, Network::NetworkFmuInformation & netInfo)
+    shared_ptr<Initialization::FmuPlan> InitialNetworkServer::findFmuInProgramPlan(const string fmuPath,
+                                                                                   NetworkFmuInformation & netInfo)
     {
-        shared_ptr<Initialization::FmuPlan> res;
         size_type simId = 0, coreId = 0, solveId = 0;
-        for (const auto & simPlanVec : _plan.simPlans)
+        for (const auto & simPlanVec : _programPlan.simPlans)
         {
             for (const auto & simPlan : simPlanVec)
             {
@@ -129,7 +126,7 @@ namespace Network
                     if (fmuPath == Util::FileHelper::absoluteFilePath(solvPlan->fmu->path)
                             || fmuPath == solvPlan->fmu->name || fmuPath == solvPlan->fmu->name + string(".fmu"))
                     {
-                        res = solvPlan->fmu;
+                        auto res = solvPlan->fmu;
                         netInfo.simPos = simId;
                         netInfo.corePos = coreId;
                         netInfo.solverPos = solveId;
@@ -139,31 +136,33 @@ namespace Network
                 }
                 ++coreId;
             }
+            ++simId;
         }
-        ++simId;
 
-        return res;
+        return nullptr;
     }
 
     void InitialNetworkServer::addSim()
     {
         NetOff::SimulationServer & server = *_networkPlan.server.get();
-        vector<Network::NetworkFmuInformation> &netFmuVec = _networkPlan.fmuNet;
+        vector<NetworkFmuInformation> & netFmuVec = _networkPlan.fmuNet;
 
-        Initialization::MainFactory mf;
-        int newId = get<1>(server.getAddedSimulation());
+        // Get <FmuPath, simId> for the most recently added simulation.
+        auto fmuPathSimId = server.getAddedSimulation();
+        auto fmuPath = get<0>(fmuPathSimId);
+        auto newId = get<1>(fmuPathSimId);
 
         netFmuVec.resize(newId + 1);
         _tmpFmus.resize(newId + 1);
 
-        shared_ptr<Initialization::FmuPlan> fmuPlan = findFmuInProgramPlan(get<0>(server.getAddedSimulation()),
-                                                                           netFmuVec[newId]);
+        auto fmuPlan = findFmuInProgramPlan(fmuPath, netFmuVec[newId]);
         if (!fmuPlan)
         {
             server.deinitialize();
             throw runtime_error("Couldn't find fmu with given path.");
         }
 
+        Initialization::MainFactory mf;
         _tmpFmus[newId] = shared_ptr<FMI::AbstractFmu>(mf.createFmu(*fmuPlan));
         _tmpFmus[newId]->load();
         const FMI::ValueInfo & info = _tmpFmus[newId]->getValueInfo();
