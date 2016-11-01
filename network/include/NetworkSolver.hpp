@@ -80,10 +80,10 @@ namespace Solver
 
             for (const auto & fmuCon : _solvPlan.networkPlan.fmuNet)
             {
-                numReals += fmuCon.inputMap.size<real_type>() + fmuCon.outputMap.size<real_type>();
-                numInts += fmuCon.inputMap.size<int_type>() + fmuCon.outputMap.size<int_type>();
-                numBools += fmuCon.inputMap.size<bool_type>() + fmuCon.outputMap.size<bool_type>();
-                numStrings += fmuCon.inputMap.size<string_type>() + fmuCon.outputMap.size<string_type>();
+                numReals += fmuCon.inputMap.template size<real_type>() + fmuCon.outputMap.template size<real_type>();
+                numInts += fmuCon.inputMap.template size<int_type>() + fmuCon.outputMap.template size<int_type>();
+                numBools += fmuCon.inputMap.template size<bool_type>() + fmuCon.outputMap.template size<bool_type>();
+                numStrings += fmuCon.inputMap.template size<string_type>() + fmuCon.outputMap.template size<string_type>();
             }
             _fmu.setNumValues(numReals, numInts, numBools, numStrings);
 
