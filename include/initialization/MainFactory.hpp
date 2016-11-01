@@ -70,11 +70,17 @@ namespace Initialization
         {
             Solver::ISolver * res;
             if (in.kind == "euler")
+            {
                 res = new Solver::Euler<DataManagerClass, FmuClass>(in, FmuClass(*in.fmu), dm);
+            }
             else if (in.kind == "ros2")
+            {
                 res = new Solver::Ros2<DataManagerClass, FmuClass>(in, FmuClass(*in.fmu), dm);
+            }
             else
-                throw std::runtime_error("MainFactory: Unknown solver type " + in.kind);
+            {
+                throw runtime_error("MainFactory: Unknown solver type " + in.kind);
+            }
             return res;
         }
 
@@ -85,17 +91,25 @@ namespace Initialization
         {
             Solver::ISolver * res;
             if (in.fmu->loader == "fmuSdk")
+            {
                 res = createSolverWithKnownFmu<DataManagerClass, FMI::FmuSdkFmu>(dm, in);
+            }
 #ifdef USE_FMILIB
             else if (in.fmu->loader == "fmiLib")
+            {
                 res = createSolverWithKnownFmu<DataManagerClass, FMI::FmiLibFmu>(dm, in);
+            }
 #endif
 #ifdef USE_NETWORK_OFFLOADER
-            else if(in.fmu->loader == "network")
-                res = new Solver::NetworkSolver<DataManagerClass>(in,FMI::EmptyFmu(*in.fmu), dm);
+            else if (in.fmu->loader == "network")
+            {
+                res = new Solver::NetworkSolver<DataManagerClass>(in, FMI::EmptyFmu(*in.fmu), dm);
+            }
 #endif
             else
+            {
                 throw runtime_error("MainFactory: Unknown FMU loader type " + in.fmu->loader);
+            }
             return res;
         }
 
@@ -114,12 +128,13 @@ namespace Initialization
         }
 
         template<class HistoryClass, class WriterClass>
-        shared_ptr<Synchronization::DataManager<HistoryClass, WriterClass> > createDataManager(SimulationPlan & in) const
+        shared_ptr<Synchronization::DataManager<HistoryClass, WriterClass> > createDataManager(
+                SimulationPlan & in) const
         {
-            return std::shared_ptr<Synchronization::DataManager<HistoryClass, WriterClass> >(
-                    new Synchronization::DataManager<HistoryClass, WriterClass>(in.dataManager, createHistory<HistoryClass>(in.dataManager.history),
-                                                                                createWriter<WriterClass>(in.dataManager.writer),
-                                                                                in.dataManager.commnicator));
+            return shared_ptr<Synchronization::DataManager<HistoryClass, WriterClass>>(
+                    new Synchronization::DataManager<HistoryClass, WriterClass>(
+                            in.dataManager, createHistory<HistoryClass>(in.dataManager.history),
+                            createWriter<WriterClass>(in.dataManager.writer), in.dataManager.commnicator));
         }
 
         vector<Synchronization::ConnectionSPtr> createConnectionsOfSolver(const SolverPlan & in) const;
@@ -127,17 +142,19 @@ namespace Initialization
         template<class HistoryClass, class WriterClass>
         vector<shared_ptr<Solver::ISolver>> createSolversWithDataManager(SimulationPlan & in) const
         {
-            shared_ptr<Synchronization::DataManager<HistoryClass, WriterClass> > dm = createDataManager<HistoryClass, WriterClass>(in);
+            shared_ptr<Synchronization::DataManager<HistoryClass, WriterClass>> dm = createDataManager<HistoryClass,
+                    WriterClass>(in);
             size_type numSolvers = in.dataManager.solvers.size();
 
             vector<shared_ptr<Solver::ISolver>> res(numSolvers);
             size_type i = 0;
             for (const auto & sp : in.dataManager.solvers)
             {
-                    res[i] = shared_ptr<Solver::ISolver>(createSolver<Synchronization::DataManager<HistoryClass, WriterClass>>(dm, *sp));
-                    auto conns = createConnectionsOfSolver(*sp);
-                    res[i].get()->getFmu()->setConnections(conns);
-                    ++i;
+                res[i] = shared_ptr<Solver::ISolver>(
+                        createSolver<Synchronization::DataManager<HistoryClass, WriterClass>>(dm, *sp));
+                auto conns = createConnectionsOfSolver(*sp);
+                res[i].get()->getFmu()->setConnections(conns);
+                ++i;
             }
             return res;
         }
@@ -161,13 +178,18 @@ namespace Initialization
             Simulation::AbstractSimulationSPtr res;
 
             if (in.dataManager.history.kind == "serial")
-                res = Simulation::AbstractSimulationSPtr(new SimulationClass(in, createSolvers<Synchronization::SerialDataHistory>(in)));
+            {
+                res = Simulation::AbstractSimulationSPtr(
+                        new SimulationClass(in, createSolvers<Synchronization::SerialDataHistory>(in)));
+            }
             //else if (in.dataManager.history.kind == "openmp")
             //{
             //    res = Simulation::AbstractSimulationSPtr(new SimulationClass(in, createSolvers<Synchronization::OpenMPDataHistory>(in)));
             //}
             else
+            {
                 throw runtime_error("History type is not supported.");
+            }
             return res;
 
         }
