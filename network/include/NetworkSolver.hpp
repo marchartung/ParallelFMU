@@ -40,7 +40,9 @@ namespace Solver
                   _outputsSent(false)
         {
             if (!_simServer->isActive())
+            {
                 throw runtime_error("SimulationServer isn't active. Abort.");
+            }
         }
 
         size_type solve(const size_type & numSteps) override
@@ -50,7 +52,9 @@ namespace Solver
             while (count++ < numSteps && testVar == 1)
             {
                 if (_lastRequestHandled)
+                {
                     _spec = _simServer->getClientRequest();
+                }
                 switch (_spec)
                 {
                     case NetOff::ClientMessageSpecifyer::INPUTS:
@@ -92,7 +96,9 @@ namespace Solver
             for (auto& con : _fmu.getConnections())
             {
                 if (con->isOutgoing(_fmu.getFmuName()))
+                {
                     _outConns.push_back(con);
+                }
             }
             _simServer->confirmStart();
         }
@@ -210,7 +216,9 @@ namespace Solver
             if (!_outputsSent)
             {
                 if (_dataManager->sendSingleOutput(remoteTime, 1, &_fmu, _outConns[fmuId]->getLocalId()))
+                {
                     _outputsSent = true;
+                }
                 else
                 {
                     _lastRequestHandled = false;
@@ -261,5 +269,7 @@ namespace Solver
         }
 
     };
-}
-#endif
+
+} // namespace Solver
+
+#endif // NETWORK_INCLUDE_NETWORKSOLVER_HPP_
