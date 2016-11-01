@@ -280,8 +280,8 @@ namespace Initialization
         {
             tmp = make_shared<ConnectionPlan>(cp);
             tuple<size_type, size_type> destId, sourceId;
-            destId = schedPlan.solvIdToCore[fmuNameToSolver[cp.destFmu]->id];
-            sourceId = schedPlan.solvIdToCore[fmuNameToSolver[cp.sourceFmu]->id];
+            destId = schedPlan.solverIdToCore[fmuNameToSolver[cp.destFmu]->id];
+            sourceId = schedPlan.solverIdToCore[fmuNameToSolver[cp.sourceFmu]->id];
             if (destId == sourceId)
             {  // same node and core
                 tmp->kind = "serial";
@@ -325,7 +325,7 @@ namespace Initialization
     void XMLConfigurationReader::createMapping(const list<SolverPlan> & solverPlans, SchedulePlan & schedPlan)
     {
         size_type spaceForSolvers = 0, count = 0, coreNum, nodeNum = 0;
-        schedPlan.solvIdToCore.resize(solverPlans.size());
+        schedPlan.solverIdToCore.resize(solverPlans.size());
         for (auto & node : schedPlan.nodeStructure)
         {
             coreNum = 0;
@@ -334,7 +334,7 @@ namespace Initialization
                 spaceForSolvers += core.size();
                 for (auto & solvSpace : core)
                 {
-                    schedPlan.solvIdToCore[count] = make_tuple(nodeNum, coreNum);
+                    schedPlan.solverIdToCore[count] = make_tuple(nodeNum, coreNum);
                     solvSpace = count++;  // i-th solver to i-th space
                 }
                 ++coreNum;
@@ -363,7 +363,7 @@ namespace Initialization
         for (const SolverPlan & sp : solverPlans)
         {
             size_type nodeId, coreId;
-            std::tie(nodeId, coreId) = schedPlan.solvIdToCore[sp.id];
+            std::tie(nodeId, coreId) = schedPlan.solverIdToCore[sp.id];
             DataManagerPlan & dm = res[nodeId][coreId].dataManager;
             dm.solvers.push_back(std::make_shared<SolverPlan>(sp));
             dm.outConnections.insert(res[nodeId][coreId].dataManager.outConnections.begin(), sp.outConnections.begin(),
@@ -405,11 +405,11 @@ namespace Initialization
         {
             // TODO(mf): do scheduling
             schedPlan.nodeStructure = vector<vector<vector<size_type>>>(1, vector<vector<size_type>>(1, vector<size_type>(1)));
-            schedPlan.solvIdToCore.resize(solverPlans.size());
+            schedPlan.solverIdToCore.resize(solverPlans.size());
             for(size_type i = 0; i < solverPlans.size(); ++i)
             {
                 schedPlan.nodeStructure[0][0].push_back(i);  // assign all solvers to one core
-                schedPlan.solvIdToCore[i] = make_tuple(static_cast<size_type>(0), static_cast<size_type>(0));
+                schedPlan.solverIdToCore[i] = make_tuple(static_cast<size_type>(0), static_cast<size_type>(0));
             }
         }
         else
