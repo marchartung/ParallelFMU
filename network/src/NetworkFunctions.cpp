@@ -13,7 +13,7 @@ namespace Network
 
     void appendNetworkInformation(Initialization::ProgramPlan & plan, const NetworkPlan & netPlan)
     {
-        size_type numFmus = 0, numCons = 0, netSimId = 0, netCoreId = 0;  //TODO own thread?!?!?
+        size_type numFmus = 0, numCons = 0, netSimId = 0, netCoreId = 0;  // TODO(mf): own thread?!?!?
         for (const auto & simVec : plan.simPlans)
         {
             for (const auto & sim : simVec)
@@ -23,8 +23,7 @@ namespace Network
             }
         }
 
-        shared_ptr<Initialization::SolverPlan> sPlan = make_shared<Initialization::SolverPlan>(
-                *plan.simPlans[0][0].dataManager.solvers[0]);
+        auto sPlan = make_shared<Initialization::SolverPlan>(*plan.simPlans[0][0].dataManager.solvers[0]);
         sPlan->fmu = make_shared<Initialization::FmuPlan>(*sPlan->fmu);
         sPlan->fmu->loader = "network";
         sPlan->fmu->id = numFmus;
@@ -34,9 +33,8 @@ namespace Network
 
         for (const auto & extender : netPlan.fmuNet)
         {
-            std::shared_ptr<Initialization::ConnectionPlan> newInputCon;  // networkFmu -> dependent Fmu
-            std::shared_ptr<Initialization::ConnectionPlan> newOutputCon;  // output/dependent fmu -> networkFmu
-            newInputCon = make_shared<Initialization::ConnectionPlan>();
+            // Connection: NetworkFmu --> dependent FMU
+            auto newInputCon = make_shared<Initialization::ConnectionPlan>();
 
             newInputCon->bufferSize = Initialization::DefaultValues::connectionPlan().bufferSize;
             newInputCon->destFmu = plan.simPlans[extender.simPos][extender.corePos].dataManager.solvers[extender
@@ -45,12 +43,15 @@ namespace Network
             newInputCon->destRank = extender.simPos;
             newInputCon->sourceRank = netSimId;
 
-            newOutputCon = make_shared<Initialization::ConnectionPlan>(*newInputCon);
+            // Connection: output/dependent FMU --> NetworkFmu
+            auto newOutputCon = make_shared<Initialization::ConnectionPlan>(*newInputCon);
 
             newInputCon->startTag = numCons;
             newInputCon->inputMapping = extender.inputMap;
             if (extender.simPos != netSimId)
+            {
                 ++numCons;
+            }
 
             newOutputCon->startTag = numCons;
             newOutputCon->inputMapping = extender.outputMap;
@@ -62,7 +63,9 @@ namespace Network
                 newOutputCon->kind = "mpi";
 
                 if (extender.inputMap.size() > 0)
+                {
                     plan.simPlans[extender.simPos][extender.corePos].dataManager.inConnections.push_back(newInputCon);
+                }
                 plan.simPlans[extender.simPos][extender.corePos].dataManager.outConnections.push_back(newOutputCon);
             }
             else if (extender.corePos != netCoreId)
@@ -71,7 +74,9 @@ namespace Network
                 newOutputCon->kind = "openmp";
 
                 if (extender.inputMap.size() > 0)
+                {
                     plan.simPlans[extender.simPos][extender.corePos].dataManager.inConnections.push_back(newInputCon);
+                }
                 plan.simPlans[extender.simPos][extender.corePos].dataManager.outConnections.push_back(newOutputCon);
             }
             else
@@ -92,15 +97,18 @@ namespace Network
                 plan.simPlans[netSimId][netCoreId].dataManager.inConnections.push_back(newOutputCon);
                 plan.simPlans[netSimId][netCoreId].dataManager.solvers.back()->inConnections.push_back(newOutputCon);
             }
+
             //Add additional connection so dependent fmu's simulation plan
             if (extender.inputMap.size() > 0)
+            {
                 plan.simPlans[extender.simPos][extender.corePos].dataManager.solvers[extender.solverPos]->inConnections
                         .push_back(newInputCon);
+            }
 
             plan.simPlans[extender.simPos][extender.corePos].dataManager.solvers[extender.solverPos]->outConnections
                     .push_back(newOutputCon);
         }
     }
 
-} // Namespace network
+}  // namespace Network
 
