@@ -22,7 +22,9 @@ namespace Initialization
         res.relTol = fmuElem.second.get<real_type>("<xmlattr>.relativeTolerance", simPlan.defaultTolerance);
         res.name = fmuElem.second.get<string_type>("<xmlattr>.name", res.name);
         if (id != std::numeric_limits<size_type>::max())
+        {
             res.name += to_string(id);
+        }
         res.tolControlled = fmuElem.second.get<bool>("<xmlattr>.toleranceControlled", res.tolControlled);
         res.intermediateResults = fmuElem.second.get<bool>("<xmlattr>.intermediateResults", res.intermediateResults);
         res.version = fmuElem.second.get<string_type>("<xmlattr>.version", res.version);
@@ -32,7 +34,9 @@ namespace Initialization
         checkForUndefinedValues(res.path, res.loader, res.name, res.version, res.workingPath);
 
         if (res.version != "1.0")
+        {
             throw runtime_error("XMLConfigurationReader: FMUs with a version higher than 1.0 aren't supported yet.");
+        }
 
         return res;
     }
@@ -64,7 +68,7 @@ namespace Initialization
             for (size_type i = 0; i < num; ++i)
             {
                 res.push_back(getSolverPlanFromFmu(firstElem, startId + i, simPlan, false).back());
-                //TODO range for init values isn't set
+                // TODO(mf): range for init values isn't set
             }
         }
         return res;
@@ -75,10 +79,13 @@ namespace Initialization
                                                                   const bool & single)
     {
         SolverPlan solv = getSolverPlan(firstElem, simPlan, id);
-        solv.fmu = make_shared<FmuPlan>(getFmuPlan(firstElem, simPlan, (single) ? std::numeric_limits<size_type>::max() : id));
+        solv.fmu = make_shared<FmuPlan>(
+                getFmuPlan(firstElem, simPlan, (single) ? std::numeric_limits<size_type>::max() : id));
         solv.fmu->id = firstElem.second.get<size_type>("<xmlattr>.id", DefaultValues::getUndefinedValue<size_type>());
         if (DefaultValues::isUndefinedValue(solv.fmu->id))
+        {
             solv.fmu->id = id;
+        }
         return list<SolverPlan>(1, solv);
     }
 
@@ -93,11 +100,17 @@ namespace Initialization
         for (ptree::value_type & firstElem : solverElem.get_child(""))
         {
             if (firstElem.first == string("fmu"))
+            {
                 tmp = getSolverPlanFromFmu(firstElem, idCount, simPlan, true);
+            }
             else if (firstElem.first == string("multipleFmu"))
+            {
                 tmp = getSolverPlanFromMultipleFmu(firstElem, idCount, simPlan);
+            }
             else
+            {
                 throw runtime_error("XMLConfigurationReader: Unknown fmu type.");
+            }
 
             idCount += tmp.size();
             res.insert(res.end(), tmp.begin(), tmp.end());
@@ -125,21 +138,33 @@ namespace Initialization
         for (ptree::value_type &varMapElem : mapElem.second.get_child(""))
         {
             if (varMapElem.first == "<xmlattr>")
+            {
                 continue;
+            }
 
             varType = varMapElem.first;
             get<0>(con) = varMapElem.second.get<size_type>("<xmlattr>.out");
             get<1>(con) = varMapElem.second.get<size_type>("<xmlattr>.in");
             if (varType == "real")
+            {
                 res.inputMapping.push_back<double>(con);
+            }
             else if (varType == "int")
+            {
                 res.inputMapping.push_back<int_type>(con);
+            }
             else if (varType == "bool_type")
+            {
                 res.inputMapping.push_back<bool_type>(con);
+            }
             else if (varType == "string")
+            {
                 res.inputMapping.push_back<string_type>(con);
+            }
             else
+            {
                 throw runtime_error("XMLConfigurationReader: Unknown variable type " + varType);
+            }
         }
         checkForUndefinedValues(res.bufferSize, res.destFmu, res.sourceFmu, res.inputMapping);
         return res;
@@ -153,7 +178,9 @@ namespace Initialization
         {
             auto connElems = _propertyTree.get_child("configuration.connections");
             for (ptree::value_type & mapElem : connElems)
+            {
                 res.push_back(getConnectionPlan(mapElem));
+            }
         }
         return res;
     }
@@ -180,10 +207,14 @@ namespace Initialization
         for (ptree::value_type &coreElem : nodeElem.second.get_child(""))
         {
             if (coreElem.first == "core")
+            {
                 res.push_back(vector<size_type>(coreElem.second.get<size_type>("<xmlattr>.numFmus", 0)));
+            }
             else if (coreElem.first == "cores")
+            {
                 res.resize(res.size() + coreElem.second.get<size_type>("<xmlattr>.numCores", 0),
                            vector<size_type>(coreElem.second.get<size_type>("<xmlattr>.numFmusPerCore", 0), 0));
+            }
         }
         return res;
     }
@@ -199,24 +230,34 @@ namespace Initialization
                 for (ptree::value_type &nodeElem : schedElem.get_child(""))
                 {
                     if (nodeElem.first == "node")
+                    {
                         res.nodeStructure.push_back(getNodeSchedule(nodeElem));
+                    }
                     else if (nodeElem.first == "nodes")
                     {
                         size_type numNewNodes = nodeElem.second.get<size_type>("<xmlattr>.numNodes", 0);
                         if (numNewNodes == 0)
+                        {
                             throw runtime_error("In tag <nodes> the attribute 'numNodes' is missing.");
+                        }
                         size_type numNewCores = nodeElem.second.get<size_type>("<xmlattr>.numCoresPerNode", 0);
                         if (numNewCores == 0)
+                        {
                             throw runtime_error("In tag <nodes> the attribute 'numCoresPerNode' is missing.");
+                        }
                         size_type numNewFmus = nodeElem.second.get<size_type>("<xmlattr>.numFmusPerCore", 0);
                         if (numNewFmus == 0)
+                        {
                             throw runtime_error("In tag <nodes> the attribute 'numFmusPerCore' is missing.");
+                        }
 
                         res.nodeStructure.resize(res.nodeStructure.size() + numNewNodes,
                                                  vector<vector<size_type>>(numNewCores, vector<size_type>(numNewFmus)));
                     }
                     else
+                    {
                         throw runtime_error("XMLConfigurationReader: In scheduling was an unknown node identifier.");
+                    }
                 }
             }
         }
@@ -231,7 +272,9 @@ namespace Initialization
         shared_ptr<ConnectionPlan> tmp;
         size_type tags = 0;
         for (SolverPlan & sp : solverPlans)
+        {
             fmuNameToSolver[sp.fmu->name] = &sp;
+        }
 
         for (ConnectionPlan & cp : connPlans)
         {
@@ -239,10 +282,14 @@ namespace Initialization
             tuple<size_type, size_type> destId, sourceId;
             destId = schedPlan.solvIdToCore[fmuNameToSolver[cp.destFmu]->id];
             sourceId = schedPlan.solvIdToCore[fmuNameToSolver[cp.sourceFmu]->id];
-            if (destId == sourceId)  // same node and core
+            if (destId == sourceId)
+            {  // same node and core
                 tmp->kind = "serial";
-            else if (std::get<0>(destId) == get<0>(sourceId))  // same node
+            }
+            else if (std::get<0>(destId) == get<0>(sourceId))
+            {  // same node
                 tmp->kind = "openmp";
+            }
             else
             {
                 tmp->kind = "mpi";
@@ -267,8 +314,10 @@ namespace Initialization
         res.numSteps = elem.second.get<size_type>("<xmlattr>.numOutputSteps", res.numSteps);
         res.filePath = elem.second.get<string_type>("<xmlattr>.resultFile", res.filePath);
         if (res.filePath == "")
+        {
             throw runtime_error("XMLConfigurationReader: Result file path not set");
-        //TODO read vars which you want to write
+        }
+        // TODO(mf): read vars which you want to write
 
         return res;
     }
@@ -293,7 +342,9 @@ namespace Initialization
             ++nodeNum;
         }
         if (spaceForSolvers != solverPlans.size())
+        {
             throw runtime_error("XmlConfigurationReader: There is an error in the scheduling.");
+        }
     }
 
     vector<vector<SimulationPlan>> XMLConfigurationReader::getSimulationPlans(const list<SolverPlan> & solverPlans,
@@ -352,17 +403,19 @@ namespace Initialization
         SchedulePlan schedPlan = getSchedulePlan();
         if (schedPlan.nodeStructure.empty())
         {
-            //TODO do scheduling
+            // TODO(mf): do scheduling
             schedPlan.nodeStructure = vector<vector<vector<size_type>>>(1, vector<vector<size_type>>(1, vector<size_type>(1)));
             schedPlan.solvIdToCore.resize(solverPlans.size());
             for(size_type i = 0; i < solverPlans.size(); ++i)
             {
-                schedPlan.nodeStructure[0][0].push_back(i);  // asssign all solvers to one core
+                schedPlan.nodeStructure[0][0].push_back(i);  // assign all solvers to one core
                 schedPlan.solvIdToCore[i] = make_tuple(static_cast<size_type>(0), static_cast<size_type>(0));
             }
         }
         else
-        createMapping(solverPlans, schedPlan);  // spread the solver on cores
+        {
+            createMapping(solverPlans, schedPlan);  // spread the solver on cores
+        }
 
         appendConnectionInformation(solverPlans, connPlans, schedPlan);
 
