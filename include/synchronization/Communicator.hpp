@@ -63,7 +63,7 @@ namespace Synchronization
         {
         }
 
-        size_type addFmu(FMI::AbstractFmu * in, vector<FMI::InputMapping> & _valuePacking);
+        size_type addFmu(FMI::AbstractFmu * in, vector<FMI::InputMapping> & valuePacking);
 
         /**
          * Send output values to dependent FMU of particular connection. The send method for the connection is called.
@@ -116,12 +116,12 @@ namespace Synchronization
         /**
          * i holds entries for i-th localId, j holds all out-going connection ids
          */
-        vector<vector<size_type> > _inConnectionIds;
+        vector<vector<size_type>> _inConnectionIds;
 
         /**
          * i holds entries for i-th localId, j holds all in-going connection ids
          */
-        vector<vector<size_type> > _outConnectionIds;
+        vector<vector<size_type>> _outConnectionIds;
 
         /**
          * All connections managed by this communicator instance.
@@ -131,7 +131,7 @@ namespace Synchronization
         size_type _numManagedCons;
         size_type _numManagedFmus;
 
-        std::map<size_type, size_type> _knownConIds;
+        map<size_type, size_type> _knownConIds;
 
         //Todo: Create buffer for communication, i.e., to store received values (later transfered to DataManager::DataHistory).
     };
