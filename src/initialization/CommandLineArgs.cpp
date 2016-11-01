@@ -67,10 +67,9 @@ namespace Initialization
         namespace po = boost::program_options;
         po::options_description desc("Options");
         desc.add_options()("help", "Print help messages")(
-                "configFile,c", boost::program_options::value<std::string>()->required(),
+                "configFile,c", boost::program_options::value<string>()->required(),
                 "Path to the configuration file containing detailed information about the FMUs")(
-                "log-settings,V", po::value<vector<std::string> >(),
-                "log information: loader, event, solver, system, other")
+                "log-settings,V", po::value<vector<string> >(), "log information: loader, event, solver, system, other")
         //"numThreads,n", po::value<size_type>(), "The number of threads respectively processes to use")
         ("server,S", po::value<int>(),
          "Setting up an simulation server based on NetworkOffloader interface. Takes the port on which it should open")(
@@ -94,7 +93,7 @@ namespace Initialization
                 cout << "Creating FMU calculation server." << endl;
                 _simulationServerPort = vm["server"].as<int>();
 #else
-                throw std::runtime_error("FMU server is not supported, since submodule NetworkOffloader is missing or hasn't been build.");
+                throw runtime_error("FMU server is not supported, since submodule NetworkOffloader is missing or hasn't been build.");
 #endif
             }
 
@@ -102,16 +101,16 @@ namespace Initialization
             {
 #ifdef USE_NETWORK_OFFLOADER
                 cout << "Creating FMU client." << endl;
-                throw std::runtime_error("FMU client is not supported, yet.");
+                throw runtime_error("FMU client is not supported, yet.");
                 _simulationClient = true;
 #else
-                throw std::runtime_error("FMU client is not supported, since submodule NetworkOffloader is missing or hasn't been build.");
+                throw runtime_error("FMU client is not supported, since submodule NetworkOffloader is missing or hasn't been build.");
 #endif
             }
 
             if (vm.count("configFile") != 0u)
             {
-                this->_configFilePath = vm["configFile"].as<std::string>();
+                this->_configFilePath = vm["configFile"].as<string>();
             }
             else
             {
@@ -121,7 +120,7 @@ namespace Initialization
             Util::LogSettings logSet;
             if (vm.count("log-settings") != 0u)
             {
-                vector<std::string> log_vec = vm["log-settings"].as<vector<std::string> >(), tmpvec;
+                vector<string> log_vec = vm["log-settings"].as<vector<string> >(), tmpvec;
                 for (auto & i : log_vec)
                 {
                     tmpvec.clear();
@@ -150,13 +149,13 @@ namespace Initialization
         }
         catch (po::error& e)
         {
-            throw runtime_error((std::string("Cannot parse command line arguments. ") + std::string(e.what())).c_str());
+            throw runtime_error((string("Cannot parse command line arguments. ") + string(e.what())).c_str());
         }
     }
 
-    map<std::string, Util::LogCategory> CommandLineArgs::getLogCatMap()
+    map<string, Util::LogCategory> CommandLineArgs::getLogCatMap()
     {
-        map<std::string, Util::LogCategory> logCatMap;
+        map<string, Util::LogCategory> logCatMap;
         logCatMap["loader"] = Util::LC_LOADER;
         logCatMap["event"] = Util::LC_EVT;
         logCatMap["solver"] = Util::LC_SOLVER;
@@ -180,9 +179,9 @@ namespace Initialization
         return _simulationServerPort;
     }
 
-    map<std::string, Util::LogLevel> CommandLineArgs::getLogLvlMap()
+    map<string, Util::LogLevel> CommandLineArgs::getLogLvlMap()
     {
-        map<std::string, Util::LogLevel> logLvlMap;
+        map<string, Util::LogLevel> logLvlMap;
         logLvlMap["error"] = Util::LL_ERROR;
         logLvlMap["warning"] = Util::LL_WARNING;
         logLvlMap["info"] = Util::LL_INFO;

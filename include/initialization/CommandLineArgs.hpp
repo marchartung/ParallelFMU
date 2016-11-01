@@ -17,7 +17,7 @@ namespace Initialization
     {
      public:
 
-        CommandLineArgs(string  configFile, const Util::LogLevel & logLvl);
+        CommandLineArgs(string configFile, const Util::LogLevel & logLvl);
 
         CommandLineArgs(int * argc, char ** argv[]);
 
