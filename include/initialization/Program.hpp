@@ -25,7 +25,7 @@ namespace Initialization
     {
      public:
 
-        Program(const CommandLineArgs & cla);
+        Program(CommandLineArgs  cla);
 
         Program(int * argc, char **argv[]);
 

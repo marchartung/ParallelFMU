@@ -22,11 +22,11 @@
 namespace Initialization
 {
 
-    Program::Program(const CommandLineArgs & cla)
+    Program::Program(CommandLineArgs cla)
             : _isInitialized(false),
               _usingMPI(false),
               _usingOMP(false),
-              _commandLineArgs(cla),
+              _commandLineArgs(std::move(cla)),
               _progPlan(),
               _simulations()
     {
@@ -40,14 +40,18 @@ namespace Initialization
     Program::~Program()
     {
         if (_isInitialized)
+        {
             deinitialize();
+        }
     }
 
     void Program::initialize()
     {
         // Already initialized?
         if (_isInitialized)
+        {
             return;
+        }
 
         Util::Logger::initialize(_commandLineArgs.getLogSettings());
         // Create simulation plan(s). If MPI should be used we have several simulation plans (One plan for each MPI process).
@@ -61,18 +65,24 @@ namespace Initialization
         {
             LOGGER_WRITE("Initialize MPI ...", Util::LC_LOADER, Util::LL_INFO);
             if (!initMPI(rank, numRanks))
+            {
                 throw std::runtime_error("Couldn't initialize simulation. MPI couldn't be initialized.");
+            }
         }
 
         if (rank == 0)
+        {
             printProgramInfo(_progPlan);
+        }
 
         std::cout << "=1===============================\n";
         // initialize server if needed
         if (isSimulationServer())
         {
             if (!initNetworkConnection(rank))
+            {
                 throw std::runtime_error("Simulation server couldn't be initialized");
+            }
             std::cout << "=2===============================\n";
         }
 
@@ -80,8 +90,10 @@ namespace Initialization
         MainFactory mf;
 
         // Not in parallel because FmuSdkFMU::load and FmiLibFmu::load is not save to call in parallel!
-        for (size_type i = 0; i < _progPlan.simPlans[rank].size(); ++i)
-            _simulations.push_back(mf.createSimulation(_progPlan.simPlans[rank][i]));
+        for (auto & i : _progPlan.simPlans[rank])
+        {
+            _simulations.push_back(mf.createSimulation(i));
+        }
 
         _isInitialized = true;
         std::cout << "=3===============================\n";
@@ -92,7 +104,9 @@ namespace Initialization
         size_type threadNum = 0;
         // not in parallel, Communicator::addFmu is not safe to call
         for (auto & sim : _simulations)
+        {
             sim->initialize();
+        }
 #pragma omp parallel num_threads(_simulations.size())
         {
 #ifdef USE_OPENMP
@@ -135,7 +149,9 @@ namespace Initialization
         LOGGER_WRITE("", Util::LC_LOADER, Util::LL_INFO);
         LOGGER_WRITE("simulating following FMUs:", Util::LC_LOADER, Util::LL_INFO);
         for (size_type i = 0; i < in.simPlans.size(); ++i)
+        {
             for (size_type j = 0; j < in.simPlans[i].size(); ++j)
+            {
                 for (size_type k = 0; k < in.simPlans[i][j].dataManager.solvers.size(); ++k)
                 {
                     const auto & fmu = *in.simPlans[i][j].dataManager.solvers[k]->fmu;
@@ -146,6 +162,8 @@ namespace Initialization
                                  Util::LL_INFO);
                     LOGGER_WRITE("", Util::LC_LOADER, Util::LL_INFO);
                 }
+            }
+        }
         LOGGER_WRITE("Program info: ", Util::LC_LOADER, Util::LL_INFO);
         LOGGER_WRITE("numNodes:     " + to_string(in.simPlans.size()), Util::LC_LOADER, Util::LL_INFO);
         LOGGER_WRITE("Node infos:   ", Util::LC_LOADER, Util::LL_INFO);
@@ -154,7 +172,9 @@ namespace Initialization
             LOGGER_WRITE("Node      " + to_string(i) + ":", Util::LC_LOADER, Util::LL_INFO);
             size_type numFmus = 0;
             for (auto& simPlan : in.simPlans[i])
+            {
                 numFmus += simPlan.dataManager.solvers.size();
+            }
             LOGGER_WRITE("NumFmus:      " + to_string(numFmus), Util::LC_LOADER, Util::LL_INFO);
             LOGGER_WRITE("NumCores:     " + to_string(in.simPlans[i].size()), Util::LC_LOADER, Util::LL_INFO);
             LOGGER_WRITE("\n", Util::LC_LOADER, Util::LL_INFO);
@@ -178,14 +198,17 @@ namespace Initialization
                 throw std::runtime_error("Program: Not enough mpi processes for given schedule.");
             }
             else if (numRanks > static_cast<int>(_progPlan.simPlans.size()))
+            {
                 LOGGER_WRITE("Program: More mpi process given than the simulation will use.", Util::LC_LOADER,
                              Util::LL_WARNING);
+            }
             MPI_Comm_rank(MPI_COMM_WORLD, &rank);
             _usingMPI = true;
             return true;
         }
-        else
+        {
             return false;
+        }
 #else
         //throw std::runtime_error("Program: MPI not supported by this system.");
 #endif
@@ -221,43 +244,51 @@ namespace Initialization
                     num = addFmu.inputMap.size<real_type>();
                     MPI_Bcast(&num, 1, MPI_INT, 0, MPI_COMM_WORLD);
                     MPI_Bcast((void*) addFmu.inputMap.data<real_type>(), 2 * addFmu.inputMap.size<real_type>(),
-                              MPI_UINT32_T, 0, MPI_COMM_WORLD);
+                    MPI_UINT32_T,
+                              0, MPI_COMM_WORLD);
 
                     num = addFmu.inputMap.size<int_type>();
                     MPI_Bcast(&num, 1, MPI_INT, 0, MPI_COMM_WORLD);
                     MPI_Bcast((void*) addFmu.inputMap.data<int_type>(), 2 * addFmu.inputMap.size<int_type>(),
-                              MPI_UINT32_T, 0, MPI_COMM_WORLD);
+                    MPI_UINT32_T,
+                              0, MPI_COMM_WORLD);
 
                     num = addFmu.inputMap.size<bool_type>();
                     MPI_Bcast(&num, 1, MPI_INT, 0, MPI_COMM_WORLD);
                     MPI_Bcast((void*) addFmu.inputMap.data<bool_type>(), 2 * addFmu.inputMap.size<bool_type>(),
-                              MPI_UINT32_T, 0, MPI_COMM_WORLD);
+                    MPI_UINT32_T,
+                              0, MPI_COMM_WORLD);
 
                     num = addFmu.inputMap.size<string_type>();
                     MPI_Bcast(&num, 1, MPI_INT, 0, MPI_COMM_WORLD);
                     MPI_Bcast((void*) addFmu.inputMap.data<string_type>(), 2 * addFmu.inputMap.size<string_type>(),
-                              MPI_UINT32_T, 0, MPI_COMM_WORLD);
+                    MPI_UINT32_T,
+                              0, MPI_COMM_WORLD);
 
                     //outputs
                     num = addFmu.outputMap.size<real_type>();
                     MPI_Bcast(&num, 1, MPI_INT, 0, MPI_COMM_WORLD);
                     MPI_Bcast((void*) addFmu.outputMap.data<real_type>(), 2 * addFmu.outputMap.size<real_type>(),
-                              MPI_UINT32_T, 0, MPI_COMM_WORLD);
+                    MPI_UINT32_T,
+                              0, MPI_COMM_WORLD);
 
                     num = addFmu.outputMap.size<int_type>();
                     MPI_Bcast(&num, 1, MPI_INT, 0, MPI_COMM_WORLD);
                     MPI_Bcast((void*) addFmu.outputMap.data<int_type>(), 2 * addFmu.outputMap.size<int_type>(),
-                              MPI_UINT32_T, 0, MPI_COMM_WORLD);
+                    MPI_UINT32_T,
+                              0, MPI_COMM_WORLD);
 
                     num = addFmu.outputMap.size<bool_type>();
                     MPI_Bcast(&num, 1, MPI_INT, 0, MPI_COMM_WORLD);
                     MPI_Bcast((void*) addFmu.outputMap.data<bool_type>(), 2 * addFmu.outputMap.size<bool_type>(),
-                              MPI_UINT32_T, 0, MPI_COMM_WORLD);
+                    MPI_UINT32_T,
+                              0, MPI_COMM_WORLD);
 
                     num = addFmu.outputMap.size<string_type>();
                     MPI_Bcast(&num, 1, MPI_INT, 0, MPI_COMM_WORLD);
                     MPI_Bcast((void*) addFmu.outputMap.data<string_type>(), 2 * addFmu.outputMap.size<string_type>(),
-                              MPI_UINT32_T, 0, MPI_COMM_WORLD);
+                    MPI_UINT32_T,
+                              0, MPI_COMM_WORLD);
                 }
             }
 #endif
@@ -267,7 +298,9 @@ namespace Initialization
         {
 #ifdef USE_MPI
             if (!_usingMPI)
+            {
                 throw std::runtime_error("Cannot start mpi simulation.");
+            }
             // quick and dirty bcast for the remote simulation data aka. for the NetworkPlan
             int num = 0;
             MPI_Recv(&num, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
@@ -282,7 +315,7 @@ namespace Initialization
                 MPI_Recv((void*) (&np.fmuNet.back().corePos), 1, MPI_UINT32_T, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
                 // solver num
                 MPI_Recv((void*) (&np.fmuNet.back().solverPos), 1, MPI_UINT32_T, 0, 0, MPI_COMM_WORLD,
-                         MPI_STATUS_IGNORE);
+                MPI_STATUS_IGNORE);
 
                 //inputs
                 MPI_Recv(&num, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
@@ -324,7 +357,7 @@ namespace Initialization
             }
 
 #else
-            // test if the rank is on default (0), if not somethings wrong with @param rank.
+            // test if the rank is on default (0), if not something is wrong with @param rank.
             throw std::runtime_error("Internal error. Rank mismatch in network initialization.");
 #endif
         }
@@ -339,7 +372,9 @@ namespace Initialization
         _isInitialized = false;
 #ifdef USE_MPI
         if (_usingMPI)
+        {
             MPI_Finalize();
+        }
 #endif
     }
 
@@ -353,4 +388,4 @@ namespace Initialization
         return _commandLineArgs.getSimulationServerPort();
     }
 
-}
+}  // namespace Initialization
