@@ -71,6 +71,13 @@ namespace Initialization
 
         SchedulePlan getSchedulePlan();
 
+        /*! \brief Creates mapping from solver ID to node and core.
+         *
+         * The solverIdToCore structure of the SchedulePlan is build up according to its nodeStructure.
+         *
+         * @param solverPlans List of solver plans t create mapping for.
+         * @param schedPlan   Schedule plan with give nodeStructure.
+         */
         void createMapping(const list<SolverPlan> & solverPlans, SchedulePlan & schedPlan);
 
         SimulationPlan getDefaultSimulationPlan();
