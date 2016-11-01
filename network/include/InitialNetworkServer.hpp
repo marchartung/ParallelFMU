@@ -8,12 +8,9 @@
 #ifndef NETWORK_INCLUDE_INITIALNETWORKSERVER_HPP_
 #define NETWORK_INCLUDE_INITIALNETWORKSERVER_HPP_
 
+#include "Stdafx.hpp"
 #include "initialization/Plans.hpp"
 #include "fmi/AbstractFmu.hpp"
-
-#include <memory>
-#include <vector>
-#include <tuple>
 
 namespace Network
 {
@@ -22,18 +19,19 @@ namespace Network
     {
      public:
         InitialNetworkServer(const int & port, Initialization::ProgramPlan & plan);
-        ~InitialNetworkServer();
 
-        NetworkPlan getNetworkPlan();
+        ~InitialNetworkServer() = default;
+
+        NetworkPlan getNetworkPlan() const;
 
         void start();
 
      private:
         Initialization::ProgramPlan & _plan;
         NetworkPlan _networkPlan;
-        std::vector<size_type> _offsets;
+        vector<size_type> _offsets;
 
-        std::vector<std::shared_ptr<FMI::AbstractFmu>> _tmpFmus;
+        vector<shared_ptr<FMI::AbstractFmu>> _tmpFmus;
 
         void addSim();
 
@@ -43,12 +41,16 @@ namespace Network
 
         void startSim();
 
-        std::shared_ptr<Initialization::FmuPlan> findFmuInProgramPlan(const std::string fmuPath, Network::NetworkFmuInformation & netInfo);
+        shared_ptr<Initialization::FmuPlan> findFmuInProgramPlan(const string fmuPath,
+                                                                 Network::NetworkFmuInformation & netInfo);
 
-        FMI::InputMapping getMappingFromNameList(const FMI::ValueReferenceCollection & refs, const NetOff::VariableList & vars, const FMI::ValueInfo & vi, bool fromFmu);
+        FMI::InputMapping getMappingFromNameList(const FMI::ValueReferenceCollection & refs,
+                                                 const NetOff::VariableList & vars, const FMI::ValueInfo & vi,
+                                                 bool fromFmu);
 
         template<typename T>
-        void addRefsToMapping(FMI::InputMapping & mapping, const std::vector<std::string> & inputs, const FMI::ValueInfo & vi, const FMI::ValueReferenceCollection & refs, bool fromFmu)
+        void addRefsToMapping(FMI::InputMapping & mapping, const vector<string> & inputs, const FMI::ValueInfo & vi,
+                              const FMI::ValueReferenceCollection & refs, bool fromFmu)
         {
             for (size_type i = 0; i < inputs.size(); ++i)  // i is index of network vars
             {
@@ -57,7 +59,10 @@ namespace Network
                 {
                     if (refs.getValues<T>()[j] == ref)
                     {
-                        mapping.push_back<T>(((!fromFmu) ? std::make_tuple(i + _offsets[dataIndex<T>()], j) : std::make_tuple(j, i + _offsets[dataIndex<T>()])));
+                        mapping.push_back<T>(
+                                ((!fromFmu) ?
+                                        make_tuple(i + _offsets[dataIndex<T>()], j) :
+                                        make_tuple(j, i + _offsets[dataIndex<T>()])));
                         ++_offsets[dataIndex<T>()];
                         break;
                     }
