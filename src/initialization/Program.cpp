@@ -66,7 +66,7 @@ namespace Initialization
             LOGGER_WRITE("Initialize MPI ...", Util::LC_LOADER, Util::LL_INFO);
             if (!initMPI(rank, numRanks))
             {
-                throw std::runtime_error("Couldn't initialize simulation. MPI couldn't be initialized.");
+                throw runtime_error("Couldn't initialize simulation. MPI couldn't be initialized.");
             }
         }
 
@@ -81,7 +81,7 @@ namespace Initialization
         {
             if (!initNetworkConnection(rank))
             {
-                throw std::runtime_error("Simulation server couldn't be initialized");
+                throw runtime_error("Simulation server couldn't be initialized");
             }
             std::cout << "=2===============================\n";
         }
@@ -112,14 +112,7 @@ namespace Initialization
 #ifdef USE_OPENMP
             threadNum = omp_get_thread_num();
 #endif
-//            try
-//            {
             _simulations[threadNum]->simulate();
-//            }
-//            catch (exception &ex)
-//            {
-//                LOGGER_WRITE(string_type("Simulate() failed. Error: ") + string_type(ex.what()), Util::LC_OTHER, Util::LL_ERROR);
-//            }
         }
     }
 
@@ -188,14 +181,14 @@ namespace Initialization
 
         if (!(_commandLineArgs.getProgramArgs() == make_tuple<const int *, const char ***>(nullptr, nullptr))
                 && MPI_SUCCESS
-                        == MPI_Init(std::get<0>(_commandLineArgs.getProgramArgs()),
-                                    std::get<1>(_commandLineArgs.getProgramArgs())))
+                        == MPI_Init(get<0>(_commandLineArgs.getProgramArgs()),
+                                    get<1>(_commandLineArgs.getProgramArgs())))
         {
             MPI_Comm_size(MPI_COMM_WORLD, &numRanks);
             if (numRanks < static_cast<int>(_progPlan.simPlans.size()))
             {
                 deinitialize();
-                throw std::runtime_error("Program: Not enough mpi processes for given schedule.");
+                throw runtime_error("Program: Not enough mpi processes for given schedule.");
             }
             else if (numRanks > static_cast<int>(_progPlan.simPlans.size()))
             {
@@ -224,7 +217,7 @@ namespace Initialization
             // initial network phase. Gather which information need to be collected and send to the client:
             Network::InitialNetworkServer initServer(getSimulationServerPort(), _progPlan);
             initServer.start();
-            // The networkPlan holds shared_pointer to a server which is copied there
+            // The NetworkPlan holds a shared_pointer to a server which is copied there
             np = initServer.getNetworkPlan();
 #ifdef USE_MPI
             if (_usingMPI)
@@ -299,12 +292,12 @@ namespace Initialization
 #ifdef USE_MPI
             if (!_usingMPI)
             {
-                throw std::runtime_error("Cannot start mpi simulation.");
+                throw runtime_error("Cannot start mpi simulation.");
             }
             // quick and dirty bcast for the remote simulation data aka. for the NetworkPlan
             int num = 0;
             MPI_Recv(&num, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            std::vector<std::tuple<size_type, size_type> > tmp1, tmp2, tmp3, tmp4;
+            vector<tuple<size_type, size_type> > tmp1, tmp2, tmp3, tmp4;
             for (int i = 0; i < num; ++i)
             {
                 np.fmuNet.push_back(Network::NetworkFmuInformation());
@@ -358,7 +351,7 @@ namespace Initialization
 
 #else
             // test if the rank is on default (0), if not something is wrong with @param rank.
-            throw std::runtime_error("Internal error. Rank mismatch in network initialization.");
+            throw runtime_error("Internal error. Rank mismatch in network initialization.");
 #endif
         }
         // adding network fmu and connections to program plan
