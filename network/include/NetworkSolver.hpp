@@ -87,8 +87,8 @@ namespace Solver
 
             for(auto& con : _fmu.getConnections())
             {
-                if(con->isOutgoing(_fmu.getFmuName()))
-                    _outConns.push_back(con);
+                if(!con->isOutgoing(_fmu.getFmuName()))
+                    _sendToVis.push_back(con);
             }
             _simServer->confirmStart();
         }
@@ -190,7 +190,7 @@ namespace Solver
         real_type _endTime;
 
         std::shared_ptr<NetOff::SimulationServer> _simServer;
-        std::vector<Synchronization::ConnectionSPtr> _outConns;  // refs simNum to connection
+        std::vector<Synchronization::ConnectionSPtr> _sendToVis;  // refs simNum to connection
         NetOff::ClientMessageSpecifyer _spec;
 
         const Initialization::SolverPlan _solvPlan;
@@ -205,7 +205,7 @@ namespace Solver
             real_type remoteTime = _simServer->getLastReceivedTime(fmuId);
             if (!_outputsSent)
             {
-                if (_dataManager->sendSingleOutput(remoteTime, 1, &_fmu, _outConns[fmuId]->getLocalId()))
+                if (_dataManager->sendSingleOutput(remoteTime, 1, &_fmu, _sendToVis[fmuId]->getLocalId()))
                     _outputsSent = true;
                 else
                 {

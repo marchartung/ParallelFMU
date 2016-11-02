@@ -20,7 +20,7 @@ namespace Network
 {
     struct NetworkFmuInformation
     {
-        size_type simPos;
+        size_type mpiPos;
         size_type corePos;
         size_type solverPos;
         FMI::InputMapping inputMap;

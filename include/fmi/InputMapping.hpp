@@ -92,7 +92,10 @@ namespace FMI
 
         size_type size() const
         {
-            return _connectedVars.size();
+            size_type res = 0;
+            for(size_t i=0;i<_connectedVars.size();++i)
+                res += _connectedVars[i].size();
+            return res;
         }
 
         ValueCollection getPackedValueCollection() const

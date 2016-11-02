@@ -13,7 +13,7 @@ namespace Network
 
     void appendNetworkInformation(Initialization::ProgramPlan & plan, NetworkPlan & netPlan)
     {
-        size_type numFmus = 0, numCons = 0, netSimId = 0, netCoreId = 0;  //TODO own thread?!?!?
+        size_type numFmus = 0, numCons = 0, netMpiRank = 0, netCoreId = 0, netSolvId;  //TODO own thread?!?!?
         for (const auto & simVec : plan.simPlans)
             for (const auto & sim : simVec)
             {
@@ -28,70 +28,95 @@ namespace Network
         sPlan->fmu->id = numFmus;
         sPlan->fmu->name = "ParallelFmu_NetworkFmu0815";
         sPlan->networkPlan = netPlan;
-        plan.simPlans[netSimId][netCoreId].dataManager.solvers.push_back(sPlan);
 
-        for (const auto & extender : netPlan.fmuNet)
+        auto & networkDataManager = plan.simPlans[netMpiRank][netCoreId].dataManager;
+        netSolvId = networkDataManager.solvers.size();
+        networkDataManager.solvers.push_back(sPlan);
+        auto & networkSolver = networkDataManager.solvers[netSolvId];
+
+        /** in this step all real fmus has to be linked to the network fmu, if their values are important for simulation
+         * 1. the output mapping in toExtend is a connection from real fmu -> network fmu
+         * 2. the input mapping in toExten is a connection from network fmu -> to real fmu
+         */
+        for (const auto & toExtend : netPlan.fmuNet)
         {
-            std::shared_ptr<Initialization::ConnectionPlan> newInputCon;  // networkFmu -> dependent Fmu
-            std::shared_ptr<Initialization::ConnectionPlan> newOutputCon;  // output/dependent fmu -> networkFmu
-            newInputCon = std::shared_ptr<Initialization::ConnectionPlan>(new Initialization::ConnectionPlan());
-            newInputCon->bufferSize = Initialization::DefaultValues::connectionPlan().bufferSize;
-            newInputCon->destFmu = plan.simPlans[extender.simPos][extender.corePos].dataManager.solvers[extender.solverPos]->fmu->name;
-            newInputCon->sourceFmu = sPlan->fmu->name;
-            newInputCon->destRank = extender.simPos;
-            newInputCon->sourceRank = netSimId;
 
-            newOutputCon = std::shared_ptr<Initialization::ConnectionPlan>(new Initialization::ConnectionPlan(*newInputCon));
+            auto & realDataManager = plan.simPlans[toExtend.mpiPos][toExtend.corePos].dataManager;
+            auto & realSolver = realDataManager.solvers[toExtend.solverPos];
+            // set up a connection plan for in- and output but insert only the ones are needed
 
-            newInputCon->startTag = numCons;
-            newInputCon->inputMapping = extender.inputMap;
-            if (extender.simPos != netSimId)
+            std::shared_ptr<Initialization::ConnectionPlan> networkToReal;  // networkFmu -> dependent Fmu
+            if (toExtend.inputMap.size() > 0)
+            {
+                networkToReal = std::shared_ptr<Initialization::ConnectionPlan>(new Initialization::ConnectionPlan());
+                networkToReal->bufferSize = Initialization::DefaultValues::connectionPlan().bufferSize;
+                networkToReal->destFmu = realSolver->fmu->name;
+                networkToReal->sourceFmu = sPlan->fmu->name;
+                networkToReal->destRank = toExtend.mpiPos;
+                networkToReal->sourceRank = netMpiRank;
+                networkToReal->inputMapping = toExtend.inputMap;
+                networkToReal->startTag = numCons;
                 ++numCons;
-
-            newOutputCon->startTag = numCons;
-            newOutputCon->inputMapping = extender.outputMap;
-            ++numCons;
-
-            if (extender.simPos != netSimId)
-            {
-                newInputCon->kind = "mpi";
-                newOutputCon->kind = "mpi";
-
-                if (extender.inputMap.size() > 0)
-                    plan.simPlans[extender.simPos][extender.corePos].dataManager.inConnections.push_back(newInputCon);
-                plan.simPlans[extender.simPos][extender.corePos].dataManager.outConnections.push_back(newOutputCon);
             }
-            else if (extender.corePos != netCoreId)
-            {
-                newInputCon->kind = "openmp";
-                newOutputCon->kind = "openmp";
 
-                if (extender.inputMap.size() > 0)
-                    plan.simPlans[extender.simPos][extender.corePos].dataManager.inConnections.push_back(newInputCon);
-                plan.simPlans[extender.simPos][extender.corePos].dataManager.outConnections.push_back(newOutputCon);
+            std::shared_ptr<Initialization::ConnectionPlan> realToNetwork;  // output/dependent fmu -> networkFmu
+            if (toExtend.outputMap.size() > 0)
+            {
+                realToNetwork = std::shared_ptr<Initialization::ConnectionPlan>(new Initialization::ConnectionPlan());
+                realToNetwork->bufferSize = Initialization::DefaultValues::connectionPlan().bufferSize;
+                realToNetwork->destFmu = sPlan->fmu->name;
+                realToNetwork->sourceFmu = realSolver->fmu->name;
+                realToNetwork->destRank = netMpiRank;
+                realToNetwork->sourceRank = toExtend.mpiPos;
+                realToNetwork->inputMapping = toExtend.outputMap;
+                realToNetwork->startTag = numCons;
+                ++numCons;
+            }
+
+            // choose the connection type which is need and add the connection(s)
+
+            if (toExtend.mpiPos != netMpiRank)
+            {
+                if (networkToReal)
+                    networkToReal->kind = "mpi";
+
+                if (realToNetwork)
+                    realToNetwork->kind = "mpi";
+
+            }
+            else if (toExtend.corePos != netCoreId)
+            {
+                if (networkToReal)
+                    networkToReal->kind = "openmp";
+
+                if (realToNetwork)
+                    realToNetwork->kind = "openmp";
             }
             else
             {
-                newInputCon->kind = "serial";
-                newOutputCon->kind = "serial";
+                if (networkToReal)
+                    networkToReal->kind = "serial";
+
+                if (realToNetwork)
+                    realToNetwork->kind = "serial";
+
             }
 
-            //Add additional connection so network fmu's simulation plan
-            if (extender.inputMap.size() > 0)
+            if (networkToReal)
             {
-                plan.simPlans[netSimId][netCoreId].dataManager.outConnections.push_back(newInputCon);
-                plan.simPlans[netSimId][netCoreId].dataManager.solvers.back()->outConnections.push_back(newInputCon);
+                realDataManager.inConnections.push_back(networkToReal);
+                realSolver->inConnections.push_back(networkToReal);
+                networkDataManager.outConnections.push_back(networkToReal);
+                networkSolver->outConnections.push_back(networkToReal);
             }
 
-            if (extender.inputMap.size() > 0)
+            if (realToNetwork)
             {
-                plan.simPlans[netSimId][netCoreId].dataManager.inConnections.push_back(newOutputCon);
-                plan.simPlans[netSimId][netCoreId].dataManager.solvers.back()->inConnections.push_back(newOutputCon);
+                realDataManager.outConnections.push_back(realToNetwork);
+                realSolver->outConnections.push_back(realToNetwork);
+                networkDataManager.inConnections.push_back(realToNetwork);
+                networkSolver->inConnections.push_back(realToNetwork);
             }
-            //Add additional connection so dependend fmu's simulation plan
-            if (extender.inputMap.size() > 0)
-                plan.simPlans[extender.simPos][extender.corePos].dataManager.solvers[extender.solverPos]->inConnections.push_back(newInputCon);
-            plan.simPlans[extender.simPos][extender.corePos].dataManager.solvers[extender.solverPos]->outConnections.push_back(newOutputCon);
         }
     }
 }

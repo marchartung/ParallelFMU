@@ -120,7 +120,7 @@ namespace Network
                     if (fmuPath == Util::FileHelper::absoluteFilePath(solvPlan->fmu->path) || fmuPath == solvPlan->fmu->name || fmuPath == solvPlan->fmu->name + std::string(".fmu"))
                     {
                         res = solvPlan->fmu;
-                        netInfo.simPos = simId;
+                        netInfo.mpiPos = simId;
                         netInfo.corePos = coreId;
                         netInfo.solverPos = solveId;
                         return res;
