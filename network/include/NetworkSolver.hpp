@@ -46,7 +46,10 @@ namespace Solver
             while (count++ < numSteps && testVar == 1)
             {
                 if (_lastRequestHandled)
+                {
                     _spec = _simServer->getClientRequest();
+                    _lastRequestHandled = false;
+                }
                 switch (_spec)
                 {
                     case NetOff::ClientMessageSpecifyer::INPUTS:
@@ -85,9 +88,9 @@ namespace Solver
 
             _dataManager->addFmu(&_fmu);
 
-            for(auto& con : _fmu.getConnections())
+            for (auto& con : _fmu.getConnections())
             {
-                if(!con->isOutgoing(_fmu.getFmuName()))
+                if (!con->isOutgoing(_fmu.getFmuName()))
                     _sendToVis.push_back(con);
             }
             _simServer->confirmStart();
@@ -189,6 +192,8 @@ namespace Solver
         real_type _currentTime;
         real_type _endTime;
 
+        SolverStepInfo _stepInfo;
+
         std::shared_ptr<NetOff::SimulationServer> _simServer;
         std::vector<Synchronization::ConnectionSPtr> _sendToVis;  // refs simNum to connection
         NetOff::ClientMessageSpecifyer _spec;
@@ -203,41 +208,40 @@ namespace Solver
         {
             int fmuId = _simServer->getLastSimId();
             real_type remoteTime = _simServer->getLastReceivedTime(fmuId);
-            if (!_outputsSent)
-            {
-                if (_dataManager->sendSingleOutput(remoteTime, 1, &_fmu, _sendToVis[fmuId]->getLocalId()))
-                    _outputsSent = true;
-                else
-                {
-                    _lastRequestHandled = false;
-                    _outputsSent = false;
-                    return 1;
-                }
-            }
-            if (std::abs(_currentTime - remoteTime) > 1.0e-10)
-            {
-                // get values
-                if (_dataManager->getDependencyInfo(&_fmu).depStatus != Solver::DependencyStatus::BLOCKED)
-                {
-                    _dataManager->setFmuInputValuesAtT(remoteTime, &_fmu);
-                    _currentTime = remoteTime;
-                }
-                else
-                {
-                    _lastRequestHandled = false;
-                    return 1;
-                }
-            }
-            NetOff::ValueContainer & vals = _simServer->getOutputValueContainer(fmuId);
-            const FMI::ValueCollection & fmuVals = _fmu.getEmptyFmuValues();
-            FMI::ValueCollection tmp = _solvPlan.networkPlan.fmuNet[fmuId].outputMap.pack(fmuVals);  // TODO alloc
-            vals.setRealValues(tmp.getValues<real_type>().data());
-            vals.setIntValues(tmp.getValues<int_type>().data());
-            vals.setBoolValues(tmp.getValues<bool_type>().data());
 
-            _lastRequestHandled = _simServer->sendOutputValues(fmuId, _currentTime, vals);
-            //_lastRequestHandled = _simServer->sendOutputValues(fmuId, _currentTime);
-            return 1;
+            if (setFmuValues(remoteTime, fmuId))
+            {
+                NetOff::ValueContainer & vals = _simServer->getOutputValueContainer(fmuId);
+                const FMI::ValueCollection & fmuVals = _fmu.getEmptyFmuValues();
+                FMI::ValueCollection tmp = _solvPlan.networkPlan.fmuNet[fmuId].outputMap.pack(fmuVals);  // TODO alloc
+                vals.setRealValues(tmp.getValues<real_type>().data());
+                vals.setIntValues(tmp.getValues<int_type>().data());
+                vals.setBoolValues(tmp.getValues<bool_type>().data());
+
+                _lastRequestHandled = _simServer->sendOutputValues(fmuId, _currentTime, vals);
+                return 1;
+            }
+            else
+                return 0;
+        }
+
+        /**
+         * scatters input values from vis client to fmus and trys to gathers output values for vis client
+         * @return Returns true if the values could be gathered at time [remoteTime], false otherwise
+         */
+        bool setFmuValues(const real_type & remoteTime, const int & fmuId)
+        {
+
+            _fmu.setTime(remoteTime);
+            if(_dataManager->getDependencyInfo(&_fmu).depStatus == Solver::DependencyStatus::BLOCKED)
+                return false;
+            else
+            {
+                if(_dataManager->saveSolverStep(&_fmu, _stepInfo, getSolverOrder()))
+                    return true;
+                else
+                    return false;
+            }
         }
 
         size_type pauseSim()
