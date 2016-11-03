@@ -193,6 +193,7 @@ namespace Solver
         real_type _endTime;
 
         SolverStepInfo _stepInfo;
+        DependencySolverInfo _depInfo;
 
         std::shared_ptr<NetOff::SimulationServer> _simServer;
         std::vector<Synchronization::ConnectionSPtr> _sendToVis;  // refs simNum to connection
@@ -217,7 +218,7 @@ namespace Solver
                 vals.setRealValues(tmp.getValues<real_type>().data());
                 vals.setIntValues(tmp.getValues<int_type>().data());
                 vals.setBoolValues(tmp.getValues<bool_type>().data());
-
+                LOGGER_WRITE("T: " + to_string(remoteTime) + ") val: " + to_string(tmp.getValues<real_type>()[0]), Util::LC_SOLVER,Util::LL_DEBUG);
                 _lastRequestHandled = _simServer->sendOutputValues(fmuId, _currentTime, vals);
                 return 1;
             }
@@ -231,17 +232,25 @@ namespace Solver
          */
         bool setFmuValues(const real_type & remoteTime, const int & fmuId)
         {
-
             _fmu.setTime(remoteTime);
-            if(_dataManager->getDependencyInfo(&_fmu).depStatus == Solver::DependencyStatus::BLOCKED)
+            _depInfo = _dataManager->getDependencyInfo(&_fmu);
+            if (_depInfo.depStatus == Solver::DependencyStatus::BLOCKED)
                 return false;
-            else
+            else if (_depInfo.depStatus == Solver::DependencyStatus::EVENT)
             {
-                if(_dataManager->saveSolverStep(&_fmu, _stepInfo, getSolverOrder()))
-                    return true;
-                else
+                _stepInfo.clear();
+                if(_depInfo.eventTimeEnd < remoteTime)
                     return false;
             }
+
+            if (_dataManager->saveSolverStep(&_fmu, _stepInfo, getSolverOrder()))
+            {
+                _stepInfo.clear();
+                return true;
+            }
+            else
+                return false;
+
         }
 
         size_type pauseSim()
