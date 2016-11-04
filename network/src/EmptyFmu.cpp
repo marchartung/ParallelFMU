@@ -5,7 +5,7 @@
  *      Author: hartung
  */
 
-#include "../include/EmptyFmu.hpp"
+#include "EmptyFmu.hpp"
 
 namespace FMI
 {
