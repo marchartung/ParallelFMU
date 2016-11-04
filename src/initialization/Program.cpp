@@ -227,7 +227,7 @@ namespace Initialization
                 for (const auto & addFmu : np.fmuNet)
                 {
                     // sim num
-                    MPI_Bcast((void*) (&addFmu.simPos), 1, MPI_UINT32_T, 0, MPI_COMM_WORLD);
+                    MPI_Bcast((void*) (&addFmu.mpiPos), 1, MPI_UINT32_T, 0, MPI_COMM_WORLD);
                     // core num
                     MPI_Bcast((void*) (&addFmu.corePos), 1, MPI_UINT32_T, 0, MPI_COMM_WORLD);
                     // solver num
@@ -303,7 +303,7 @@ namespace Initialization
                 np.fmuNet.push_back(Network::NetworkFmuInformation());
 
                 // sim num
-                MPI_Recv((void*) (&np.fmuNet.back().simPos), 1, MPI_UINT32_T, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                MPI_Recv((void*) (&np.fmuNet.back().mpiPos), 1, MPI_UINT32_T, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
                 // core num
                 MPI_Recv((void*) (&np.fmuNet.back().corePos), 1, MPI_UINT32_T, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
                 // solver num

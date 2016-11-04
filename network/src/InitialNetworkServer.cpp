@@ -116,6 +116,7 @@ namespace Network
     shared_ptr<Initialization::FmuPlan> InitialNetworkServer::findFmuInProgramPlan(const string fmuPath,
                                                                                    NetworkFmuInformation & netInfo)
     {
+        shared_ptr<Initialization::FmuPlan> res = nullptr;
         size_type simId = 0, coreId = 0, solveId = 0;
         for (const auto & simPlanVec : _programPlan.simPlans)
         {
@@ -126,8 +127,8 @@ namespace Network
                     if (fmuPath == Util::FileHelper::absoluteFilePath(solvPlan->fmu->path)
                             || fmuPath == solvPlan->fmu->name || fmuPath == solvPlan->fmu->name + string(".fmu"))
                     {
-                        auto res = solvPlan->fmu;
-                        netInfo.simPos = simId;
+                        res = solvPlan->fmu;
+                        netInfo.mpiPos = simId;
                         netInfo.corePos = coreId;
                         netInfo.solverPos = solveId;
                         return res;
@@ -139,7 +140,7 @@ namespace Network
             ++simId;
         }
 
-        return nullptr;
+        return res;
     }
 
     void InitialNetworkServer::addSim()
