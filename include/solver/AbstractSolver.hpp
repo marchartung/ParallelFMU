@@ -29,15 +29,16 @@ namespace Solver
 
     /**
      * This is an abstract class which serves as skeleton for time integration solvers. Concrete implementations
-     * are currently Euler and Ros2.
+     * are currently \ref Euler and \ref Ros2.
      * A solver also stores information about occurred events.
+     * @remark One solver handles exactly one FMU.
      */
     template<class DataManagerClass, class FmuClass>
     class AbstractSolver : public ISolver
     {
-        static_assert(std::is_base_of<Synchronization::IDataManager,DataManagerClass>::value,
+        static_assert(std::is_base_of<Synchronization::IDataManager, DataManagerClass>::value,
                 "AbstractSolver: Template argument FmuClass must be a specialization of IDataManager");
-        static_assert(std::is_base_of<FMI::AbstractFmu,FmuClass>::value,
+        static_assert(std::is_base_of<FMI::AbstractFmu, FmuClass>::value,
                 "AbstractSolver: Template argument 2 must be a specialization of AbstractFMU");
 
      protected:
@@ -52,25 +53,25 @@ namespace Solver
 
         AbstractSolver() = delete;
 
-        /**
-         * Constructs AbstractSolver from given parameters.
-         * @param id ID of the solver.
-         * @param fmu
-         * @param dataManager
+        /** \brief Constructs AbstractSolver from given parameters.
+         *
+         * @param solverPlan    Plan how to set up this solver.
+         * @param fmu           The FMU that this solver should be used to simulate.
+         * @param dataManager   Pointer to DataManager object to handle the communication with depended FMUs.
          */
-        AbstractSolver(const Initialization::SolverPlan & in, const FmuClass & fmu,
+        AbstractSolver(const Initialization::SolverPlan & solverPlan, const FmuClass & fmu,
                        shared_ptr<DataManagerClass> & dataManager)
                 : _numStates(0),
                   _numEvents(0),
-                  _currentTime(in.startTime),
+                  _currentTime(solverPlan.startTime),
                   _prevTime(_currentTime),
-                  _curStepSize(in.stepSize),
+                  _curStepSize(solverPlan.stepSize),
                   _initStepSize(_curStepSize),
                   _tmpStepSize(_curStepSize),
-                  _endTime(in.endTime),
+                  _endTime(solverPlan.endTime),
                   _eventCounter(0),
-                  _tolerance(in.fmu->relTol),
-                  _maxError(in.maxError),
+                  _tolerance(solverPlan.fmu->relTol),
+                  _maxError(solverPlan.maxError),
                   _states(),
                   _prevStates(),
                   _stateDerivatives(),
@@ -85,7 +86,7 @@ namespace Solver
                   _tmpValues(),
                   _fmu(fmu),
                   _depHist(),
-                  _id(in.id),
+                  _id(solverPlan.id),
                   _dataManager(dataManager)
         {
             //assert(dataManager != nullptr);
