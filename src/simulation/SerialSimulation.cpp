@@ -42,8 +42,7 @@ namespace Simulation
                     --numSteps[i];
                 else
                     ++numSteps[i];
-                LOGGER_WRITE("(" + to_string(i) + ") numSteps: " + to_string(numSteps[i]), Util::LC_SOLVER,
-                             Util::LL_ERROR);
+                //LOGGER_WRITE("(" + to_string(i) + ") numSteps: " + to_string(numSteps[i]), Util::LC_SOLVER, Util::LL_ERROR);
                 if (solver[i]->getCurrentTime() < getSimulationEndTime())
                     running = true;
                 else

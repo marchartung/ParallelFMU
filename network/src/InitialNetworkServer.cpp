@@ -94,9 +94,9 @@ namespace Network
             const FMI::ValueReferenceCollection & refs = fmu->getAllValueReferences();
             const FMI::ValueInfo & vi = fmu->getValueInfo();
 
-            _networkPlan.fmuNet[newId].inputMap = getMappingFromNameList(refs, server.getSelectedOutputVariables(newId),
+            _networkPlan.fmuNet[newId].outputMap = getMappingFromNameList(refs, server.getSelectedOutputVariables(newId),
                                                                          vi, true);
-            _networkPlan.fmuNet[newId].outputMap = getMappingFromNameList(refs, server.getSelectedInputVariables(newId),
+            _networkPlan.fmuNet[newId].inputMap = getMappingFromNameList(refs, server.getSelectedInputVariables(newId),
                                                                           vi, false);
         }
         else
@@ -104,7 +104,7 @@ namespace Network
             throw runtime_error("Remote simulation failed. Fmu couldn't be initialized.");
         }
 
-        FMI::ValueCollection tmpVals = _networkPlan.fmuNet[newId].inputMap.pack(
+        FMI::ValueCollection tmpVals = _networkPlan.fmuNet[newId].outputMap.pack(
                 fmu->getValues(FMI::ReferenceContainerType::ALL));
         NetOff::ValueContainer & initialValues = server.getOutputValueContainer(newId);
         initialValues.setRealValues(tmpVals.getValues<real_type>().data());

@@ -64,7 +64,6 @@ namespace Synchronization
                 _lastInsertedElem = 0;
             _entries[_lastInsertedElem] = in;
             ++_numAddedElems;
-            std::cout << "RingBufferSubHistory:: Added elements. NumAddedElems= " << _numAddedElems << '\n';
         }
         else
         {
@@ -84,12 +83,10 @@ namespace Synchronization
     {
         if (_numAddedElems > 1)
         {
-            std::cout << "_numAddedElems = " << _numAddedElems << std::endl;
             return std::make_tuple(((_curIndex == 0) ? _entries.size() - 1 : _curIndex - 1), _curIndex);
         }
         else
         {
-            std::cout << "---------------------------------------------------------\n";
             throw runtime_error("RingBufferSubHistory: Not enough data for interpolation.");
         }
     }

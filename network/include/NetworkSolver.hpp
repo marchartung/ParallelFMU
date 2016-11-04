@@ -229,7 +229,7 @@ namespace Solver
                 vals.setBoolValues(tmp.getValues<bool_type>().data());
                 LOGGER_WRITE("T: " + to_string(remoteTime) + ") val: " + to_string(tmp.getValues<real_type>()[0]),
                              Util::LC_SOLVER, Util::LL_DEBUG);
-                _lastRequestHandled = _simServer->sendOutputValues(fmuId, _currentTime, vals);
+                _lastRequestHandled = _simServer->sendOutputValues(fmuId, _currentTime /*, vals*/);
                 return 1;
             }
 

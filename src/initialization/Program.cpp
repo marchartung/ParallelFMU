@@ -75,7 +75,6 @@ namespace Initialization
             printProgramInfo(_progPlan);
         }
 
-        std::cout << "=1===============================\n";
         // initialize server if needed
         if (isSimulationServer())
         {
@@ -83,7 +82,6 @@ namespace Initialization
             {
                 throw runtime_error("Simulation server couldn't be initialized");
             }
-            std::cout << "=2===============================\n";
         }
 
         // Let the factory create and initialize the simulation.
@@ -96,7 +94,6 @@ namespace Initialization
         }
 
         _isInitialized = true;
-        std::cout << "=3===============================\n";
     }
 
     void Program::simulate()
