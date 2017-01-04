@@ -1,16 +1,16 @@
 # ParallelFMU - A scalable Framework for computing multiple FMUs in parallel.
 
 
-## What is ParallelFMU?
-ParallelFMU is a framework for ...
+## Overview
+ParallelFMU is a framework for computing multiple (coupled or non-coupled) FMUs in parallel.
 
-ParallelFMU is developed by Marc Hartung and Martin Flehmig at TU Dresden. If you have questions 
-concerning ParallelFMU or trouble using it, feel free to contact us via 
-marc.hartung[at]tu-dresden.de.
+ParallelFMU is developed by Marc Hartung and Martin Flehmig at Technische Universität Dresden. If 
+you have questions concerning ParallelFMU or trouble using it, feel free to contact us via 
+marc.hartung[at]tu-dresden.de and martin.flehmig[at]tu-dresden.de.
 
-ParallelFMU is open-source and released under GNU GENERAL PUBLIC LICENSE (v3.0). See the LICENSE 
-file which is comes with ParallelFMU or visit http://www.gnu.org/licenses/gpl.html for further 
-information.
+ParallelFMU is open-source and released under 3-Clause BSD License. See the LICENSE 
+file which is comes with ParallelFMU or visit https://opensource.org/licenses/BSD-3-Clause for 
+further information.
 
 
 ## Installation
