@@ -174,7 +174,7 @@ namespace Initialization
     {
         list<ConnectionPlan> res;
 
-        if (!_propertyTree.get_child_optional("configuration.connections"))
+        if (_propertyTree.get_child_optional("configuration.connections"))
         {
             auto connElems = _propertyTree.get_child("configuration.connections");
             for (ptree::value_type & mapElem : connElems)
@@ -222,7 +222,7 @@ namespace Initialization
     SchedulePlan XMLConfigurationReader::getSchedulePlan()
     {
         SchedulePlan res = DefaultValues::schedulePlan();
-        if (!_propertyTree.get_child_optional("configuration.scheduling"))
+        if (_propertyTree.get_child_optional("configuration.scheduling"))
         {
             auto schedElem = _propertyTree.get_child("configuration.scheduling");
             if (!schedElem.empty())
