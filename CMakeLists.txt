@@ -58,9 +58,11 @@ set(MATCMP_INCLUDE_DIR "thirdparty/MatFileCompare")
 find_package(MPI)
 if(MPI_C_FOUND)
   message(STATUS "MPI found")
+  set(INTERNAL_USE_MPI TRUE)
   add_definitions(-DUSE_MPI)
 else(MPI_C_FOUND)
   message(STATUS "MPI not found")
+  set(INTERNAL_USE_MPI FALSE)
   set(MPI_C_INCLUDE_PATH "")
   set(MPI_C_LIBRARIES "")
   set(MPI_C_LINK_FLAGS "")
@@ -172,11 +174,19 @@ if(NOT(INTERNAL_USE_OPENMP))
     "${CMAKE_CURRENT_SOURCE_DIR}/include/synchronization/openmp/OpenMPCounter.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/synchronization/openmp/OpenMPDataHistory.hpp"
   )
-  # src/simulation/openmp/OpenMPSimulation.cpp" ) 
-  # "${CMAKE_CURRENT_SOURCE_DIR}/include/simulation/openmp/OpenMPSimulation.hpp" # 
-  # "${CMAKE_CURRENT_SOURCE_DIR}/src/synchronization/openmp/*" # 
-  # "${CMAKE_CURRENT_SOURCE_DIR}/include/synchronization/openmp/")
 endif(NOT(INTERNAL_USE_OPENMP))
+
+# Remove MPI-Files if MPI is not available
+#set(INTERNAL_USE_MPI FALSE) #for debugging only
+if(NOT(INTERNAL_USE_MPI))
+  message(STATUS "Pre: ${SRCS}")
+  list(REMOVE_ITEM SRCS
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/synchronization/mpi/MPIConnection.cpp"
+  )
+  list(REMOVE_ITEM HEADERS
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/synchronization/mpi/MPIConnection.hpp"
+  )
+endif(NOT(INTERNAL_USE_MPI))
 
 
 # ---------------------------
@@ -227,7 +237,7 @@ add_dependencies(fmucleancmake fmuclean)
 
 # Handle this includes as system libraries. This suppresses compiler warnings.
 include_directories(SYSTEM ${NETWORK_INCLUDES} ${NETWORK_OFFLOADER_INCLUDE_DIR} ${MPI_C_INCLUDE_PATH}
-                           ${FMILIB_INCLUDE_DIR} ${FMUSDK_INCLUDE_DIR} ${MATIO_INCLUDE_DIR} 
+                           ${FMILIB_INCLUDE_DIR} ${FMUSDK_INCLUDE_DIR} ${MATIO_INCLUDE_DIR}
                            ${MATCMP_INCLUDE_DIR} ${GTEST_INCLUDE_DIR}
                            ${Boost_INCLUDE_DIRS} ${LAPACK_INCLUDE_DIR})
 
@@ -245,11 +255,11 @@ install(TARGETS ParallelFmu DESTINATION "bin")
 if(BUILD_PARALLELFMU_TEST)
   #compile FMUs
   message(STATUS "Building FMUs for testing")
-  if(NOT (EXISTS "${CMAKE_CURRENT_BINARY_DIR}/test/data/BouncingBall.fmu") OR 
-                 "${CMAKE_CURRENT_SOURCE_DIR}/test/data/BouncingBall.mos" IS_NEWER_THAN 
+  if(NOT (EXISTS "${CMAKE_CURRENT_BINARY_DIR}/test/data/BouncingBall.fmu") OR
+                 "${CMAKE_CURRENT_SOURCE_DIR}/test/data/BouncingBall.mos" IS_NEWER_THAN
                  "${CMAKE_CURRENT_BINARY_DIR}/test/data/BouncingBall.fmu")
     file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/test/data" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/test_tmp")
-    execute_process(COMMAND "${OMC_COMPILER}" "${CMAKE_CURRENT_BINARY_DIR}/test_tmp/data/BouncingBall.mos" WORKING_DIRECTORY 
+    execute_process(COMMAND "${OMC_COMPILER}" "${CMAKE_CURRENT_BINARY_DIR}/test_tmp/data/BouncingBall.mos" WORKING_DIRECTORY
                     "${CMAKE_CURRENT_BINARY_DIR}/test_tmp/data" RESULT_VARIABLE OMC_RESULT OUTPUT_VARIABLE OMC_ERROR)
     if(OMC_RESULT)
       message(FATAL_ERROR "Couldn't build test fmus: ${git_ver}")
@@ -257,7 +267,7 @@ if(BUILD_PARALLELFMU_TEST)
       message(STATUS "Built BouncingBall.fmu")
     endif(OMC_RESULT)
 
-    execute_process(COMMAND "${OMC_COMPILER}" "${CMAKE_CURRENT_BINARY_DIR}/test_tmp/data/SimpleView.mos" WORKING_DIRECTORY 
+    execute_process(COMMAND "${OMC_COMPILER}" "${CMAKE_CURRENT_BINARY_DIR}/test_tmp/data/SimpleView.mos" WORKING_DIRECTORY
                     "${CMAKE_CURRENT_BINARY_DIR}/test_tmp/data" RESULT_VARIABLE OMC_RESULT OUTPUT_VARIABLE OMC_ERROR)
     if(OMC_RESULT)
       message(FATAL_ERROR "Couldn't build test fmus: ${git_ver}")
@@ -265,7 +275,7 @@ if(BUILD_PARALLELFMU_TEST)
       message(STATUS "Built SimpleView.fmu")
     endif(OMC_RESULT)
 
-    execute_process(COMMAND "${OMC_COMPILER}" "${CMAKE_CURRENT_BINARY_DIR}/test_tmp/data/Blower.mos" WORKING_DIRECTORY 
+    execute_process(COMMAND "${OMC_COMPILER}" "${CMAKE_CURRENT_BINARY_DIR}/test_tmp/data/Blower.mos" WORKING_DIRECTORY
                     "${CMAKE_CURRENT_BINARY_DIR}/test_tmp/data" RESULT_VARIABLE OMC_RESULT OUTPUT_VARIABLE OMC_ERROR)
     if(OMC_RESULT)
       message(FATAL_ERROR "Couldn't build test fmus: ${git_ver}")
@@ -273,7 +283,7 @@ if(BUILD_PARALLELFMU_TEST)
       message(STATUS "Built Blower.fmu")
     endif(OMC_RESULT)
 
-    execute_process(COMMAND "${OMC_COMPILER}" "${CMAKE_CURRENT_BINARY_DIR}/test_tmp/data/BouncingBall_gravity_input.mos" WORKING_DIRECTORY 
+    execute_process(COMMAND "${OMC_COMPILER}" "${CMAKE_CURRENT_BINARY_DIR}/test_tmp/data/BouncingBall_gravity_input.mos" WORKING_DIRECTORY
                     "${CMAKE_CURRENT_BINARY_DIR}/test_tmp/data" RESULT_VARIABLE OMC_RESULT OUTPUT_VARIABLE OMC_ERROR)
     if(OMC_RESULT)
       message(FATAL_ERROR "Couldn't build test fmus: ${git_ver}")
@@ -281,7 +291,7 @@ if(BUILD_PARALLELFMU_TEST)
       message(STATUS "Built BouncingBall_gravity_input.fmu")
     endif(OMC_RESULT)
 
-    file(GLOB_RECURSE XML_FMU_BINARIES "${CMAKE_CURRENT_BINARY_DIR}/test_tmp/data/*.fmu" 
+    file(GLOB_RECURSE XML_FMU_BINARIES "${CMAKE_CURRENT_BINARY_DIR}/test_tmp/data/*.fmu"
          "${CMAKE_CURRENT_BINARY_DIR}/test_tmp/data/*.xml")
     file(COPY ${XML_FMU_BINARIES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/test/data")
     file(REMOVE_RECURSE "${CMAKE_CURRENT_BINARY_DIR}/test_tmp")
