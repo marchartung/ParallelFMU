@@ -4,20 +4,20 @@
 ## Overview
 ParallelFMU is a framework for computing multiple (coupled or non-coupled) FMUs in parallel.
 
-ParallelFMU is developed by Marc Hartung and Martin Flehmig at Technische Universität Dresden. If 
-you have questions concerning ParallelFMU or trouble using it, feel free to contact us via 
+ParallelFMU is developed by Marc Hartung and Martin Flehmig at Technische Universität Dresden. If
+you have questions concerning ParallelFMU or trouble using it, feel free to contact us via
 marc.hartung[at]tu-dresden.de and martin.flehmig[at]tu-dresden.de.
 
-ParallelFMU is open-source and released under 3-Clause BSD License. See the LICENSE 
-file which is comes with ParallelFMU or visit https://opensource.org/licenses/BSD-3-Clause for 
+ParallelFMU is open-source and released under 3-Clause BSD License. See the LICENSE
+file which is comes with ParallelFMU or visit https://opensource.org/licenses/BSD-3-Clause for
 further information.
 
 
 ## Installation
 
 ### Software Dependencies
-ParallelFMU, like most other software projects, builds up on a variety of software packages. In 
-the following we give a list of all necessary dependencies and the version number, which is 
+ParallelFMU, like most other software projects, builds up on a variety of software packages. In
+the following we give a list of all necessary dependencies and the version number, which is
 required.
 
     0. CMake (>= 3.0.0)
@@ -31,7 +31,7 @@ required.
     2. FMU SDK (BSD)
         - https://www.qtronic.de/de/fmusdk.html
         - Is "shipped" as thirdparty
-        - Linux: 
+        - Linux:
         - Windows: Download from website (s.a.)
 
     3. matio Library (BSD)
@@ -52,7 +52,7 @@ required.
      5. Lapack Implementation
 
 ### Additional Sofware Dependencies
-In order to get the full support for parallel computation of ParallelFMU, there are additional 
+In order to get the full support for parallel computation of ParallelFMU, there are additional
 software dependencies.
 
     6. MPI implementation
@@ -63,14 +63,14 @@ software dependencies.
 
     8. OpenModelica Compiler (OSMC-PL, GPL v3.0)
       - https://github.com/OpenModelica/OMCompiler
-      - The OMC is used to build the test FMUs. Of course, this can be also done with an other Modelica Compiler.
+      - The OMC is used to build the test FMUs. Of course, this can be also done with any other Modelica Compiler.
 
     9. FMI Library (>= 2.0) (BSD)
         - Replaced by FMU SDK and therefore not supported anymore
         - http://www.jmodelica.org/FMILibrary
         - Linux: Download sources, unzip, read FMILIB_Readme.txt, configure, make, install
         - Windows: download binaries
-        - Its important to remember where FMIlibary is installed to. The installation path has to 
+        - Its important to remember where FMIlibary is installed to. The installation path has to
           be provided to the CMake file of OMVis.
 
 
@@ -83,19 +83,27 @@ software dependencies.
 ```
 
 ### Environment Settings / Configure Options
-It might be neccessary to provide one or all of the following environment settings to the CMake 
+It might be neccessary to provide one or all of the following environment settings to the CMake
 makefile of OMVis:
 
-As usual, the C/C++ compiler and the compiler flags can be controlled via the environment variables 
+As usual, the C/C++ compiler and the compiler flags can be controlled via the environment variables
 `CC=<cc>`, `CXX=<cxx>`, `CFLAGS=<cflags>` and `CXXFLAGS=<cxxflags>`.
 
 More to come.
 
-FMILIB_HOME=/PATH/TO/FMILIB make
-MATIO_HOME=/PATH/TO/MATIO
+If not installed in standard locations or for some other reasons, sometimes one or all of the following
+hints need to passed to CMake:
+
+-DFMILIB_HOME=/PATH/TO/FMILIB
+-DMATIO_HOME=/PATH/TO/MATIO
+-DSDL2MAIN_LIBRARY=/PATH/TO/libSDL2_net.so
+
+Since the OpenModelica compiler (omc) is used to build the test FMUs, it has to be in the PATH. Otherwise
+the CMake script will not find the omc.
+
 
 ### Configure and Build using Makefile
-ParallelFmu is shipped with a Makefile. We need to emphasise, that the Makefile might be not fully 
+ParallelFmu is shipped with a Makefile. We need to emphasise, that the Makefile might be not fully
 compliant with the CMake build process. Nevertheless, it might be useful and provides the following
 targets:
 
